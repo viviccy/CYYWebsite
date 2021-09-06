@@ -1,0 +1,86 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+@mixin mediaProcess($limit: 800px, $objectFit: none, $arg1: 0%, $arg2: 0%) {
+  @media (min-width: $limit) {
+    object-fit: $objectFit;
+    object-position: $arg1 $arg2;
+  }
+}
+
+//handle responsive font-size
+@function strip-unit($value) {
+  @return $value / ($value * 0 + 1);
+}
+
+@mixin fluid-type($min-vw, $max-vw, $min-font-size, $max-font-size) {
+  $u1: unit($min-vw);
+  $u2: unit($max-vw);
+  $u3: unit($min-font-size);
+  $u4: unit($max-font-size);
+
+  @if $u1 == $u2 and $u1 == $u3 and $u1 == $u4 {
+    & {
+      font-size: $min-font-size;
+      @media screen and (min-width: $min-vw) {
+        font-size: calc(
+          #{$min-font-size} + #{strip-unit($max-font-size - $min-font-size)} *
+            ((100vw - #{$min-vw}) / #{strip-unit($max-vw - $min-vw)})
+        );
+      }
+      @media screen and (min-width: $max-vw) {
+        font-size: $max-font-size;
+      }
+    }
+  }
+}
+
+/* Input field color */
+$inputColor1: #d9d8de;
+$inputColor2: #969696;
+$inputColor3: #ccc;
+
+$errorColor1: #f11c30;
+
+/* Button color */
+$buttonColor1: #3c4f6f;
+$buttonColor2: #0a1944;
+
+@mixin inputFieldPadding {
+  padding: 5px 8px 5px 8px;
+}
+
+//<-----standard form button css----->
+/* Button text sizes */
+$buttonTextSizeMax: 14px;
+$buttonTextSizeMin: 10px;
+
+@mixin formButton {
+  transition: 500ms ease-in-out all;
+  align-self: center;
+  cursor: pointer;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  padding: 12px;
+  color: white;
+  background-color: $buttonColor1;
+  text-decoration: none;
+
+  @media (hover: hover) {
+    &:hover {
+      background-color: #0a1944;
+    }
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+//</-----standard form button css----->
+
+//<-----line break for flex display----->
+.break {
+  flex-basis: 100%;
+  width: 0;
+}
+//</-----line break for flex display----->
