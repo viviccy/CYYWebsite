@@ -38,6 +38,7 @@ export default {
     return {}
   },
   computed: {
+    //testing with git
     blogPostFeed() {
       return this.$store.getters.blogPostFeed
     },
