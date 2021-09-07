@@ -102,16 +102,13 @@ export default {
     },
     getImageData(payload) {
       if (!this.$store.state[payload]) {
-        if (sessionStorage.getItem("coverImageTempFileObject")) {
+        if (sessionStorage.getItem(payload)) {
           let obj = {
-            coverImageTempFileObject: sessionStorage.getItem(
-              "coverImageTempFileObject"
-            ),
+            coverImageTempFileObject: sessionStorage.getItem(payload),
           }
           this.$store.commit("updateState", obj)
         }
       }
-      console.log("what is payload=" + this.$store.state[payload])
       return this.$store.state[payload]
     },
     goBack() {

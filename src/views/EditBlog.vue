@@ -42,6 +42,194 @@
         </div>
         <div class="break"></div>
         <div class="editor">
+          <div id="standalone-container">
+            <div id="toolbar-container">
+              <span class="ql-formats">
+                <div
+                  class="fontTypeContainer"
+                  v-tooltip.top-center="{
+                    content: 'Font Type',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                >
+                  <select class="ql-font">
+                    <option selected value="roboto">Roboto</option>
+                    <option value="arial">Arial</option>
+                    <option value="verdana">Verdana</option>
+                    <option value="sans-serif">Sans Serif</option>
+                  </select>
+                </div>
+                <div
+                  class="fontSizeContainer"
+                  v-tooltip.top-center="{
+                    content: 'Font Size',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                >
+                  <select
+                    class="ql-size"
+                    v-tooltip.top-center="{
+                      content: 'Font Size',
+                      delay: { show: 0, hide: 0 },
+                    }"
+                  ></select>
+                </div>
+              </span>
+              <span class="ql-formats">
+                <button
+                  class="ql-bold"
+                  v-tooltip.top-center="{
+                    content: 'Bold',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-italic"
+                  v-tooltip.top-center="{
+                    content: 'Italic',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-underline"
+                  v-tooltip.top-center="{
+                    content: 'Underline',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-strike"
+                  v-tooltip.top-center="{
+                    content: 'Strikeout',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+              </span>
+              <span
+                class="ql-formats"
+                v-tooltip.top-center="{
+                  content: 'Color',
+                  delay: { show: 0, hide: 0 },
+                }"
+              >
+                <select class="ql-color"></select>
+                <select class="ql-background"></select>
+              </span>
+              <span class="ql-formats">
+                <button
+                  class="ql-blockquote"
+                  v-tooltip.top-center="{
+                    content: 'Blockquote',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-code-block"
+                  v-tooltip.top-center="{
+                    content: 'HTML Edit Mode',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-link"
+                  v-tooltip.top-center="{
+                    content: 'Hyperlink',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+              </span>
+              <span class="ql-formats">
+                <button
+                  class="ql-header"
+                  value="1"
+                  v-tooltip.top-center="{
+                    content: 'H1 tag',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-header"
+                  value="2"
+                  v-tooltip.top-center="{
+                    content: 'H2 tag',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+              </span>
+              <span class="ql-formats">
+                <button
+                  class="ql-list"
+                  value="ordered"
+                  v-tooltip.top-center="{
+                    content: 'Numbered List',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-list"
+                  value="bullet"
+                  v-tooltip.top-center="{
+                    content: 'Bulleted List',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-indent"
+                  value="-1"
+                  v-tooltip.top-center="{
+                    content: 'Indent To The Left',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-indent"
+                  value="+1"
+                  v-tooltip.top-center="{
+                    content: 'Indent To The Right',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+              </span>
+              <span
+                class="ql-formats"
+                v-tooltip.top-center="{
+                  content: 'Type Direction & Alignment',
+                  delay: { show: 0, hide: 0 },
+                }"
+              >
+                <button class="ql-direction" value="rtl"></button>
+                <select class="ql-align"></select>
+              </span>
+              <span class="ql-formats">
+                <button
+                  class="ql-script"
+                  value="sub"
+                  v-tooltip.top-center="{
+                    content: 'Subscript',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-script"
+                  value="super"
+                  v-tooltip.top-center="{
+                    content: 'Superscript',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+              </span>
+              <span class="ql-formats">
+                <button
+                  class="ql-clean"
+                  v-tooltip.top-center="{
+                    content: 'Clear Format',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+              </span>
+            </div>
+          </div>
+
           <!--   Use '@image-added' to call a function when the user choose the image icon to upload image in the text editor -->
           <vue-editor
             :editorOptions="editorSettings"
@@ -80,6 +268,8 @@
 </template>
 
 <script>
+import LoadImageToCanvas from "../mixins/loadImageToCanvas"
+
 import BlogCoverPreview from "../components/BlogCoverPreview"
 import firebase from "firebase/app"
 
@@ -114,9 +304,16 @@ const ImageResize = require("quill-image-resize-module").default
 In this case the module 'imageResize' is registered. */
 Quill.register("modules/imageResize", ImageResize)
 
+// Add fonts to whitelist
+let Font = Quill.import("formats/font")
+// We do not add Sans Serif since it is the default
+Font.whitelist = ["roboto", "verdana", "arial", "sans-serif"]
+Quill.register(Font, true)
+
 export default {
   name: "CreatePost",
   components: { BlogCoverPreview, Loading },
+  mixins: [LoadImageToCanvas],
   data() {
     return {
       //the file object for the big cover image
@@ -127,11 +324,13 @@ export default {
       loading: null,
       routeID: null,
       currentBlog: null,
+      leavingPage: false,
       editorSettings: {
         //use the snow theme
         theme: "snow",
         modules: {
           imageResize: {},
+          toolbar: "#toolbar-container",
         },
       },
     }
@@ -162,6 +361,7 @@ export default {
   beforeRouteLeave(to, from, next) {
     if (to) {
       if (to.name != "BlogPreview") {
+        this.leavingPage = true
         let obj = {
           coverImageTempFileObject: null,
           currentBlogReady: false,
@@ -182,11 +382,164 @@ export default {
   },
 
   methods: {
+    async loadFromDatabase() {
+      //'.filter' return AN ARRAY of elements (and NOT object) that passed the condition given
+      //'this.currentBlog' assigned route ID if the route ID exists in state.blogPost
+      //Hence this.currentBlog = [{"blogID":"rJHBiMp0Gvr0uDwELqOh","blogHTML":"<p>woi</p>",...}]
+      //Take note of the [] bracket. To access the values in this array, we have to use the form this.currentBlog[0]
+      this.currentBlog = await this.$store.state.blogPosts.filter((post) => {
+        //return the 'post' object that has 'blogID' matched with 'routeID'
+        return post.blogID === this.routeID
+      })
+
+      //call 'setBlogState' to assign values to variables in #anchorPostVariable in store. These variables store the current blog that is being created or edited.
+      /*  Take note that we have to pass in as this.currentBlog[0] as this will extract out the object from the array and pass the object into "setBlogState" store function. */
+
+      let obj = {
+        currentBlogReady: true,
+        blogTitle: this.currentBlog[0].blogTitle,
+        blogShortDesc: this.currentBlog[0].blogShortDesc,
+        blogHTML: this.currentBlog[0].blogHTML,
+        blogPhotoFileURL: this.currentBlog[0].blogCoverPhoto,
+        blogPhotoFileThumbnailURL: this.currentBlog[0].blogCoverPhotoThumb,
+        blogPhotoName: this.currentBlog[0].blogCoverPhotoName,
+        blogDate: this.currentBlog[0].blogDate,
+      }
+      this.$store.commit("updateState", obj)
+
+      sessionStorage.setItem("currentBlogReady", "true")
+      sessionStorage.setItem("blogTitle", this.currentBlog[0].blogTitle)
+      sessionStorage.setItem("blogShortDesc", this.currentBlog[0].blogShortDesc)
+      sessionStorage.setItem("blogHTML", this.currentBlog[0].blogHTML)
+      sessionStorage.setItem(
+        "blogPhotoFileURL",
+        this.currentBlog[0].blogCoverPhoto
+      )
+      sessionStorage.setItem(
+        "blogPhotoFileThumbnailURL",
+        this.currentBlog[0].blogCoverPhotoThumb
+      )
+      sessionStorage.setItem(
+        "blogPhotoName",
+        this.currentBlog[0].blogCoverPhotoName
+      )
+      sessionStorage.setItem("blogDate", this.currentBlog[0].blogDate)
+
+      const thumbnailStorageRef = firebase.storage().ref()
+
+      const docRef = thumbnailStorageRef.child(
+        `documents/BlogCoverPhotos_Thumbnail/${this.$store.state.blogPhotoName}`
+      )
+
+      docRef
+        .getDownloadURL()
+        .then((url) => {
+          // This can be downloaded directly:
+          const xhr = new XMLHttpRequest()
+          xhr.responseType = "blob"
+          xhr.onload = () => {
+            const blob = xhr.response
+
+            const file1 = new File([blob], this.$store.state.blogPhotoName, {
+              type: blob.type,
+            })
+            this.imageLoadToCanvas(file1)
+          }
+          xhr.open("GET", url)
+          xhr.send()
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+
+      const mainImageStorageRef = firebase.storage().ref()
+
+      const docRef2 = mainImageStorageRef.child(
+        `documents/BlogCoverPhotos/${this.$store.state.blogPhotoName}`
+      )
+
+      docRef2
+        .getDownloadURL()
+        .then((url) => {
+          // This can be downloaded directly:
+          const xhr = new XMLHttpRequest()
+          xhr.responseType = "blob"
+          xhr.onload = () => {
+            const blob = xhr.response
+
+            const file2 = new File([blob], this.$store.state.blogPhotoName, {
+              type: blob.type,
+            })
+            this.file = file2
+          }
+          xhr.open("GET", url)
+          xhr.send()
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    },
+
+    loadImageFromBase64String(payload) {
+      var canvas = document.getElementById("imageCanvas")
+      var ctx = canvas.getContext("2d")
+
+      var img = new Image()
+
+      img.onload = function() {
+        canvas.width = 400
+        canvas.height = (img.height * canvas.width) / img.width
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      }
+
+      img.src = payload
+
+      //return a promise that resolves with a File instance
+
+      let base64Image = payload
+
+      let obj = { blogPhotoFileURL: base64Image }
+      this.$store.commit("updateState", obj)
+
+      let thisPointer = this
+
+      //Usage example:
+      this.urltoFile(
+        payload,
+        sessionStorage.getItem("blogPhotoName"),
+        base64Image.substring(
+          "data:image/".length,
+          base64Image.indexOf(";base64")
+        )
+      ).then(function(file) {
+        thisPointer.file = file
+
+        thisPointer.fileChange()
+      })
+    },
+
     fileChange() {
       /*'this.file' is the 'file' variable from data(). This variable will be assigned to the 'blogPhoto' uploaded first file object because of the files[0].
       Use '$refs' to reference to any element in the html in the template. */
       //#anchorFile
-      this.file = this.$refs.blogPhoto.files[0]
+
+      if (this.$refs.blogPhoto.files[0]) {
+        this.file = this.$refs.blogPhoto.files[0]
+        /*  URL.createObjectURL() is used for converted input type file or blob to URL.
+      This will create an URL location for the upload file.
+      Below code is to enable the image preview button once 'blogPhotoFileURL' variable in store has a value.
+      */
+      }
+
+      //Convert 'this.file' to temporary blob URL and save it to store variable 'blogPhotoFileURL'
+      let obj1 = { blogPhotoFileURL: URL.createObjectURL(this.file) }
+      this.$store.commit("updateState", obj1)
+
+      //Save the value to local storage
+      sessionStorage.setItem(
+        "blogPhotoFileURL",
+        this.$store.state.blogPhotoFileURL
+      )
 
       //assign a temporary variable 'fileName' and assigned it to file object name (string) by using '.name'
       const fileName = this.file.name
@@ -208,27 +561,6 @@ export default {
       sessionStorage.setItem("blogPhotoFileURL", URL.createObjectURL(this.file))
 
       this.imageLoadToCanvas(this.file)
-    },
-    imageLoadToCanvas(file) {
-      var canvas = document.getElementById("imageCanvas")
-      var ctx = canvas.getContext("2d")
-
-      var reader = new FileReader()
-      reader.onload = function(event) {
-        var img = new Image()
-        img.onload = function() {
-          canvas.width = 400
-          canvas.height = (img.height * canvas.width) / img.width
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        }
-        img.src = event.target.result
-
-        canvas.toBlob(function(blob) {
-          var image = new Image()
-          image.src = blob
-        })
-      }
-      reader.readAsDataURL(file)
     },
     openPreview() {
       //To change the value of variable 'blogPhotoPreview' in store to the opposite of current value whenever the preview button is clicked. The modal for the preview button (BlogCoverPreview.vue) will also have this function.
@@ -501,7 +833,6 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
     'blogtitle' will need to be put in 'computed' for this kind of two way binding to work. */
     blogTitle: {
       get() {
-        console.log("been to title")
         //get the value of 'blogTitle' from store.
         //'blogTitle' is a string value.
         return this.$store.state.blogTitle
@@ -554,11 +885,13 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
           this.removeErrorMessage("Please enter blog content")
         }
 
-        /*  'payload' is the 'value' of the textarea element, in this case it is a html string. */
-        let obj = { blogHTML: payload }
-        this.$store.commit("updateState", obj)
+        if (!this.leavingPage) {
+          /*  'payload' is the 'value' of the textarea element, in this case it is a html string. */
+          let obj = { blogHTML: payload }
+          this.$store.commit("updateState", obj)
 
-        sessionStorage.setItem("blogHTML", payload)
+          sessionStorage.setItem("blogHTML", payload)
+        }
       },
     },
     blogCoverPhotoName() {
@@ -575,7 +908,11 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
     //to check if the current blog information is ready to use, if not, load the data to the current blog variables (#anchorPostVariable) in store.
     if (!this.$store.state.currentBlogReady) {
       if (JSON.parse(sessionStorage.getItem("currentBlogReady"))) {
-        let obj = {
+        this.loadImageFromBase64String(
+          sessionStorage.getItem("coverImageTempFileObject")
+        )
+
+        let obj2 = {
           currentBlogReady: JSON.parse(
             sessionStorage.getItem("currentBlogReady")
           ),
@@ -586,117 +923,25 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
           blogPhotoFileThumbnailURL: sessionStorage.getItem(
             "blogPhotoFileThumbnailURL"
           ),
+          coverImageTempFileObject: sessionStorage.getItem(
+            "coverImageTempFileObject"
+          ),
           blogPhotoName: sessionStorage.getItem("blogPhotoName"),
           blogDate: sessionStorage.getItem("blogDate"),
         }
 
-        this.$store.commit("updateState", obj)
+        this.$store.commit("updateState", obj2)
 
         //reassign values to 'blogTitle', 'blogShortDesc' and 'blogHTML' to trigger the error checking function in Computed everytime when the page reloaded.
         this.blogTitle = this.$store.state.blogTitle
         this.blogShortDesc = this.$store.state.blogShortDesc
         this.blogHTML = this.$store.state.blogHTML
       } else {
-        //'.filter' return AN ARRAY of elements (and NOT object) that passed the condition given
-        //'this.currentBlog' assigned route ID if the route ID exists in state.blogPost
-        //Hence this.currentBlog = [{"blogID":"rJHBiMp0Gvr0uDwELqOh","blogHTML":"<p>woi</p>",...}]
-        //Take note of the [] bracket. To access the values in this array, we have to use the form this.currentBlog[0]
-        this.currentBlog = await this.$store.state.blogPosts.filter((post) => {
-          //return the 'post' object that has 'blogID' matched with 'routeID'
-          return post.blogID === this.routeID
-        })
-
-        //call 'setBlogState' to assign values to variables in #anchorPostVariable in store. These variables store the current blog that is being created or edited.
-        /*  Take note that we have to pass in as this.currentBlog[0] as this will extract out the object from the array and pass the object into "setBlogState" store function. */
-
-        let obj = {
-          currentBlogReady: true,
-          blogTitle: this.currentBlog[0].blogTitle,
-          blogShortDesc: this.currentBlog[0].blogShortDesc,
-          blogHTML: this.currentBlog[0].blogHTML,
-          blogPhotoFileURL: this.currentBlog[0].blogCoverPhoto,
-          blogPhotoFileThumbnailURL: this.currentBlog[0].blogCoverPhotoThumb,
-          blogPhotoName: this.currentBlog[0].blogCoverPhotoName,
-          blogDate: this.currentBlog[0].blogDate,
-        }
-        this.$store.commit("updateState", obj)
-
-        sessionStorage.setItem("currentBlogReady", "true")
-        sessionStorage.setItem("blogTitle", this.currentBlog[0].blogTitle)
-        sessionStorage.setItem(
-          "blogShortDesc",
-          this.currentBlog[0].blogShortDesc
-        )
-        sessionStorage.setItem("blogHTML", this.currentBlog[0].blogHTML)
-        sessionStorage.setItem(
-          "blogPhotoFileURL",
-          this.currentBlog[0].blogCoverPhoto
-        )
-        sessionStorage.setItem(
-          "blogPhotoFileThumbnailURL",
-          this.currentBlog[0].blogCoverPhotoThumb
-        )
-        sessionStorage.setItem(
-          "blogPhotoName",
-          this.currentBlog[0].blogCoverPhotoName
-        )
-        sessionStorage.setItem("blogDate", this.currentBlog[0].blogDate)
+        this.loadFromDatabase()
       }
+    } else {
+      this.loadImageFromBase64String(this.$store.state.coverImageTempFileObject)
     }
-
-    const thumbnailStorageRef = firebase.storage().ref()
-
-    const docRef = thumbnailStorageRef.child(
-      `documents/BlogCoverPhotos_Thumbnail/${this.$store.state.blogPhotoName}`
-    )
-
-    docRef
-      .getDownloadURL()
-      .then((url) => {
-        // This can be downloaded directly:
-        const xhr = new XMLHttpRequest()
-        xhr.responseType = "blob"
-        xhr.onload = () => {
-          const blob = xhr.response
-
-          const file1 = new File([blob], this.$store.state.blogPhotoName, {
-            type: blob.type,
-          })
-          this.imageLoadToCanvas(file1)
-        }
-        xhr.open("GET", url)
-        xhr.send()
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-
-    const mainImageStorageRef = firebase.storage().ref()
-
-    const docRef2 = mainImageStorageRef.child(
-      `documents/BlogCoverPhotos/${this.$store.state.blogPhotoName}`
-    )
-
-    docRef2
-      .getDownloadURL()
-      .then((url) => {
-        // This can be downloaded directly:
-        const xhr = new XMLHttpRequest()
-        xhr.responseType = "blob"
-        xhr.onload = () => {
-          const blob = xhr.response
-
-          const file2 = new File([blob], this.$store.state.blogPhotoName, {
-            type: blob.type,
-          })
-          this.file = file2
-        }
-        xhr.open("GET", url)
-        xhr.send()
-      })
-      .catch((error) => {
-        console.log(error)
-      })
   },
 }
 </script>
@@ -765,9 +1010,10 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
 
     & > h2 {
       text-transform: uppercase;
+      @include fluid-type(320px, 1200px, 16px, 26px);
       color: $buttonColor2;
       letter-spacing: 3px;
-      font-weight: 900;
+      font-weight: 700;
       margin: 5px 0 5px 0;
     }
   }
@@ -936,52 +1182,54 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
       }
     }
     //<-----Quill CSS----->
-  }
 
-  .blog-actions {
-    flex: 1;
-    display: flex;
-    margin-top: 25px;
-    flex-wrap: wrap;
+    //<-----Bottom Button CSS----->
+    .blog-actions {
+      flex: 1;
+      display: flex;
+      margin-top: 25px;
+      flex-wrap: wrap;
 
-    & > button {
-      margin-right: 16px;
-      @include fluid-type(
-        320px,
-        1200px,
-        $buttonTextSizeMin,
-        $buttonTextSizeMax
-      );
-      @media (max-width: 380px) {
-        flex: 1;
-        flex-basis: 100%;
-        order: 3;
+      & > button {
+        margin-right: 16px;
+        @include fluid-type(
+          320px,
+          1200px,
+          $buttonTextSizeMin,
+          $buttonTextSizeMax
+        );
+        @media (max-width: 380px) {
+          flex: 1;
+          flex-basis: 100%;
+          order: 3;
+        }
+      }
+
+      a {
+        text-align: center;
+        margin-right: 16px;
+        @include fluid-type(
+          320px,
+          1200px,
+          $buttonTextSizeMin,
+          $buttonTextSizeMax
+        );
+        @media (max-width: 380px) {
+          flex: 1;
+          order: 1;
+          margin-bottom: 16px;
+        }
+      }
+
+      button:last-of-type {
+        @media (max-width: 380px) {
+          flex: 1;
+          order: 2;
+          margin-bottom: 16px;
+        }
       }
     }
-
-    a {
-      text-align: center;
-      margin-right: 16px;
-      @include fluid-type(
-        320px,
-        1200px,
-        $buttonTextSizeMin,
-        $buttonTextSizeMax
-      );
-      @media (max-width: 380px) {
-        flex: 1;
-        order: 1;
-        margin-bottom: 16px;
-      }
-    }
-
-    button:last-of-type {
-      @media (max-width: 380px) {
-        flex: 1;
-        order: 2;
-        margin-bottom: 16px;
-      }
-    }
+    //</-----Bottom Button CSS----->
   }
 
   .button-inactive {
@@ -989,4 +1237,146 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
     opacity: 0.6; /* Real browsers */
   }
 }
+
+//<-----Tooltip CSS----->
+.tooltip {
+  display: block !important;
+  z-index: 10000;
+
+  .tooltip-inner {
+    background: $buttonColor2;
+    color: white;
+    border-radius: 5px;
+    padding: 5px 10px 4px;
+  }
+
+  .tooltip-arrow {
+    width: 0 !important;
+    height: 0 !important;
+    border-style: solid;
+    position: absolute;
+    margin: 5px;
+    border-color: $buttonColor2;
+  }
+
+  &[x-placement^="top"] {
+    margin-bottom: 5px;
+
+    .tooltip-arrow {
+      border-width: 5px 5px 0 5px;
+      border-left-color: transparent !important;
+      border-right-color: transparent !important;
+      border-bottom-color: transparent !important;
+      bottom: -5px;
+      left: calc(50% - 5px);
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  &[x-placement^="bottom"] {
+    margin-top: 5px;
+
+    .tooltip-arrow {
+      border-width: 0 5px 5px 5px;
+      border-left-color: transparent !important;
+      border-right-color: transparent !important;
+      border-top-color: transparent !important;
+      top: -5px;
+      left: calc(50% - 5px);
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  &[x-placement^="right"] {
+    margin-left: 5px;
+
+    .tooltip-arrow {
+      border-width: 5px 5px 5px 0;
+      border-left-color: transparent !important;
+      border-top-color: transparent !important;
+      border-bottom-color: transparent !important;
+      left: -5px;
+      top: calc(50% - 5px);
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  &[x-placement^="left"] {
+    margin-right: 5px;
+
+    .tooltip-arrow {
+      border-width: 5px 0 5px 5px;
+      border-top-color: transparent !important;
+      border-right-color: transparent !important;
+      border-bottom-color: transparent !important;
+      right: -5px;
+      top: calc(50% - 5px);
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  &[aria-hidden="true"] {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.15s, visibility 0.15s;
+  }
+
+  &[aria-hidden="false"] {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.15s;
+  }
+}
+//</-----Tooltip CSS----->
+
+//<-----Editor Toolbar CSS----->
+.fontTypeContainer,
+.fontSizeContainer {
+  display: inline-block;
+}
+
+#toolbar-container {
+  border-radius: 5px 5px 0 0;
+}
+
+#toolbar-container .ql-font span[data-label="Roboto"]::before {
+  font-family: "Roboto";
+}
+
+#toolbar-container .ql-font span[data-label="Arial"]::before {
+  font-family: "Arial";
+}
+
+#toolbar-container .ql-font span[data-label="Verdana"]::before {
+  font-family: "Verdana";
+}
+
+#toolbar-container .ql-font span[data-label="sans-serif"]::before {
+  font-family: "Sans Serif";
+}
+
+.ql-font-sans-serif {
+  font-family: "sans-serif";
+}
+
+.ql-font-roboto {
+  font-family: "Roboto";
+}
+
+.ql-font-verdana {
+  font-family: "Verdana";
+}
+
+.ql-font-arial {
+  font-family: "Arial";
+}
+
+#editor-container {
+  height: 100px;
+}
+//</-----Editor Toolbar CSS----->
 </style>

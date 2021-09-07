@@ -49,54 +49,187 @@
           <div id="standalone-container">
             <div id="toolbar-container">
               <span class="ql-formats">
-                <select class="ql-font">
-                  <option selected>Sans Serif</option>
-                  <option value="inconsolata">Inconsolata</option>
-                  <option value="roboto">Roboto</option>
-                  <option value="mirza">Mirza</option>
-                  <option value="arial">Arial</option>
-                </select>
-                <select class="ql-size"></select>
+                <div
+                  class="fontTypeContainer"
+                  v-tooltip.top-center="{
+                    content: 'Font Type',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                >
+                  <select class="ql-font">
+                    <option selected value="roboto">Roboto</option>
+                    <option value="arial">Arial</option>
+                    <option value="verdana">Verdana</option>
+                    <option value="sans-serif">Sans Serif</option>
+                  </select>
+                </div>
+                <div
+                  class="fontSizeContainer"
+                  v-tooltip.top-center="{
+                    content: 'Font Size',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                >
+                  <select
+                    class="ql-size"
+                    v-tooltip.top-center="{
+                      content: 'Font Size',
+                      delay: { show: 0, hide: 0 },
+                    }"
+                  ></select>
+                </div>
               </span>
               <span class="ql-formats">
                 <button
                   class="ql-bold"
-                  data-toggle="tooltip"
-                  title="Bold"
+                  v-tooltip.top-center="{
+                    content: 'Bold',
+                    delay: { show: 0, hide: 0 },
+                  }"
                 ></button>
-                <button class="ql-italic"></button>
-                <button class="ql-underline"></button>
-                <button class="ql-strike"></button>
+                <button
+                  class="ql-italic"
+                  v-tooltip.top-center="{
+                    content: 'Italic',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-underline"
+                  v-tooltip.top-center="{
+                    content: 'Underline',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-strike"
+                  v-tooltip.top-center="{
+                    content: 'Strikeout',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
-              <span class="ql-formats">
+              <span
+                class="ql-formats"
+                v-tooltip.top-center="{
+                  content: 'Color',
+                  delay: { show: 0, hide: 0 },
+                }"
+              >
                 <select class="ql-color"></select>
                 <select class="ql-background"></select>
               </span>
               <span class="ql-formats">
-                <button class="ql-blockquote"></button>
-                <button class="ql-code-block"></button>
-                <button class="ql-link"></button>
+                <button
+                  class="ql-blockquote"
+                  v-tooltip.top-center="{
+                    content: 'Blockquote',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-code-block"
+                  v-tooltip.top-center="{
+                    content: 'HTML Edit Mode',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-link"
+                  v-tooltip.top-center="{
+                    content: 'Hyperlink',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
               <span class="ql-formats">
-                <button class="ql-header" value="1"></button>
-                <button class="ql-header" value="2"></button>
+                <button
+                  class="ql-header"
+                  value="1"
+                  v-tooltip.top-center="{
+                    content: 'H1 tag',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-header"
+                  value="2"
+                  v-tooltip.top-center="{
+                    content: 'H2 tag',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
               <span class="ql-formats">
-                <button class="ql-list" value="ordered"></button>
-                <button class="ql-list" value="bullet"></button>
-                <button class="ql-indent" value="-1"></button>
-                <button class="ql-indent" value="+1"></button>
+                <button
+                  class="ql-list"
+                  value="ordered"
+                  v-tooltip.top-center="{
+                    content: 'Numbered List',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-list"
+                  value="bullet"
+                  v-tooltip.top-center="{
+                    content: 'Bulleted List',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-indent"
+                  value="-1"
+                  v-tooltip.top-center="{
+                    content: 'Right Indent',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-indent"
+                  value="+1"
+                  v-tooltip.top-center="{
+                    content: 'Left Indent',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
-              <span class="ql-formats">
+              <span
+                class="ql-formats"
+                v-tooltip.top-center="{
+                  content: 'Type Direction & Alignment',
+                  delay: { show: 0, hide: 0 },
+                }"
+              >
                 <button class="ql-direction" value="rtl"></button>
                 <select class="ql-align"></select>
               </span>
               <span class="ql-formats">
-                <button class="ql-script" value="sub"></button>
-                <button class="ql-script" value="super"></button>
+                <button
+                  class="ql-script"
+                  value="sub"
+                  v-tooltip.top-center="{
+                    content: 'Subscript',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
+                <button
+                  class="ql-script"
+                  value="super"
+                  v-tooltip.top-center="{
+                    content: 'Superscript',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
               <span class="ql-formats">
-                <button class="ql-clean"></button>
+                <button
+                  class="ql-clean"
+                  v-tooltip.top-center="{
+                    content: 'Clear Format',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
             </div>
           </div>
@@ -113,7 +246,7 @@
         <div class="break"></div>
         <div class="blog-actions">
           <button
-            class="save"
+            class="standardBtn"
             :class="{ 'button-inactive': !formReady }"
             @click="uploadBlog"
           >
@@ -135,6 +268,12 @@
 </template>
 
 <script>
+import Vue from "vue"
+import VTooltip from "v-tooltip"
+Vue.use(VTooltip)
+
+import LoadImageToCanvas from "../mixins/loadImageToCanvas"
+
 import BlogCoverPreview from "../components/BlogCoverPreview"
 import firebase from "firebase/app"
 
@@ -181,14 +320,16 @@ Quill.register("modules/imageResize", ImageResize)
 // Add fonts to whitelist
 let Font = Quill.import("formats/font")
 // We do not add Sans Serif since it is the default
-Font.whitelist = ["inconsolata", "roboto", "mirza", "arial"]
+Font.whitelist = ["roboto", "verdana", "arial", "sans-serif"]
 Quill.register(Font, true)
 
 export default {
   name: "CreatePost",
   components: { BlogCoverPreview, Loading },
+  mixins: [LoadImageToCanvas],
   data() {
     return {
+      msg: "This is a button.",
       formReady: null,
       file: null,
       error: null,
@@ -277,42 +418,9 @@ export default {
     if (this.file) {
       await this.fileChange()
     } else if (sessionStorage.getItem("coverImageTempFileObject")) {
-      var canvas = document.getElementById("imageCanvas")
-      var ctx = canvas.getContext("2d")
-
-      var img = new Image()
-
-      img.onload = function() {
-        canvas.width = 400
-        canvas.height = (img.height * canvas.width) / img.width
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-      }
-
-      img.src = sessionStorage.getItem("coverImageTempFileObject")
-
-      //return a promise that resolves with a File instance
-
-      let base64Image = sessionStorage.getItem("coverImageTempFileObject")
-
-      let obj = { blogPhotoFileURL: base64Image }
-      this.$store.commit("updateState", obj)
-
-      let thisPointer = this
-      //Usage example:
-      this.urltoFile(
-        sessionStorage.getItem("coverImageTempFileObject"),
-        sessionStorage.getItem("blogPhotoName"),
-        base64Image.substring(
-          "data:image/".length,
-          base64Image.indexOf(";base64")
-        )
-      ).then(function(file) {
-        console.log(file)
-
-        thisPointer.file = file
-
-        thisPointer.fileChange()
-      })
+      this.loadImageFromBase64String(
+        sessionStorage.getItem("coverImageTempFileObject")
+      )
     }
 
     this.checkFormReady()
@@ -349,16 +457,6 @@ export default {
     }
   },
   methods: {
-    urltoFile(url, filename, mimeType) {
-      return fetch(url)
-        .then(function(res) {
-          return res.arrayBuffer()
-        })
-        .then(function(buf) {
-          return new File([buf], filename, { type: mimeType })
-        })
-    },
-
     fileChange() {
       /*'this.file' is the 'file' variable from data(). This variable will be assigned to the 'blogPhoto' uploaded first file object because of the files[0].
       Use '$refs' to reference to any element in the html in the template. */
@@ -392,27 +490,7 @@ export default {
 
       sessionStorage.setItem("blogPhotoName", this.$store.state.blogPhotoName)
 
-      let canvas = document.getElementById("imageCanvas")
-      let ctx = canvas.getContext("2d")
-      let thisPointer = this
-
-      var reader = new FileReader()
-      reader.onload = function(event) {
-        var img = new Image()
-
-        img.onload = function() {
-          canvas.width = 400
-          canvas.height = (img.height * canvas.width) / img.width
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-        }
-        img.src = event.target.result
-
-        let obj3 = { coverImageTempFileObject: reader.result }
-        thisPointer.$store.commit("updateState", obj3)
-
-        sessionStorage.setItem("coverImageTempFileObject", reader.result)
-      }
-      reader.readAsDataURL(this.file)
+      this.imageLoadToCanvas(this.file)
 
       this.checkFormReady()
     },
@@ -779,50 +857,9 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
   .blog-info {
     & > p {
       flex: 1;
-      margin: 10px 0;
+      margin: 10px 0 0 0;
       color: $buttonColor1;
     }
   }
-}
-
-#toolbar-container .ql-font span[data-label="Sans Serif"]::before {
-  font-family: "Sans Serif";
-}
-
-#toolbar-container .ql-font span[data-label="Inconsolata"]::before {
-  font-family: "Inconsolata";
-}
-
-#toolbar-container .ql-font span[data-label="Roboto"]::before {
-  font-family: "Roboto", sans-serif;
-}
-
-#toolbar-container .ql-font span[data-label="Mirza"]::before {
-  font-family: "Mirza";
-}
-
-#toolbar-container .ql-font span[data-label="Arial"]::before {
-  font-family: "Arial";
-}
-/* Set content font-families */
-
-.ql-font-inconsolata {
-  font-family: "Inconsolata";
-}
-
-.ql-font-roboto {
-  font-family: "Roboto";
-}
-
-.ql-font-mirza {
-  font-family: "Mirza";
-}
-
-.ql-font-arial {
-  font-family: "Arial";
-}
-
-#editor-container {
-  height: 100px;
 }
 </style>

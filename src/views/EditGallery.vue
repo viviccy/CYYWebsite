@@ -148,9 +148,12 @@ import draggable from "vuedraggable"
 
 import Loading from "../components/Loading"
 
+import sortGallery from "../mixins/sortGalleryData"
+
 export default {
   name: "EditGallery",
   components: { draggable, Loading },
+  mixins: [sortGallery],
   data() {
     return {
       oldIndex: "",
@@ -411,41 +414,6 @@ export default {
     },
   },
   computed: {
-    photoDataSorted() {
-      let reference_array = this.$store.state.galOrder
-
-      let reference_object = {}
-
-      for (var i = 0; i < reference_array.length; i++) {
-        reference_object[reference_array[i]] = i
-      }
-
-      console.log(
-        "before spread = " + JSON.stringify(this.$store.state.galleryPhotos)
-      )
-
-      var array = [...this.$store.state.galleryPhotos]
-      console.log("starting array =" + JSON.stringify(array))
-
-      array.sort(function(a, b) {
-        return (
-          Number(reference_object[a.photoId]) -
-          Number(reference_object[b.photoId])
-        )
-      })
-
-      array = array.slice(
-        this.paginationStartIndex,
-        this.paginationStartIndex + this.paginationRecordPerPage
-      )
-
-      console.log("ending array=" + JSON.stringify(array))
-
-      return array
-
-      //return this.$store.state.galleryPhotos
-    },
-
     countTotalPage() {
       return Math.ceil(
         this.galleryCurrentOrder.length / this.paginationRecordPerPage

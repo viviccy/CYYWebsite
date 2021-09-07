@@ -28,7 +28,7 @@
 <script>
 import BlogPost from "../components/BlogPost"
 import BlogCards from "../components/BlogCard"
-import Arrow from "../assets/Icons/arrow-right-light.svg"
+import Arrow from "../assets/Icons/arrow-right-light.svg?inline"
 import SwiperComp from "../components/SwiperComp"
 
 export default {
@@ -38,7 +38,6 @@ export default {
     return {}
   },
   computed: {
-    //testing with gitttttt
     blogPostFeed() {
       return this.$store.getters.blogPostFeed
     },

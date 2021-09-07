@@ -5,7 +5,7 @@
         <a
           class="gallery-item"
           v-bind:key="item.photoId"
-          v-for="item in photoData"
+          v-for="item in photoDataSorted"
           :href="item.photoURL"
           :data-sub-html="
             `<h6>${item.photoTitle}</h6><p>${item.photoShortDesc}</p>`
@@ -27,8 +27,11 @@ import "justifiedGallery/dist/js/jquery.justifiedGallery.js"
 import "justifiedGallery/dist/css/justifiedGallery.css"
 import $ from "jquery"
 
+import sortGallery from "../mixins/sortGalleryData"
+
 export default {
-  name: "hello",
+  name: "Gallery",
+  mixins: [sortGallery],
   data() {
     return {
       msg: "Welcome to Your Vue.js App",
@@ -73,9 +76,9 @@ export default {
     },
   },
   computed: {
-    photoData() {
+    /*   photoData() {
       return this.$store.state.galleryPhotos
-    },
+    }, */
   },
 }
 </script>
