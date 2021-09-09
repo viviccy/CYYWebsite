@@ -45,6 +45,11 @@ $errorColor1: #f11c30;
 $buttonColor1: #3c4f6f;
 $buttonColor2: #0a1944;
 
+/* The width limit for responsive view */
+$viewThreshold1: 700px;
+$viewThreshold2: 320px;
+$viewThreshold3: 1200px;
+
 @mixin inputFieldPadding {
   padding: 5px 8px 5px 8px;
 }
@@ -84,3 +89,10 @@ $buttonTextSizeMin: 10px;
   width: 0;
 }
 //</-----line break for flex display----->
+
+//<-----element box shadow----->
+@mixin boxShadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+//</-----element box shadow----->

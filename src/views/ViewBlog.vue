@@ -31,14 +31,33 @@ export default {
     }
   },
   async mounted() {
-    //Use '.filter' to extract out each object from 'this.$store.state.blogPosts'
-    this.currentBlog = await this.$store.state.blogPosts.filter(
-      //for each object in 'this.$store.state.blogPosts'
-      (post) => {
-        //check to see if object property 'blogID' is equals to the current 'blogid' parameter from URL. If there is a match, return the whole object to 'this.currentBlgo'.
-        return post.blogID === this.$route.params.blogid
+    //Check to see if 'blogPosts' values in Store are ready.
+    //If yes the find the blog wanted.
+    if (this.$store.state.blogPosts.length) {
+      this.findBlog()
+    }
+
+    //watch for 'state.blogPosts' to get all values first before rendering the whole page
+    this.$store.watch(
+      (state) => {
+        //the state (which is 'blogPosts') that we want to watch
+        return state.blogPosts
+      },
+      async () => {
+        this.findBlog()
       }
     )
+  },
+  methods: {
+    async findBlog() {
+      this.currentBlog = await this.$store.state.blogPosts.filter(
+        //for each object in 'this.$store.state.blogPosts'
+        (post) => {
+          //check to see if object property 'blogID' is equals to the current 'blogid' parameter from URL. If there is a match, return the whole object to 'this.currentBlgo'.
+          return post.blogID === this.$route.params.blogid
+        }
+      )
+    },
   },
 }
 </script>
@@ -47,7 +66,7 @@ export default {
 .post-view {
   .shortDesc {
     font-style: italic;
-    @include fluid-type(320px, 1200px, 18px, 24px);
+    @include fluid-type($viewThreshold1, $viewThreshold2, 18px, 24px);
   }
   h4 {
     font-weight: 400;

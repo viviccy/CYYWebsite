@@ -175,7 +175,7 @@ header {
       align-items: center;
 
       .header {
-        @include fluid-type(320px, 1200px, 12px, 24px);
+        @include fluid-type($viewThreshold1, $viewThreshold2, 12px, 24px);
         font-weight: 600;
         color: black;
         text-decoration: none;

@@ -14,7 +14,7 @@
         <h2 v-if="post.welcomeScreen">{{ post.title }}</h2>
         <h2 v-else>{{ post.blogTitle }}</h2>
         <p v-if="post.welcomeScreen">{{ post.blogPost }}</p>
-        <p class="content-preview" v-else v-html="post.blogHTML"></p>
+        <div class="content-preview" v-else v-html="post.blogHTML"></div>
         <router-link class="link link-light" v-if="post.welcomeScreen" to="#">
           Login / Register <Arrow class="arrow arrow-light" />
         </router-link>
@@ -54,81 +54,91 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+//the container for 1 blog cover image and 1 blog detail box
 .blog-wrapper {
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  @media (min-width: 700px) {
-    min-height: 650px;
-    max-height: 650px;
-    flex-direction: row;
+  //use grid system
+  display: grid;
+
+  //1, 1fr = each row has 1 column of 1 fraction
+  grid-template-columns: repeat(1, 1fr);
+
+  //make each row has the same height and expand according to the child within the grid that has the tallest content
+  grid-auto-rows: 1fr;
+  align-content: center;
+
+  //small shadow for the whole container at the bottom
+  @include boxShadow;
+
+  @media (min-width: $viewThreshold3) {
+    //make 2 elements per row when in computer view
+    grid-template-columns: repeat(2, 1fr);
   }
 
+  //the box with the blog details
   .blog-content {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    /* 
-    equal to flex-grow: 4, flex shrink: 1 (default), flex-basis: 0 (default).
-    '.blog-content' will take 4 out of 8 portion of the space when the screen size is less than 700px 
-    */
-    flex: 4;
 
-    /*  
-    '.blog-content' is ordered to the bottom of '.blog-photo' when screen width less than 700px (mobile view).
+    //horizontally centered the content
+    justify-content: center;
+
+    //vertically centered the content
+    align-items: center;
+    /*
+    '.blog-content' is initial stack on top of '.blog-photo'.
+    '.blog-content' is then ordered to the bottom of '.blog-photo' when screen width less than 700px (mobile view).
     'order' property is based on 0,1,2,3...with element assigned to 0 will be placed before elements with 1 and so on.
-     Element with not 'order' assignment is default to 0.
+     Element with no 'order' assignment is default to 0.
     */
     order: 1;
+
     @media (min-width: 700px) {
-      /*  '.blog-content' is ordered to the left when screen width more than 700px */
-      order: 0;
-    }
-    @media (min-width: 800px) {
-      /* 
-      '.blog-content' will take 3 out of 6 portion of the space when the screen size is more than 800px 
+      /*  '.blog-content' is ordered to the left when screen width more than 700px.
+      This will be altered in #alternatePosition to make the alternating positions.
       */
-      flex: 3;
+
+      order: 0;
     }
 
     div {
       max-width: 375px;
-      padding: 72px 24px;
-      @media (min-width: 700px) {
-        padding: 0 24px;
-      }
+      height: auto;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-direction: column;
 
       h2 {
-        font-size: 32px;
+        @include fluid-type($viewThreshold1, $viewThreshold2, 20px, 32px);
         font-weight: 300;
         text-transform: uppercase;
-        margin-bottom: 24px;
-        @media (min-width: 700px) {
-          font-size: 40px;
-        }
-      }
-
-      p {
-        font-size: 15px;
-        font-weight: 300;
-        line-height: 1.7;
+        margin: 0;
       }
 
       .content-preview {
-        font-size: 13px;
-        max-height: 24px;
-        width: 250px;
-        white-space: nowrap;
+        @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 15px);
+        font-weight: 300;
+        line-height: 1.7;
+        text-align: justify;
         overflow: hidden;
         text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+
+        p {
+          margin: 15px 0;
+          display: -webkit-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          -webkit-line-clamp: 6;
+          -webkit-box-orient: vertical;
+        }
       }
 
       .link {
         display: inline-flex;
         align-items: center;
-        margin-top: 32px;
         padding-bottom: 4px;
         border-bottom: 1px solid transparent;
         transition: 0.5s ease-in all;
@@ -147,22 +157,13 @@ export default {
   }
 
   .blog-photo {
-    flex: 4;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    @include boxShadow;
 
     /*  '.blog-photo' is ordered to the top when screen width less than 700px (mobile view) */
     order: 0;
     @media (min-width: 700px) {
       /*  '.blog-photo' is ordered to the right when screen width more than 700px */
       order: 1;
-    }
-
-    @media (min-width: 800px) {
-      /* 
-      '.blog-photo' will take 3 out of 6 portion of the space when the screen size is more than 800px 
-      */
-      flex: 3;
     }
 
     img {
@@ -190,17 +191,20 @@ export default {
   }
 
   
- 'background-color:red' will be shown on page even screen size is more than 700px in the first place.
+ 'background-color:red' will always be shown on page even screen size is more than 700px in the first place.
  This is because 'background-color:blue' is executed first then overwritten by 'background-color:red'.
  */
   &:nth-child(even) {
-    /*   even numbered 'blog-wrapper' will have 'blog-photo' placed before 'blog-content'
+    @media (min-width: 700px) {
+      //#alternatePosition
+      /*   even numbered 'blog-wrapper' will have 'blog-photo' placed before 'blog-content'
      odd numbered 'blog-wrapper' will have 'blog-content' placed before 'blog-photo' */
-    .blog-content {
-      order: 1;
-    }
-    .blog-photo {
-      order: 0;
+      .blog-content {
+        order: 1;
+      }
+      .blog-photo {
+        order: 0;
+      }
     }
   }
 }

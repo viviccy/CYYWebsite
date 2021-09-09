@@ -1,79 +1,81 @@
 <template>
-  <swiper
-    :slides-per-view="1"
-    :space-between="0"
-    navigation
-    :pagination="{ clickable: true }"
-    :scrollbar="{ draggable: true }"
-    @swiper="onSwiper"
-    @slideChange="onSlideChange"
-    :options="swiperOptions"
-  >
-    <swiper-slide>
-      <div class="desc">
-        <h3>Kuala Lumpur</h3>
+  <div class="swiperDiv">
+    <swiper
+      :slides-per-view="1"
+      :space-between="0"
+      navigation
+      :pagination="{ clickable: true }"
+      :scrollbar="{ draggable: true }"
+      @swiper="onSwiper"
+      @slideChange="onSlideChange"
+      :options="swiperOptions"
+    >
+      <swiper-slide>
+        <div class="desc">
+          <h3>Kuala Lumpur</h3>
 
-        <p>
-          Malaysia's capital and largest city has much to offer visitors,
-          regardless of their interests
-        </p>
-        <a href="#">Get to know more! &raquo;</a>
-        <div class="whiteBg"></div>
-      </div>
+          <p>
+            Malaysia's capital and largest city has much to offer visitors,
+            regardless of their interests
+          </p>
+          <a href="#">Get to know more! &raquo;</a>
+          <div class="whiteBg"></div>
+        </div>
 
-      <img
-        class="img1 swiper-lazy"
-        :data-src="require('@/assets/swiperImages/image1.jpg')"
-        sizes="100vw"
-      />
+        <img
+          class="img1 swiper-lazy"
+          :data-src="require('@/assets/swiperImages/image1.jpg')"
+          sizes="100vw"
+        />
 
-      <div class="swiper-lazy-preloader">
-        <span></span>
-      </div>
-    </swiper-slide>
-    <swiper-slide>
-      <div class="desc">
-        <h3>Pulau Tioman</h3>
-        <p>
-          Pulau Tioman is an island off Peninsular Malaysia's east coast
-          paradise and one of Southeast Asia's most beautiful travel
-          destinations
-        </p>
-        <a href="#">Get to know more! &raquo;</a>
-        <div class="whiteBg"></div>
-      </div>
-      <img
-        class="img2 swiper-lazy"
-        :data-src="require('@/assets/swiperImages/image2.jpg')"
-        sizes="100vw"
-      />
-      <div class="swiper-lazy-preloader">
-        <span></span>
-      </div>
-    </swiper-slide>
-    <swiper-slide>
-      <div class="desc">
-        <h3>Cameron Highland</h3>
-        <p>
-          Cameron Highlands is the most popular of the highland retreats in
-          Malaysia
-        </p>
-        <a href="#">Get to know more! &raquo;</a>
-        <div class="whiteBg"></div>
-      </div>
-      <img
-        class="img3 swiper-lazy"
-        :data-src="require('@/assets/swiperImages/image3.jpg')"
-        sizes="100vw"
-      />
-      <div class="swiper-lazy-preloader">
-        <span></span>
-      </div>
-    </swiper-slide>
-    <div class="swiper-pagination" slot="pagination"></div>
-    <div class="swiper-button-next" slot="button-next"></div>
-    <div class="swiper-button-prev" slot="button-prev"></div>
-  </swiper>
+        <div class="swiper-lazy-preloader">
+          <span></span>
+        </div>
+      </swiper-slide>
+      <swiper-slide>
+        <div class="desc">
+          <h3>Pulau Tioman</h3>
+          <p>
+            Pulau Tioman is an island off Peninsular Malaysia's east coast
+            paradise and one of Southeast Asia's most beautiful travel
+            destinations
+          </p>
+          <a href="#">Get to know more! &raquo;</a>
+          <div class="whiteBg"></div>
+        </div>
+        <img
+          class="img2 swiper-lazy"
+          :data-src="require('@/assets/swiperImages/image2.jpg')"
+          sizes="100vw"
+        />
+        <div class="swiper-lazy-preloader">
+          <span></span>
+        </div>
+      </swiper-slide>
+      <swiper-slide>
+        <div class="desc">
+          <h3>Cameron Highland</h3>
+          <p>
+            Cameron Highlands is the most popular of the highland retreats in
+            Malaysia
+          </p>
+          <a href="#">Get to know more! &raquo;</a>
+          <div class="whiteBg"></div>
+        </div>
+        <img
+          class="img3 swiper-lazy"
+          :data-src="require('@/assets/swiperImages/image3.jpg')"
+          sizes="100vw"
+        />
+        <div class="swiper-lazy-preloader">
+          <span></span>
+        </div>
+      </swiper-slide>
+      <div class="swiper-pagination" slot="pagination"></div>
+      <div class="swiper-button-next" slot="button-next"></div>
+      <div class="swiper-button-prev" slot="button-prev"></div>
+    </swiper>
+  </div>
 </template>
 
 <script>
@@ -225,6 +227,9 @@ export default {
   }
 }
 
+.swiperDiv {
+}
+
 .swiper-slide {
   text-align: center;
   height: 100%;
@@ -241,13 +246,13 @@ export default {
     h3 {
       z-index: 55;
       text-transform: uppercase;
-      @include fluid-type(320px, 1200px, 18px, 30px);
+      @include fluid-type($viewThreshold1, $viewThreshold2, 18px, 30px);
       margin-bottom: 10px;
     }
 
     p {
       z-index: 55;
-      @include fluid-type(320px, 1200px, 12px, 20px);
+      @include fluid-type($viewThreshold1, $viewThreshold2, 12px, 20px);
       margin-bottom: 8px;
       color: #606060;
     }
@@ -255,7 +260,7 @@ export default {
     a {
       color: #606060;
       font-weight: 700;
-      @include fluid-type(320px, 1200px, 11px, 19px);
+      @include fluid-type($viewThreshold1, $viewThreshold2, 11px, 19px);
       text-decoration: none;
     }
 
@@ -299,28 +304,27 @@ export default {
   background-color: white;
 }
 .swiper-container {
-  width: auto;
-  height: 80vh;
+  width: 100vw;
+  height: calc(100vw * 0.35);
+
   background: #e8e6e6;
 
   .swiper-wrapper {
-    border: 1px solid white;
     .swiper-slide {
       margin: 0 auto;
       img {
         display: block;
         max-width: 150%;
+        max-height: initial !important;
 
         //required for small screen
         width: auto;
-        height: 100%;
+        height: auto;
 
         margin: 0px;
         padding: 0px;
         overflow-x: hidden;
         object-fit: cover;
-        //to fix the left and right image get exposed on the left and right edges when current image in view
-        transform: translate(-50.1%, -50.1%);
 
         @media (min-width: 650px) {
           width: 100%;

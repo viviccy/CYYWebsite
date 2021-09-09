@@ -273,6 +273,8 @@ To use other methods of 'context', they can be written like this:
         }
       })
       state.postLoaded = true
+
+      console.log("post ready")
     },
 
     // delete post. Caller is from 'BlogCard.vue'.

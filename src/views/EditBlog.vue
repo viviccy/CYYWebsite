@@ -137,6 +137,13 @@
                     delay: { show: 0, hide: 0 },
                   }"
                 ></button>
+                <button
+                  class="ql-image"
+                  v-tooltip.top-center="{
+                    content: 'Upload Image',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
               <span class="ql-formats">
                 <button
@@ -568,6 +575,9 @@ export default {
     },
     //imageHandler(file object, editor object, index number of the current cursor location in the textarea, resetUploader)
     imageHandler(file, Editor, cursorLocation, resetUploader) {
+      //show preloader
+      this.loading = true
+
       //this is a pointer to the root location of the images
       const storageRef = firebase.storage().ref()
 
@@ -602,6 +612,9 @@ export default {
           Editor.insertEmbed(cursorLocation, "image", downloadURL)
           //use together with 'insertEmbed'
           resetUploader()
+
+          //hide preloader
+          this.loading = false
         }
       )
     },
@@ -1010,7 +1023,7 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
 
     & > h2 {
       text-transform: uppercase;
-      @include fluid-type(320px, 1200px, 16px, 26px);
+      @include fluid-type($viewThreshold1, $viewThreshold2, 16px, 26px);
       color: $buttonColor2;
       letter-spacing: 3px;
       font-weight: 700;
@@ -1046,7 +1059,7 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
     span {
       transition: 0.5s ease all;
       transition-delay: 0.3s;
-      @include fluid-type(320px, 1200px, 13px, 16px);
+      @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
       font-weight: bold;
       opacity: 1;
     }
@@ -1085,8 +1098,8 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
         flex: 1;
         align-self: stretch;
         @include fluid-type(
-          320px,
-          1200px,
+          $viewThreshold1,
+          $viewThreshold2,
           $buttonTextSizeMin,
           $buttonTextSizeMax
         );
@@ -1106,8 +1119,8 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
         margin: 0 8px 0 8px;
         text-transform: initial;
         @include fluid-type(
-          320px,
-          1200px,
+          $viewThreshold1,
+          $viewThreshold2,
           $buttonTextSizeMin,
           $buttonTextSizeMax
         );
@@ -1118,8 +1131,8 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
       /* <-----File name-----> */
       span {
         @include fluid-type(
-          320px,
-          1200px,
+          $viewThreshold1,
+          $viewThreshold2,
           $buttonTextSizeMin,
           $buttonTextSizeMax
         );
@@ -1137,7 +1150,7 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
     //<-----Quill CSS----->
     .editor {
       flex: 1;
-      height: 60vh;
+      height: 100%;
       display: flex;
       flex-direction: column;
       margin-top: 20px;
@@ -1146,7 +1159,7 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
         position: relative;
         display: flex;
         flex-direction: column;
-        height: 100%;
+        height: 250px;
 
         .ql-toolbar {
           border-radius: 5px 5px 0 0;
@@ -1157,7 +1170,7 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
           flex-direction: column;
           height: 100%;
           /*   to allow the textarea to scroll when user type in lengthy paragraph and goes over the limit */
-          overflow: scroll;
+          overflow: hidden;
           border-radius: 0 0 5px 5px;
 
           .ql-editor {
@@ -1193,8 +1206,8 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
       & > button {
         margin-right: 16px;
         @include fluid-type(
-          320px,
-          1200px,
+          $viewThreshold1,
+          $viewThreshold2,
           $buttonTextSizeMin,
           $buttonTextSizeMax
         );
@@ -1209,8 +1222,8 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
         text-align: center;
         margin-right: 16px;
         @include fluid-type(
-          320px,
-          1200px,
+          $viewThreshold1,
+          $viewThreshold2,
           $buttonTextSizeMin,
           $buttonTextSizeMax
         );

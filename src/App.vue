@@ -22,7 +22,7 @@ export default {
       navigation: null,
     }
   },
-  created() {
+  async created() {
     firebase.auth().onAuthStateChanged((user) => {
       this.$store.commit("updateUser", user)
       if (user) {
@@ -30,7 +30,8 @@ export default {
       }
     })
     this.checkRoute()
-    this.$store.dispatch("getPost")
+    await this.$store.dispatch("getPost")
+    console.log("getPost ended")
   },
   mounted() {},
   methods: {

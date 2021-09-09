@@ -1,16 +1,23 @@
 <template>
   <div>
     <div class="app-container">
-      <div id="lightgallery">
+      <div id="lightgallery" v-show="galleryReady">
         <a
           class="gallery-item"
           v-bind:key="item.photoId"
-          v-for="item in photoDataSorted"
+          v-for="(item, index) in photoDataSorted"
           :href="item.photoURL"
-          :data-sub-html="
-            `<h6>${item.photoTitle}</h6><p>${item.photoShortDesc}</p>`
-          "
+          :data-sub-html="'#caption' + index"
         >
+          <div :id="'caption' + index">
+            <h3>{{ item.photoTitle }}</h3>
+            <p>{{ item.photoShortDesc }}</p>
+            <router-link
+              class="link"
+              :to="{ name: 'ViewBlog', params: { blogid: `${item.blogId}` } }"
+              >Explore More</router-link
+            >
+          </div>
           <img :src="item.thumbPhotoURL" />
         </a>
       </div>
@@ -34,51 +41,52 @@ export default {
   mixins: [sortGallery],
   data() {
     return {
-      msg: "Welcome to Your Vue.js App",
       blocks: [],
       imageList: [],
+      galleryReady: false,
     }
   },
-  mounted: async function() {
+  async mounted() {
     await this.loadGallery()
-
-    $("#lightgallery").justifiedGallery({
-      rowHeight: 200,
-      maxRowHeight: 250,
-      lastRow: "nojustify",
-      margins: 3,
-    })
-
-    const el = document.getElementById("lightgallery")
-    window.lightGallery(el, {
-      plugins: [lgThumbnail],
-      thumbnail: true,
-      animateThumb: true,
-      currentPagerPosition: "right",
-      pullCaptionUp: true,
-      download: false,
-      thumbMargin: 10,
-      thumbItem: 1,
-    })
   },
 
   methods: {
-    onInit: () => {
-      console.log("lightGallery has been initialized")
-    },
-    onBeforeSlide: () => {
-      console.log("calling before slide")
-    },
-
     //load gallery data from Firestore to store
     async loadGallery() {
+      this.$store.commit("resetGalleryState")
       await this.$store.dispatch("loadGalleryData")
     },
   },
-  computed: {
-    /*   photoData() {
-      return this.$store.state.galleryPhotos
-    }, */
+  computed: {},
+  watch: {
+    photoDataSorted() {
+      let thisPointer = this
+      this.$nextTick(() => {
+        $("#lightgallery")
+          .justifiedGallery({
+            rowHeight: 200,
+            maxRowHeight: 250,
+            lastRow: "nojustify",
+            margins: 3,
+          })
+          .on("jg.complete", function() {
+            thisPointer.galleryReady = true
+          })
+
+        let el = document.getElementById("lightgallery")
+
+        window.lightGallery(el, {
+          plugins: [lgThumbnail],
+          thumbnail: true,
+          animateThumb: true,
+          currentPagerPosition: "right",
+          pullCaptionUp: true,
+          download: false,
+          thumbMargin: 10,
+          thumbItem: 1,
+        })
+      })
+    },
   },
 }
 </script>
@@ -87,10 +95,30 @@ export default {
 .app-container {
   margin-left: 5%;
   margin-right: 5%;
+
+  #lightgallery {
+    margin-top: 45px;
+
+    .gallery-item {
+      div {
+        display: none;
+      }
+    }
+  }
 }
 
-#lightgallery {
-  margin-top: 10px;
+.lg-sub-html {
+  h3 {
+    @include fluid-type($viewThreshold1, $viewThreshold2, 15px, 18px);
+  }
+  p {
+    @include fluid-type($viewThreshold1, $viewThreshold2, 12px, 15px);
+  }
+
+  a {
+    @include fluid-type($viewThreshold1, $viewThreshold2, 11px, 14px);
+    letter-spacing: 2px;
+  }
 }
 
 h1,
@@ -119,11 +147,5 @@ a {
   img {
     width: 100%;
   }
-}
-
-//the container of the whole gallery
-.masonry-container {
-  width: 95%;
-  margin: 0 auto;
 }
 </style>

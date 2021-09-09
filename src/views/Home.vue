@@ -37,6 +37,9 @@ export default {
   data() {
     return {}
   },
+  created() {
+    this.$store.dispatch("getPost")
+  },
   computed: {
     blogPostFeed() {
       return this.$store.getters.blogPostFeed

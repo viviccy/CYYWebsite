@@ -194,8 +194,8 @@ export default {
       @include formButton;
       padding: 12px 15px;
       @include fluid-type(
-        320px,
-        1200px,
+        $viewThreshold1,
+        $viewThreshold2,
         $buttonTextSizeMin,
         $buttonTextSizeMax
       );

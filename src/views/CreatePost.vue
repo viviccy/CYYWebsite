@@ -141,6 +141,13 @@
                     delay: { show: 0, hide: 0 },
                   }"
                 ></button>
+                <button
+                  class="ql-image"
+                  v-tooltip.top-center="{
+                    content: 'Upload Image',
+                    delay: { show: 0, hide: 0 },
+                  }"
+                ></button>
               </span>
               <span class="ql-formats">
                 <button
@@ -500,6 +507,9 @@ export default {
     },
     //imageHandler(file object, editor object, index number of the current cursor location in the textarea, resetUploader)
     imageHandler(file, Editor, cursorLocation, resetUploader) {
+      //show preloader
+      this.loading = true
+
       //this is a pointer to the root location of the images
       const storageRef = firebase.storage().ref()
 
@@ -534,6 +544,9 @@ export default {
           Editor.insertEmbed(cursorLocation, "image", downloadURL)
           //use together with 'insertEmbed'
           resetUploader()
+
+          //hide preloader
+          this.loading = false
         }
       )
     },
