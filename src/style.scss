@@ -46,9 +46,13 @@ $buttonColor1: #3c4f6f;
 $buttonColor2: #0a1944;
 
 /* The width limit for responsive view */
-$viewThreshold1: 700px;
-$viewThreshold2: 320px;
-$viewThreshold3: 1200px;
+$viewThreshold1: 320px;
+$viewThreshold2: 1200px;
+$viewThreshold3: 700px;
+
+:export {
+  viewThreshold3: $viewThreshold3;
+}
 
 @mixin inputFieldPadding {
   padding: 5px 8px 5px 8px;

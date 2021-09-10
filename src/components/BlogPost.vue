@@ -1,6 +1,6 @@
 <template>
   <!-- 'BlogPost' component is the big post section on the page. Caller is from "Home.vue" -->
-  <div class="blog-wrapper" :class="{ 'no-user': !user }">
+  <div class="blog-wrapper" :class="{ 'no-user': !user }" ref="blogSection">
     <div class="blog-content">
       <div>
         <!--   Child way of using a prop 
@@ -11,16 +11,11 @@
         <!--    prop 'post' has the 'welcomeScreen' object as value
         post.welcomeScreen = return either true or false
         post.title = return title property for the object 'welcomeScreen' -->
-        <h2 v-if="post.welcomeScreen">{{ post.title }}</h2>
-        <h2 v-else>{{ post.blogTitle }}</h2>
-        <p v-if="post.welcomeScreen">{{ post.blogPost }}</p>
-        <div class="content-preview" v-else v-html="post.blogHTML"></div>
-        <router-link class="link link-light" v-if="post.welcomeScreen" to="#">
-          Login / Register <Arrow class="arrow arrow-light" />
-        </router-link>
+
+        <h2>{{ post.blogTitle }}</h2>
+        <div class="content-preview" v-html="post.blogShortDesc"></div>
         <router-link
           class="link"
-          v-else
           :to="{ name: 'ViewBlog', params: { blogid: this.post.blogID } }"
         >
           View The Post <Arrow class="arrow" />
@@ -32,7 +27,7 @@
         v-if="post.welcomeScreen"
         :src="require(`../assets/blogPhotos/${post.photo}.jpg`)"
       />
-      <img v-else :src="post.blogCoverPhoto" alt="" />
+      <img v-else :src="post.blogCoverPhoto" alt="" @load="onImgLoad" />
     </div>
   </div>
 </template>
@@ -43,8 +38,24 @@ import Arrow from "../assets/Icons/arrow-right-light.svg?inline"
 export default {
   name: "BlogPost",
   props: ["post"],
+  blogHeight: null,
   components: {
     Arrow,
+  },
+  created() {
+    window.addEventListener("resize", this.divSizeCheck)
+  },
+  mounted() {},
+  methods: {
+    divSizeCheck() {
+      this.$emit("blogSectionHeightChange", this.$refs.blogSection.clientHeight)
+    },
+    onImgLoad() {
+      this.divSizeCheck()
+    },
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.myEventHandler)
   },
   computed: {
     user() {
@@ -104,6 +115,7 @@ export default {
       max-width: 375px;
       height: auto;
       padding: 0;
+      margin: 30px;
       display: flex;
       align-items: center;
       justify-content: space-between;

@@ -1,5 +1,5 @@
 <template>
-  <div class="swiperDiv">
+  <div class="swiperDiv" v-show="blogSectionHeightForSwiper">
     <swiper
       :slides-per-view="1"
       :space-between="0"
@@ -104,12 +104,15 @@ import "swiper/components/pagination/pagination.scss"
 import "swiper/components/navigation/navigation.scss"
 import "swiper/components/lazy/lazy.min.css"
 
+import scssStyle from "../style.scss"
+
 // install Swiper modules
 SwiperClass.use([Pagination, Navigation, Mousewheel, Autoplay, Lazy])
 const { Swiper, SwiperSlide } = getAwesomeSwiper(SwiperClass)
 
 export default {
   name: "SwiperComp",
+  props: ["blogSectionHeightForSwiper"],
   components: {
     Swiper,
     SwiperSlide,
@@ -124,9 +127,9 @@ export default {
         lazy: true,
         preloadImages: true,
         updateOnImagesReady: true,
-        spaceBetween: 10,
+        spaceBetween: 0,
         autoplay: {
-          delay: 500000,
+          delay: 5000,
           disableOnInteraction: false,
         },
         //Bottom dot buttons
@@ -174,66 +177,163 @@ export default {
     onSlideChange() {
       console.log("slide change")
     },
+  },
+  mounted() {
+    scssStyle.viewThreshold1
 
-    testing: function() {
-      console.log("testing")
+    document.querySelector(".swiperDiv").style.height =
+      this.blogSectionHeightForSwiper + "px"
+  },
+  watch: {
+    blogSectionHeightForSwiper: function(newVal) {
+      let val = newVal
+
+      console.log("window.screen.availWidth=" + window.screen.availWidth)
+      console.log(
+        "scssStyle.viewThreshold3=" + parseInt(scssStyle.viewThreshold3, 10)
+      )
+
+      if (window.screen.availWidth <= parseInt(scssStyle.viewThreshold3, 10)) {
+        val = val / 2
+      }
+
+      val = val + "px"
+
+      document.querySelector(".swiperDiv").style.height = val
+      console.log(
+        "swiperDiv height=" + document.querySelector(".swiperDiv").style.height
+      )
     },
   },
 }
 </script>
 
 <style lang="scss">
-.swiper-lazy-preloader {
-  //to turn make default swiper loading icon invisible
-  visibility: hidden;
-
-  //the height and width of the preloader icon
-  width: 50px;
-  height: 50px;
-
-  //set the icon slightly above
-  top: 48%;
-
-  // this will make a new custom icon to replace the default Swiper icon
-
-  background-color: red;
-  //'@keyframes' is for 'span' element below. To define the animation used by 'span'.
-  //#anchorSpin
-  @keyframes spin {
-    to {
-      transform: rotateZ(360deg);
-    }
-  }
-
-  span {
-    //make this child visible
-    visibility: visible;
-    display: block;
-
-    //the the size of the span smaller to cater for the round circle
+.swiperDiv {
+  .swiper-container {
     width: 100%;
+    // height: calc(100vw * 0.45);
     height: 100%;
 
-    //remove margin and center the element
-    margin: 0 auto;
+    background: #e8e6e6;
 
-    border: 3px solid transparent;
-    border-top-color: #3e3e3e;
-    border-bottom-color: #3e3e3e;
-    border-radius: 50%;
+    .swiper-wrapper {
+      .swiper-slide {
+        margin: 0 auto;
+        img {
+          display: block;
+          max-width: 300%;
+          max-height: initial !important;
 
-    //use the 'spin' animation as defined in #anchorSpin
-    animation: spin ease 1000ms infinite;
+          //required for small screen
+          width: auto;
+          height: auto;
+
+          margin: 0px;
+          padding: 0px;
+          overflow-x: hidden;
+          object-fit: cover;
+
+          &.img1 {
+            @include mediaProcess(800px, none, 40%, 80%);
+            @include mediaProcess(930px, none, 0%, 90%);
+            @include mediaProcess(1000px, none, 0%, 100%);
+          }
+
+          &.img2 {
+            @include mediaProcess(700px, none, 0% 40%);
+            @include mediaProcess(1030px, none, 50% 550%);
+          }
+
+          &.img3 {
+            @include mediaProcess(900px, none, 0% 95%);
+            @include mediaProcess(1030px, none, 50% 220%);
+          }
+        }
+
+        .swiper-lazy-preloader {
+          //to turn make default swiper loading icon invisible
+          visibility: hidden;
+
+          //the height and width of the preloader icon
+          width: 50px;
+          height: 50px;
+
+          //set the icon slightly above
+          top: 48%;
+
+          // this will make a new custom icon to replace the default Swiper icon
+
+          background-color: red;
+          //'@keyframes' is for 'span' element below. To define the animation used by 'span'.
+          //#anchorSpin
+          @keyframes spin {
+            to {
+              transform: rotateZ(360deg);
+            }
+          }
+
+          span {
+            //make this child visible
+            visibility: visible;
+            display: block;
+
+            //the the size of the span smaller to cater for the round circle
+            width: 100%;
+            height: 100%;
+
+            //remove margin and center the element
+            margin: 0 auto;
+
+            border: 3px solid transparent;
+            border-top-color: #3e3e3e;
+            border-bottom-color: #3e3e3e;
+            border-radius: 50%;
+
+            //use the 'spin' animation as defined in #anchorSpin
+            animation: spin ease 1000ms infinite;
+          }
+        }
+      }
+
+      .swiper-button-next,
+      .swiper-button-prev {
+        transform: scale(0.1);
+      }
+    }
+
+    .swiper-button-next,
+    .swiper-button-prev {
+      background-image: url("../assets/Icons/swipe-arrow.svg");
+
+      background-repeat: no-repeat;
+      background-size: 100% auto;
+      background-position: center;
+      opacity: 0.4;
+    }
+
+    .swiper-button-prev {
+      transform: rotate(180deg);
+    }
+
+    .swiper-button-next::after,
+    .swiper-button-prev::after {
+      display: none;
+    }
   }
-}
-
-.swiperDiv {
 }
 
 .swiper-slide {
   text-align: center;
   height: 100%;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+
+  @media (min-width: $viewThreshold3) {
+    display: flex;
+    align-items: flex-start;
+  }
 
   .desc {
     position: relative;
@@ -241,7 +341,11 @@ export default {
 
     text-align: left;
     width: 40%;
-    margin: 2% 4% 0 4%;
+    margin: 4% 12% 0 12%;
+
+    @media (min-width: $viewThreshold3) {
+      margin: 4% 8% 0 8%;
+    }
 
     h3 {
       z-index: 55;
@@ -266,22 +370,27 @@ export default {
 
     .whiteBg {
       z-index: -1;
-      background: white;
       position: absolute;
-      top: -130px;
-      left: -100px;
       display: block;
-      opacity: 0.6;
-      width: 160%;
+      top: -200px;
+      left: -100px;
+      width: 180%;
       height: 800px;
-      transform: rotate(10deg);
+      transform: rotate(0deg);
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.8) 0%,
+        rgba(255, 255, 255, 0.5) 85%,
+        rgba(0, 0, 0, 0) 100%
+      );
 
-      @media (min-width: 580px) {
-        width: 140%;
-      }
+      @media (min-width: $viewThreshold3) {
+        top: -250px;
+        left: -170px;
 
-      @media (min-width: 950px) {
-        width: 120%;
+        width: 150%;
+
+        transform: rotate(20deg);
       }
     }
   }
@@ -302,79 +411,5 @@ export default {
   > .swiper-pagination-bullets
   .swiper-pagination-bullet {
   background-color: white;
-}
-.swiper-container {
-  width: 100vw;
-  height: calc(100vw * 0.35);
-
-  background: #e8e6e6;
-
-  .swiper-wrapper {
-    .swiper-slide {
-      margin: 0 auto;
-      img {
-        display: block;
-        max-width: 150%;
-        max-height: initial !important;
-
-        //required for small screen
-        width: auto;
-        height: auto;
-
-        margin: 0px;
-        padding: 0px;
-        overflow-x: hidden;
-        object-fit: cover;
-
-        @media (min-width: 650px) {
-          width: 100%;
-        }
-
-        @media screen and (orientation: landscape) {
-          width: 100%;
-        }
-
-        &.img1 {
-          @include mediaProcess(800px, none, 40%, 80%);
-          @include mediaProcess(930px, none, 0%, 90%);
-          @include mediaProcess(1000px, none, 0%, 100%);
-        }
-
-        &.img2 {
-          @include mediaProcess(700px, none, 0% 40%);
-          @include mediaProcess(1030px, none, 50% 550%);
-        }
-
-        &.img3 {
-          @include mediaProcess(900px, none, 0% 95%);
-          @include mediaProcess(1030px, none, 50% 220%);
-        }
-      }
-    }
-
-    .swiper-button-next,
-    .swiper-button-prev {
-      transform: scale(0.1);
-    }
-  }
-
-  .swiper-button-next,
-  .swiper-button-prev {
-    background-image: url("../assets/Icons/swipe-arrow.svg");
-
-    background-repeat: no-repeat;
-    background-size: 100% auto;
-    background-position: center;
-    opacity: 0.4;
-  }
-
-  .swiper-button-prev {
-    transform: rotate(180deg);
-  }
-
-  .swiper-button-next::after,
-  .swiper-button-prev::after {
-    display: none;
-  }
 }
 </style>

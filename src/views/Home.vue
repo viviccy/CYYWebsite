@@ -1,7 +1,12 @@
 <template>
   <div class="home">
-    <SwiperComp />
-    <BlogPost :post="post" v-for="(post, index) in blogPostFeed" :key="index" />
+    <SwiperComp :blogSectionHeightForSwiper="blogSectionHeight" />
+    <BlogPost
+      :post="post"
+      @blogSectionHeightChange="getHeightChange"
+      v-for="(post, index) in blogPostFeed"
+      :key="index"
+    />
     <div class="blog-card-wrap">
       <div class="container">
         <h3>View More Recent Blogs</h3>
@@ -35,10 +40,15 @@ export default {
   name: "Home",
   components: { BlogPost, BlogCards, Arrow, SwiperComp },
   data() {
-    return {}
+    return { blogSectionHeight: null }
   },
   created() {
     this.$store.dispatch("getPost")
+  },
+  methods: {
+    getHeightChange(event) {
+      this.blogSectionHeight = event
+    },
   },
   computed: {
     blogPostFeed() {
