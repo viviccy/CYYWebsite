@@ -3,9 +3,6 @@
     <swiper
       :slides-per-view="1"
       :space-between="0"
-      navigation
-      :pagination="{ clickable: true }"
-      :scrollbar="{ draggable: true }"
       @swiper="onSwiper"
       @slideChange="onSlideChange"
       :options="swiperOptions"
@@ -118,15 +115,14 @@ export default {
     SwiperSlide,
   },
   data() {
-    const vue = this
     return {
       swiperOptions: {
         loop: true,
         speed: 600,
         slidesPerView: 1,
+        preloadImages: false,
+        updateOnImagesReady: false,
         lazy: true,
-        preloadImages: true,
-        updateOnImagesReady: true,
         spaceBetween: 0,
         autoplay: {
           delay: 5000,
@@ -144,23 +140,27 @@ export default {
         },
         on: {
           init: function() {
-            console.log("initialized.") // this works
-            vue.testing
+            //to fix a bug in Swiper that the last image on the list (duplicate of first image) not removing the 'data-src' attribute even the lazy loading is done.
+            let lastImgURL = document
+              .querySelector(".swiperDiv .swiper-slide:last-child img")
+              .getAttribute("data-src")
+
+            document
+              .querySelector(".swiperDiv .swiper-slide:last-child img")
+              .removeAttribute("data-src")
+
+            document
+              .querySelector(".swiperDiv .swiper-slide:last-child img")
+              .setAttribute("src", lastImgURL)
           },
           lazyImageLoad: function() {
-            //this.slides[this.activeIndex].querySelector(".desc").style.display =
-            // "none"
+            // if (lastChild.getAttribute("data-src")) {
+            //    console.log("last child")
+            //  }
+            // document.querySelector(".swiperDiv .swiper-slide.swiper-slide-active img").getAttribute("data-src")
           },
-          lazyImageReady: function() {
-            //  console.log("been here")
-            // this.slides[this.activeIndex].querySelector(".desc").style.display =
-            //   "block"
-          },
-          beforeSlideChangeStart: function() {
-            //  console.log("kkkkkk")
-            // this.slides[this.activeIndex].querySelector(".desc").style.display =
-            //  "none"
-          },
+          lazyImageReady: function() {},
+          beforeSlideChangeStart: function() {},
         },
       },
     }
@@ -174,8 +174,9 @@ export default {
     onSwiper(swiper) {
       console.log(swiper)
     },
-    onSlideChange() {
+    onSlideChange(swiper) {
       console.log("slide change")
+      swiper.autoplay.start()
     },
   },
   mounted() {
@@ -188,11 +189,6 @@ export default {
     blogSectionHeightForSwiper: function(newVal) {
       let val = newVal
 
-      console.log("window.screen.availWidth=" + window.screen.availWidth)
-      console.log(
-        "scssStyle.viewThreshold3=" + parseInt(scssStyle.viewThreshold3, 10)
-      )
-
       if (window.screen.availWidth <= parseInt(scssStyle.viewThreshold3, 10)) {
         val = val / 2
       }
@@ -200,9 +196,6 @@ export default {
       val = val + "px"
 
       document.querySelector(".swiperDiv").style.height = val
-      console.log(
-        "swiperDiv height=" + document.querySelector(".swiperDiv").style.height
-      )
     },
   },
 }
