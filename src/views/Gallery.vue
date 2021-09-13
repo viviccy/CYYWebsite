@@ -5,7 +5,7 @@
         <a
           class="gallery-item"
           v-bind:key="item.photoId"
-          v-for="(item, index) in photoDataSorted"
+          v-for="(item, index) in photoDataForInfiniteScroll"
           :href="item.photoURL"
           :data-sub-html="'#caption' + index"
         >
@@ -34,20 +34,78 @@ import "justifiedGallery/dist/js/jquery.justifiedGallery.js"
 import "justifiedGallery/dist/css/justifiedGallery.css"
 import $ from "jquery"
 
-import sortGallery from "../mixins/sortGalleryData"
+//import sortGallery from "../mixins/sortGalleryData"
 
 export default {
   name: "Gallery",
-  mixins: [sortGallery],
+  // mixins: [sortGallery],
   data() {
     return {
       blocks: [],
       imageList: [],
       galleryReady: false,
+
+      currentImageIndex: 0,
+      imageStartTotal: 3,
+      imageLoadBatchTotal: 1,
     }
   },
   async mounted() {
     await this.loadGallery()
+
+    this.currentImageIndex = this.imageStartTotal - 1
+
+    let thisPointer = this
+
+    $(window).scroll(function() {
+      if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+        console.log(
+          "thisPointer.currentImageIndex=" + thisPointer.currentImageIndex
+        )
+        console.log(
+          "thisPointer.$store.getters.photoDataSorted.length=" +
+            thisPointer.$store.getters.photoDataSorted.length
+        )
+
+        for (
+          let i = thisPointer.currentImageIndex;
+          i < thisPointer.$store.getters.photoDataSorted.length;
+          i++
+        ) {
+          console.log("loop time=" + i)
+          $("#lightgallery").append(
+            /*   '<a class="gallery-item" href="' +
+              thisPointer.$store.getters.photoDataSorted[i].photoURL +
+              '" data-sub-html="#caption' +
+              i +
+              '"' +
+              ' <div id="caption' +
+              i +
+              '"><h3>' +
+              thisPointer.$store.getters.photoDataSorted[i].photoTitle +
+              "</h3>" +
+              "<p>" +
+              thisPointer.$store.getters.photoDataSorted[i].photoShortDesc +
+              "</p>" +
+              "</div>" +
+              '<img src="' +
+              thisPointer.$store.getters.photoDataSorted[i].thumbPhotoURL +
+              '" dfsdfsfsfd &#47;></a>' */
+            '<div  id="caption' +
+              i +
+              '"><h3>' +
+              thisPointer.$store.getters.photoDataSorted[i].photoTitle +
+              "</h3>" +
+              "<p>" +
+              thisPointer.$store.getters.photoDataSorted[i].photoShortDesc +
+              "</p>" +
+              ' <router-link class="link" :to="#"></router-link>' +
+              "</div>"
+          )
+        }
+        $("#gallery").justifiedGallery("norewind")
+      }
+    })
   },
 
   methods: {
@@ -57,14 +115,25 @@ export default {
       await this.$store.dispatch("loadGalleryData")
     },
   },
-  computed: {},
+  computed: {
+    photoDataForInfiniteScroll() {
+      //get all the gallery data after sorted in the Store's getter 'photoDataSorted'
+      let tempPhotoData = this.$store.getters.photoDataSorted
+
+      // show only the ones needed
+      tempPhotoData = tempPhotoData.slice(0, this.imageStartTotal)
+      return tempPhotoData
+    },
+  },
   watch: {
-    photoDataSorted() {
+    photoDataForInfiniteScroll() {
       let thisPointer = this
       this.$nextTick(() => {
         $("#lightgallery")
           .justifiedGallery({
+            //the preferred height of images for each row
             rowHeight: 200,
+            //the max height of images for each row
             maxRowHeight: 250,
             lastRow: "nojustify",
             margins: 3,

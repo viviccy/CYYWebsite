@@ -2,13 +2,13 @@
   <div>
     <Loading v-show="loading" />
     <div class="accordion accordion-flush" id="accordionFlushExample">
-      <draggable v-model="photoDataSorted" ghost-class="ghost" @end="onEnd">
+      <draggable v-model="requiredPhotoData" ghost-class="ghost" @end="onEnd">
         <!--  <draggable ghost-class="ghost" @end="onEnd"> -->
         <transition-group type="transition" name="flip-list">
           <div
             class="accordion-item"
             v-bind:key="item.photoId"
-            v-for="item in photoDataSorted"
+            v-for="item in requiredPhotoData"
           >
             <h2 class="accordion-header" :id="`flush-heading-${item.photoId}`">
               <button
@@ -148,12 +148,12 @@ import draggable from "vuedraggable"
 
 import Loading from "../components/Loading"
 
-import sortGallery from "../mixins/sortGalleryData"
+//import sortGallery from "../mixins/sortGalleryData"
 
 export default {
   name: "EditGallery",
   components: { draggable, Loading },
-  mixins: [sortGallery],
+  // mixins: [sortGallery],
   data() {
     return {
       oldIndex: "",
@@ -420,10 +420,17 @@ export default {
       )
     },
 
-    /*  photoData() {
-      console.log(JSON.stringify(this.$store.state.galleryPhotos))
-      return this.$store.state.galleryPhotos
-    }, */
+    requiredPhotoData() {
+      //get all the gallery data after sorted in the Store's getter 'photoDataSorted'
+      let allPhotoData = this.$store.getters.photoDataSorted
+
+      // show only the ones needed
+      allPhotoData = allPhotoData.slice(
+        this.paginationStartIndex,
+        this.paginationStartIndex + this.paginationRecordPerPage
+      )
+      return allPhotoData
+    },
   },
 
   watch: {},

@@ -11,6 +11,7 @@ export default new Vuex.Store({
     //blogPosts hold the values of all blogs created.
     blogPosts: [],
     galleryPhotos: [],
+    //store the 'order' array from 'galleryOrder' document
     galOrder: [],
     // pageStartPoint: null,
     pageLimit: 2,
@@ -51,6 +52,27 @@ export default new Vuex.Store({
     blogPostCards(state) {
       //Use '.slice' method to get the object value from a start index to an end index. In this case is to get the value of state.blogPosts from index 2 to index 5 (putting number 6 specify until index 5 and not index 6), which is the third post until fifth post in the object. The three posts will be shown as the bottom card section of the page.
       return state.blogPosts.slice(2, 6)
+    },
+
+    photoDataSorted(state) {
+      let reference_array = state.galOrder
+
+      let reference_object = {}
+
+      for (var i = 0; i < reference_array.length; i++) {
+        reference_object[reference_array[i]] = i
+      }
+
+      var array = [...state.galleryPhotos]
+
+      array.sort(function(a, b) {
+        return (
+          Number(reference_object[a.photoId]) -
+          Number(reference_object[b.photoId])
+        )
+      })
+
+      return array
     },
   },
 
@@ -155,6 +177,7 @@ The argument for this function is state follow by the payload from the caller e.
     },
 
     updateGalleryOrderState(state, payload) {
+      //update 'order' array from firestore 'galleryOrder' collection the the Store array 'galOrder'
       state.galOrder = [...payload]
     },
   },
@@ -332,6 +355,7 @@ To use other methods of 'context', they can be written like this:
       })
 
       await galleryOrderDocument.get().then(async (snap) => {
+        //tempArray = the array 'order' in document 'galleryOrder' of collection 'galleryOrder'
         let tempArray = await snap.data().order
 
         const index = tempArray.indexOf(galleryDocumentId)
@@ -423,8 +447,6 @@ To use other methods of 'context', they can be written like this:
       await dataBase.get().then((docSnapshot) => {
         if (docSnapshot.size >= 1) {
           for (const doc of docSnapshot.docs) {
-            console.log("what is doc=" + JSON.stringify(doc.data()))
-            //docSnapshot.forEach(async (doc) => {
             const data = {
               photoId: doc.id,
               blogId: doc.data().blogID,
@@ -445,7 +467,7 @@ To use other methods of 'context', they can be written like this:
         }
       })
 
-      //reference to 'gallery' collection in firestore
+      //reference to 'galleryOrder' collection in firestore
       const galleryOrderDatabase = await db.collection("galleryOrder")
 
       await galleryOrderDatabase.get().then((docSnapshot) => {
