@@ -1,12 +1,14 @@
 <template>
   <div class="home">
     <SwiperComp :blogSectionHeightForSwiper="blogSectionHeight" />
-    <BlogPost
-      :post="post"
-      @blogSectionHeightChange="getHeightChange"
-      v-for="(post, index) in blogPostFeed"
-      :key="index"
-    />
+    <div class="topSection">
+      <BlogPost
+        :post="post"
+        @blogSectionHeightChange="getHeightChange"
+        v-for="(post, index) in blogPostFeed"
+        :key="index"
+      />
+    </div>
     <div class="blog-card-wrap">
       <div class="container">
         <h3>View More Recent Blogs</h3>
@@ -65,6 +67,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.topSection {
+  display: grid;
+  grid-auto-rows: 1fr;
+}
+
 .blog-card-wrap {
   h3 {
     font-weight: 300;

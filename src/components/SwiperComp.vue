@@ -141,17 +141,6 @@ export default {
         on: {
           init: function() {
             //to fix a bug in Swiper that the last image on the list (duplicate of first image) not removing the 'data-src' attribute even the lazy loading is done.
-            let lastImgURL = document
-              .querySelector(".swiperDiv .swiper-slide:last-child img")
-              .getAttribute("data-src")
-
-            document
-              .querySelector(".swiperDiv .swiper-slide:last-child img")
-              .removeAttribute("data-src")
-
-            document
-              .querySelector(".swiperDiv .swiper-slide:last-child img")
-              .setAttribute("src", lastImgURL)
           },
           lazyImageLoad: function() {
             // if (lastChild.getAttribute("data-src")) {
@@ -161,6 +150,31 @@ export default {
           },
           lazyImageReady: function() {},
           beforeSlideChangeStart: function() {},
+          reachEnd: function() {
+            let lastImgURL = document
+              .querySelector(".swiperDiv .swiper-slide:last-child img")
+              .getAttribute("data-src")
+
+            if (lastImgURL) {
+              document
+                .querySelector(".swiperDiv .swiper-slide:last-child img")
+                .setAttribute("testing", "testing")
+
+              document
+                .querySelector(".swiperDiv .swiper-slide:last-child img")
+                .removeAttribute("data-src")
+
+              document
+                .querySelector(".swiperDiv .swiper-slide:last-child img")
+                .setAttribute("src", lastImgURL)
+
+              document
+                .querySelector(
+                  ".swiperDiv .swiper-slide:last-child .swiper-lazy-preloader"
+                )
+                .remove()
+            }
+          },
         },
       },
     }
@@ -180,8 +194,6 @@ export default {
     },
   },
   mounted() {
-    scssStyle.viewThreshold1
-
     document.querySelector(".swiperDiv").style.height =
       this.blogSectionHeightForSwiper + "px"
   },
@@ -302,7 +314,12 @@ export default {
       background-repeat: no-repeat;
       background-size: 100% auto;
       background-position: center;
+      transition: 0.5s ease all;
       opacity: 0.4;
+
+      &:hover {
+        opacity: 1;
+      }
     }
 
     .swiper-button-prev {
@@ -343,7 +360,7 @@ export default {
     h3 {
       z-index: 55;
       text-transform: uppercase;
-      @include fluid-type($viewThreshold1, $viewThreshold2, 18px, 30px);
+      @include fluid-type($viewThreshold1, $viewThreshold2, 22px, 35px);
       margin-bottom: 10px;
     }
 
@@ -365,10 +382,10 @@ export default {
       z-index: -1;
       position: absolute;
       display: block;
-      top: -200px;
+      top: -700px;
       left: -100px;
       width: 180%;
-      height: 800px;
+      height: 2000px;
       transform: rotate(0deg);
       background-image: linear-gradient(
         90deg,
@@ -378,10 +395,10 @@ export default {
       );
 
       @media (min-width: $viewThreshold3) {
-        top: -250px;
-        left: -170px;
+        top: -300px;
+        left: -500px;
 
-        width: 150%;
+        width: 200%;
 
         transform: rotate(20deg);
       }

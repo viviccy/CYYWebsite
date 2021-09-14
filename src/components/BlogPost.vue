@@ -103,7 +103,7 @@ export default {
     */
     order: 1;
 
-    @media (min-width: 700px) {
+    @media (min-width: $viewThreshold3) {
       /*  '.blog-content' is ordered to the left when screen width more than 700px.
       This will be altered in #alternatePosition to make the alternating positions.
       */
@@ -173,7 +173,7 @@ export default {
 
     /*  '.blog-photo' is ordered to the top when screen width less than 700px (mobile view) */
     order: 0;
-    @media (min-width: 700px) {
+    @media (min-width: $viewThreshold3) {
       /*  '.blog-photo' is ordered to the right when screen width more than 700px */
       order: 1;
     }
@@ -207,7 +207,7 @@ export default {
  This is because 'background-color:blue' is executed first then overwritten by 'background-color:red'.
  */
   &:nth-child(even) {
-    @media (min-width: 700px) {
+    @media (min-width: $viewThreshold3) {
       //#alternatePosition
       /*   even numbered 'blog-wrapper' will have 'blog-photo' placed before 'blog-content'
      odd numbered 'blog-wrapper' will have 'blog-content' placed before 'blog-photo' */

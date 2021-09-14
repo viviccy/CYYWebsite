@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="app-container">
-      <div id="lightgallery" v-show="galleryReady">
+      <div id="lightgallery">
         <a
           class="gallery-item"
           v-bind:key="item.photoId"
@@ -42,66 +42,98 @@ export default {
   data() {
     return {
       blocks: [],
-      imageList: [],
-      galleryReady: false,
-
+      currentImageList: [],
+      // galleryReady: false,
+      rowHeight: 200,
+      maxRowHeight: 250,
       currentImageIndex: 0,
-      imageStartTotal: 3,
-      imageLoadBatchTotal: 1,
+      imageStartTotal: null,
+      imageLoadBatchTotal: null,
     }
   },
   async mounted() {
-    await this.loadGallery()
+    //if no value in 'galleryPhotos' array variable from store, then load the data from 'gallery' collection in firestore.
+    if (this.$store.state.galleryPhotos.length == 0) {
+      await this.loadGallery()
+    }
 
-    this.currentImageIndex = this.imageStartTotal - 1
+    //load all image details to 'currentImageList' after sorted properly with store getter function 'photoDataSorted'
+
+    this.currentImageList.push(...this.$store.getters.photoDataSorted)
+
+    /*  let tempMaxRowHeight = this.maxRowHeight
+
+    if(){
+
+    } */
+
+    console.log("$(window).height()=" + $(window).height())
+    console.log("this.maxRowHeight=" + this.maxRowHeight)
+
+    let imageRow = $(window).height() / this.maxRowHeight
+
+    if (imageRow < 1) {
+      imageRow = 1
+    }
+
+    console.log("imageRow=" + imageRow)
+
+    let imageCol = $(window).width() / ((this.maxRowHeight / 2) * 3)
+
+    if (imageCol < 1) {
+      imageCol = 1
+    }
+
+    console.log("imageCol=" + imageCol)
+
+    let allowedImage = Math.floor(imageCol * imageRow)
+
+    if (allowedImage <= this.$store.getters.photoDataSorted.length) {
+      this.imageStartTotal = allowedImage
+    } else {
+      this.imageStartTotal = this.$store.getters.photoDataSorted.length
+    }
+
+    this.currentImageList = this.currentImageList.slice(0, this.imageStartTotal)
+
+    this.currentImageIndex = this.imageStartTotal
+
+    console.log("mounted")
 
     let thisPointer = this
 
     $(window).scroll(function() {
-      if ($(window).scrollTop() + $(window).height() == $(document).height()) {
-        console.log(
-          "thisPointer.currentImageIndex=" + thisPointer.currentImageIndex
-        )
-        console.log(
-          "thisPointer.$store.getters.photoDataSorted.length=" +
-            thisPointer.$store.getters.photoDataSorted.length
-        )
+      /* 
+    $(window).scrollTop():
+    The position of scrollbar at the top of the browser is 0. 
+    Once it starts moving down, it will has value. 
+    
+    $(window).height():
+    The height of the browser viewport
+
+    $(document).height():
+    The height of the whole html page
+    */
+
+      if (
+        $(window).scrollTop() + $(window).height() + $(window).height() / 2 >=
+        $(document).height()
+      ) {
+        let countLoop = 0
 
         for (
           let i = thisPointer.currentImageIndex;
           i < thisPointer.$store.getters.photoDataSorted.length;
           i++
         ) {
-          console.log("loop time=" + i)
-          $("#lightgallery").append(
-            /*   '<a class="gallery-item" href="' +
-              thisPointer.$store.getters.photoDataSorted[i].photoURL +
-              '" data-sub-html="#caption' +
-              i +
-              '"' +
-              ' <div id="caption' +
-              i +
-              '"><h3>' +
-              thisPointer.$store.getters.photoDataSorted[i].photoTitle +
-              "</h3>" +
-              "<p>" +
-              thisPointer.$store.getters.photoDataSorted[i].photoShortDesc +
-              "</p>" +
-              "</div>" +
-              '<img src="' +
-              thisPointer.$store.getters.photoDataSorted[i].thumbPhotoURL +
-              '" dfsdfsfsfd &#47;></a>' */
-            '<div  id="caption' +
-              i +
-              '"><h3>' +
-              thisPointer.$store.getters.photoDataSorted[i].photoTitle +
-              "</h3>" +
-              "<p>" +
-              thisPointer.$store.getters.photoDataSorted[i].photoShortDesc +
-              "</p>" +
-              ' <router-link class="link" :to="#"></router-link>' +
-              "</div>"
+          countLoop++
+          if (countLoop > 3) {
+            break
+          }
+          thisPointer.currentImageList.push(
+            thisPointer.$store.getters.photoDataSorted[i]
           )
+          thisPointer.currentImageIndex++
         }
         $("#gallery").justifiedGallery("norewind")
       }
@@ -117,29 +149,26 @@ export default {
   },
   computed: {
     photoDataForInfiniteScroll() {
-      //get all the gallery data after sorted in the Store's getter 'photoDataSorted'
-      let tempPhotoData = this.$store.getters.photoDataSorted
-
-      // show only the ones needed
-      tempPhotoData = tempPhotoData.slice(0, this.imageStartTotal)
-      return tempPhotoData
+      return this.currentImageList
     },
   },
   watch: {
     photoDataForInfiniteScroll() {
-      let thisPointer = this
+      console.log("watch")
+      // let thisPointer = this
       this.$nextTick(() => {
+        console.log("tick" + this.currentImageIndex)
         $("#lightgallery")
           .justifiedGallery({
             //the preferred height of images for each row
-            rowHeight: 200,
+            rowHeight: this.rowHeight,
             //the max height of images for each row
-            maxRowHeight: 250,
+            maxRowHeight: this.maxRowHeight,
             lastRow: "nojustify",
             margins: 3,
           })
           .on("jg.complete", function() {
-            thisPointer.galleryReady = true
+            console.log("image ready")
           })
 
         let el = document.getElementById("lightgallery")

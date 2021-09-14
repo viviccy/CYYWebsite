@@ -10,6 +10,7 @@ export default new Vuex.Store({
   state: {
     //blogPosts hold the values of all blogs created.
     blogPosts: [],
+    //store the gallery details from 'gallery' collection
     galleryPhotos: [],
     //store the 'order' array from 'galleryOrder' document
     galOrder: [],
