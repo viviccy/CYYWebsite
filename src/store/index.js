@@ -121,7 +121,7 @@ The argument for this function is state follow by the payload from the caller e.
       state.profileLastName = payload
     },
     changeUsername(state, payload) {
-      state.profileUsername = payload
+      state.profileUserName = payload
     },
 
     /*     <to be deleted> */
@@ -226,7 +226,7 @@ To use other methods of 'context', they can be written like this:
       await dataBase.update({
         firstName: state.profileFirstName,
         lastName: state.profileLastName,
-        username: state.profileUsername,
+        username: state.profileUserName,
       })
 
       commit("setProfileInitials")
@@ -287,6 +287,8 @@ To use other methods of 'context', they can be written like this:
             blogDate: doc.data().date,
             //the name of the cover photo
             blogCoverPhotoName: doc.data().blogCoverPhotoName,
+            //author ID
+            profileId: doc.data().profileId,
           }
 
           //add all the latest records to state.blogPosts

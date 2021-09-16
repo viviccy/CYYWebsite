@@ -662,7 +662,7 @@ export default {
                             blogTitle: thisContextPointer.blogTitle,
                             blogShortDescription:
                               thisContextPointer.blogShortDesc,
-                            userName: userDoc.data().username,
+                            userName: userDoc.data().userName,
                           }
                         )
 

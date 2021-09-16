@@ -55,7 +55,8 @@ export default {
     },
   },
   destroyed() {
-    window.removeEventListener("resize", this.myEventHandler)
+    console.log("destroyed been here")
+    window.removeEventListener("resize", this.divSizeCheck)
   },
   computed: {
     user() {
@@ -154,16 +155,17 @@ export default {
         padding-bottom: 4px;
         border-bottom: 1px solid transparent;
         transition: 0.5s ease-in all;
+        color: #303030;
 
-        &:hover {
+        /*  &:hover {
           border-bottom-color: #303030;
-        }
+        } */
       }
 
       .link-light {
-        &:hover {
+        /*  &:hover {
           border-bottom-color: #fff;
-        }
+        } */
       }
     }
   }
@@ -218,13 +220,6 @@ export default {
         order: 0;
       }
     }
-  }
-}
-
-.no-user:first-child {
-  .blog-content {
-    background-color: #303030;
-    color: #fff;
   }
 }
 </style>

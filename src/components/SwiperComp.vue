@@ -9,13 +9,17 @@
     >
       <swiper-slide>
         <div class="desc">
-          <h3>Kuala Lumpur</h3>
+          <transition enter-active-class="animate__animated animate__backInUp">
+            <div v-if="this.showDesc[0]">
+              <h3>Kuala Lumpur</h3>
 
-          <p>
-            Malaysia's capital and largest city has much to offer visitors,
-            regardless of their interests
-          </p>
-          <a href="#">Get to know more! &raquo;</a>
+              <p>
+                Malaysia's capital and largest city has much to offer visitors,
+                regardless of their interests
+              </p>
+              <a href="#">Get to know more! &raquo;</a>
+            </div>
+          </transition>
           <div class="whiteBg"></div>
         </div>
 
@@ -31,13 +35,17 @@
       </swiper-slide>
       <swiper-slide>
         <div class="desc">
-          <h3>Pulau Tioman</h3>
-          <p>
-            Pulau Tioman is an island off Peninsular Malaysia's east coast
-            paradise and one of Southeast Asia's most beautiful travel
-            destinations
-          </p>
-          <a href="#">Get to know more! &raquo;</a>
+          <transition enter-active-class="animate__animated animate__fadeInUp">
+            <div v-if="this.showDesc[1]">
+              <h3>Pulau Tioman</h3>
+              <p>
+                Pulau Tioman is an island off Peninsular Malaysia's east coast
+                paradise and one of Southeast Asia's most beautiful travel
+                destinations
+              </p>
+              <a href="#">Get to know more! &raquo;</a>
+            </div></transition
+          >
           <div class="whiteBg"></div>
         </div>
         <img
@@ -51,12 +59,16 @@
       </swiper-slide>
       <swiper-slide>
         <div class="desc">
-          <h3>Cameron Highland</h3>
-          <p>
-            Cameron Highlands is the most popular of the highland retreats in
-            Malaysia
-          </p>
-          <a href="#">Get to know more! &raquo;</a>
+          <transition enter-active-class="animate__animated animate__zoomIn">
+            <div v-if="this.showDesc[2]">
+              <h3>Cameron Highland</h3>
+              <p>
+                Cameron Highlands is the most popular of the highland retreats
+                in Malaysia
+              </p>
+              <a href="#">Get to know more! &raquo;</a>
+            </div></transition
+          >
           <div class="whiteBg"></div>
         </div>
         <img
@@ -116,6 +128,7 @@ export default {
   },
   data() {
     return {
+      showDesc: [false, false, false],
       swiperOptions: {
         loop: true,
         speed: 600,
@@ -148,7 +161,11 @@ export default {
             //  }
             // document.querySelector(".swiperDiv .swiper-slide.swiper-slide-active img").getAttribute("data-src")
           },
-          lazyImageReady: function() {},
+          lazyImageReady: (swiper) => {
+            let k = swiper.activeIndex - 1
+
+            this.$set(this.showDesc, k, true)
+          },
           beforeSlideChangeStart: function() {},
           reachEnd: function() {
             let lastImgURL = document
@@ -214,6 +231,22 @@ export default {
 </script>
 
 <style lang="scss">
+//@import "https://cdn.jsdelivr.net/npm/animate.css@3.5.1";
+
+@import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css";
+
+.animate__animated.animate__backInUp {
+  --animate-duration: 0.8s;
+}
+
+.animate__animated.animate__fadeInUp {
+  --animate-duration: 0.8s;
+}
+
+.animate__animated.animate__zoomIn {
+  --animate-duration: 0.8s;
+}
+
 .swiperDiv {
   .swiper-container {
     width: 100%;
@@ -350,8 +383,12 @@ export default {
     z-index: 50;
 
     text-align: left;
-    width: 40%;
+    width: 100%;
     margin: 4% 12% 0 12%;
+
+    @media (min-width: $viewThreshold4) {
+      width: 40%;
+    }
 
     @media (min-width: $viewThreshold3) {
       margin: 4% 8% 0 8%;
@@ -383,8 +420,10 @@ export default {
       position: absolute;
       display: block;
       top: -700px;
-      left: -100px;
-      width: 180%;
+
+      left: -80px;
+      width: 300%;
+
       height: 2000px;
       transform: rotate(0deg);
       background-image: linear-gradient(
@@ -393,6 +432,11 @@ export default {
         rgba(255, 255, 255, 0.5) 85%,
         rgba(0, 0, 0, 0) 100%
       );
+
+      @media (min-width: $viewThreshold4) {
+        left: -100px;
+        width: 180%;
+      }
 
       @media (min-width: $viewThreshold3) {
         top: -300px;

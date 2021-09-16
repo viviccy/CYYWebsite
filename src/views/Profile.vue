@@ -59,6 +59,7 @@ export default {
       this.modalActive = !this.modalActive
     },
   },
+  mounted() {},
   computed: {
     firstName: {
       get() {
@@ -78,7 +79,6 @@ export default {
     },
     username: {
       get() {
-        console.log("eee" + JSON.stringify(this.$store.state))
         return this.$store.state.profileUserName
       },
       set(payload) {
