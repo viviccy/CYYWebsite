@@ -110,10 +110,7 @@ The argument for this function is state follow by the payload from the caller e.
         state[variable] = payload[variable]
       }
     },
-    updateUser(state, payload) {
-      //store the object 'user' to state.user
-      state.user = payload
-    },
+
     changeFirstName(state, payload) {
       state.profileFirstName = payload
     },

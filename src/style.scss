@@ -59,6 +59,18 @@ $viewThreshold4: 500px;
   padding: 5px 8px 5px 8px;
 }
 
+//<-----standard page title css----->
+@mixin pageTitle {
+  text-transform: uppercase;
+  @include fluid-type($viewThreshold1, $viewThreshold2, 20px, 26px);
+  color: $buttonColor2;
+  letter-spacing: 3px;
+  font-weight: 700;
+  margin: 0 0 5px 0;
+  padding: 0;
+}
+//</-----standard page title css----->
+
 //<-----standard form button css----->
 /* Button text sizes */
 $buttonTextSizeMax: 14px;

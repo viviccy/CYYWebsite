@@ -11,6 +11,10 @@
             v-for="item in requiredPhotoData"
           >
             <h2 class="accordion-header" :id="`flush-heading-${item.photoId}`">
+              <div class="title-container">
+                <input type="text" v-model="item.photoTitle" />
+              </div>
+              <div class="image-container"><img :src="item.photoURL" /></div>
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -19,7 +23,7 @@
                 aria-expanded="false"
                 :aria-controls="`#flush-collapse-${item.photoId}`"
               >
-                <input type="text" v-model="item.photoTitle" />
+                <dropDownArrow />
               </button>
             </h2>
 
@@ -27,11 +31,9 @@
               :id="`flush-collapse-${item.photoId}`"
               class="accordion-collapse collapse"
               :aria-labelledby="`flush-heading-${item.photoId}`"
-              data-bs-parent="#accordionFlushExample"
             >
               <div class="accordion-body">
-                <span><img :src="item.photoURL"/></span>
-                <span>{{ item.photoName }}</span>
+                <span>{{ item.photoShortDesc }}</span>
 
                 <span>{{ item.photoCreator }}</span>
               </div>
@@ -148,11 +150,13 @@ import draggable from "vuedraggable"
 
 import Loading from "../components/Loading"
 
+import dropDownArrow from "../assets/Icons/swipe-arrow.svg?inline"
+
 //import sortGallery from "../mixins/sortGalleryData"
 
 export default {
   name: "EditGallery",
-  components: { draggable, Loading },
+  components: { draggable, Loading, dropDownArrow },
   // mixins: [sortGallery],
   data() {
     return {
@@ -306,7 +310,6 @@ export default {
           let tempArray = []
 
           await galleryDatabase.get().then((docSnapshot) => {
-            console.log("size=" + docSnapshot.size)
             if (docSnapshot.size >= 1) {
               for (const doc of docSnapshot.docs) {
                 // docSnapshot.forEach(async (doc) => {
@@ -420,16 +423,18 @@ export default {
       )
     },
 
-    requiredPhotoData() {
-      //get all the gallery data after sorted in the Store's getter 'photoDataSorted'
-      let allPhotoData = this.$store.getters.photoDataSorted
-
-      // show only the ones needed
-      allPhotoData = allPhotoData.slice(
-        this.paginationStartIndex,
-        this.paginationStartIndex + this.paginationRecordPerPage
-      )
-      return allPhotoData
+    requiredPhotoData: {
+      get() {
+        //get all the gallery data after sorted in the Store's getter 'photoDataSorted'
+        let allPhotoData = this.$store.getters.photoDataSorted
+        // show only the ones needed
+        allPhotoData = allPhotoData.slice(
+          this.paginationStartIndex,
+          this.paginationStartIndex + this.paginationRecordPerPage
+        )
+        return allPhotoData
+      },
+      set() {},
     },
   },
 
@@ -438,6 +443,114 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.accordion {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+
+  .accordion-item {
+    margin: 0 5px 5px 5px;
+    border: 0;
+
+    background: $inputColor1;
+    border-radius: 7px;
+    box-shadow: none;
+    overflow: hidden;
+    h2 {
+      //display: flex;
+      display: grid;
+      //grid-template-columns: 8fr 1fr 50px;
+      grid-template-columns: 5fr 2fr 50px;
+
+      .title-container {
+        margin: 25px 15px;
+        display: flex;
+        align-items: center;
+        input {
+          width: 100%;
+
+          line-height: 0px;
+          padding: 5px;
+          border: none;
+          border-bottom: 1px solid #ccc;
+          background: transparent;
+          color: #969696;
+
+          @include fluid-type($viewThreshold1, $viewThreshold2, 22px, 30px);
+
+          font-size: 22px;
+
+          &:focus {
+            outline: none !important;
+            border-bottom: 1px solid $buttonColor1;
+          }
+        }
+      }
+
+      .image-container {
+        padding: 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          width: 100%;
+          max-width: 100px;
+          height: auto;
+          border-radius: 7px;
+        }
+      }
+
+      .accordion-button {
+        background: transparent;
+        // flex: 2;
+        /*     display: flex;
+        background: $inputColor1;
+        border-radius: 7px 7px 0 0;
+        box-shadow: none;
+        padding: 5px 20px; */
+
+        padding: 15px;
+
+        &:focus {
+          outline: 0;
+          border: none;
+          box-shadow: none;
+        }
+
+        svg {
+          width: 100%;
+          transition: 0.3s ease all;
+          path {
+            fill: $buttonColor1;
+          }
+        }
+
+        &::after {
+          content: none;
+        }
+
+        &.collapsed svg {
+          transform: rotate(180deg);
+        }
+
+        &:not(.collapsed) {
+          box-shadow: none;
+          svg {
+            transform: rotate(90deg);
+          }
+        }
+      }
+    }
+    .accordion-collapse {
+      .accordion-body {
+        border-radius: 0 0 7px 7px;
+        background: #ccc;
+      }
+    }
+  }
+}
+
 strong {
   display: inline-block;
 }

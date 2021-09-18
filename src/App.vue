@@ -24,9 +24,13 @@ export default {
   },
   async created() {
     firebase.auth().onAuthStateChanged((user) => {
-      this.$store.commit("updateUser", user)
+      let obj1 = { user: user }
+      this.$store.commit("updateState", obj1)
+
       if (user) {
         this.$store.dispatch("getCurrentUser", user)
+        let obj2 = { editPost: true }
+        this.$store.commit("updateState", obj2)
       }
     })
     this.checkRoute()

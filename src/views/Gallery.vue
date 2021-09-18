@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="app-container">
+      <h1>Blogs</h1>
       <div id="lightgallery">
         <a
           class="gallery-item"
@@ -191,11 +192,16 @@ export default {
 
 <style lang="scss" scoped>
 .app-container {
+  padding: 50px 0;
   margin-left: 5%;
   margin-right: 5%;
 
+  h1 {
+    @include pageTitle;
+  }
+
   #lightgallery {
-    margin-top: 45px;
+    margin-top: 40px;
 
     .gallery-item {
       div {

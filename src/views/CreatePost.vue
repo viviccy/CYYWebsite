@@ -863,14 +863,16 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
 }
 </script>
 
-<style lang="scss">
-@import url("https://fonts.googleapis.com/css2?family=Allison&display=swap");
-
+<style lang="scss" scoped>
 .container {
+  & > h2 {
+    margin-bottom: 40px !important;
+  }
+
   .blog-info {
     & > p {
       flex: 1;
-      margin: 10px 0 0 0;
+      margin: 0;
       color: $buttonColor1;
     }
   }

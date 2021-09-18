@@ -53,19 +53,27 @@
                     {{ this.$store.state.profileFirstName }}
                     {{ this.$store.state.profileLastName }}
                   </p>
-                  <p>{{ this.$store.state.profileUsername }}</p>
+                  <p>{{ this.$store.state.profileUserName }}</p>
                   <p>{{ this.$store.state.profileEmail }}</p>
                 </div>
               </div>
               <div class="options">
                 <div class="option">
-                  <router-link class="option" :to="{ name: 'Profile' }">
+                  <router-link
+                    @click.native="resetProfileMenu"
+                    class="option"
+                    :to="{ name: 'Profile' }"
+                  >
                     <userIcon class="icon" />
                     <p>Profile</p>
                   </router-link>
                 </div>
                 <div class="option">
-                  <router-link class="option" :to="{ name: 'Admin' }">
+                  <router-link
+                    @click.native="resetProfileMenu"
+                    class="option"
+                    :to="{ name: 'Admin' }"
+                  >
                     <adminIcon class="icon" />
                     <p>Admin</p>
                   </router-link>
@@ -193,6 +201,7 @@ export default {
       let mobileMenuContainer = document.querySelector(".mobile-nav")
 
       if (this.mobileNav) {
+        this.profileMenu = false
         document.addEventListener("click", this.checkClick)
         mobileMenuContainer.setAttribute("listener", "true")
       } else if (mobileMenuContainer.getAttribute("listener") === "true") {
@@ -214,6 +223,9 @@ export default {
     resetMobileNav() {
       this.mobileNav = false
     },
+    resetProfileMenu() {
+      this.profileMenu = false
+    },
     toggleProfileMenu(e) {
       /*
       'e' means event from an action. In this case it is a click.
@@ -226,6 +238,28 @@ export default {
       if (e.target === this.$refs.profile) {
         this.profileMenu = !this.profileMenu
       }
+
+      let profileMenuContainer = document.querySelector(".profile-menu")
+
+      if (this.profileMenu) {
+        this.mobileNav = false
+        document.addEventListener("click", this.checkProfileClick)
+        profileMenuContainer.setAttribute("listener", "true")
+      } else if (profileMenuContainer.getAttribute("listener") === "true") {
+        profileMenuContainer.removeAttribute("listener")
+        document.removeEventListener("click", this.checkProfileClick)
+      }
+    },
+    checkProfileClick(event) {
+      // If user clicks inside the element, do nothing
+      if (
+        event.target.closest(".profile-menu") ||
+        event.target.closest(".profile")
+      )
+        return
+
+      // If user clicks outside the element, hide it!
+      this.profileMenu = false
     },
     signOut() {
       firebase.auth().signOut()
@@ -264,7 +298,7 @@ header {
       align-items: center;
 
       .header {
-        @include fluid-type($viewThreshold1, $viewThreshold2, 14px, 24px);
+        @include fluid-type($viewThreshold1, $viewThreshold2, 15px, 25px);
         font-weight: 600;
         color: black;
         text-decoration: none;
@@ -358,9 +392,21 @@ header {
             top: 60px;
             right: 0px;
             width: 250px;
-            background-color: #303030;
+            background-color: $buttonColor2;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
               0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+            &:before {
+              content: "";
+              position: absolute;
+              right: 11px;
+              top: -10px;
+              width: 0;
+              height: 0;
+              border-style: solid;
+              border-width: 0 10px 10px 10px;
+              border-color: transparent transparent $buttonColor2 transparent;
+            }
           }
 
           .info {
@@ -383,27 +429,29 @@ header {
 
             .right {
               flex: 1;
-              margin-left: 24px;
+              margin: 0 0 0 24px;
 
               p:nth-child(1) {
+                margin: 7px 0 7px 0;
                 font-size: 14px;
               }
 
               p:nth-child(2),
               p:nth-child(3) {
+                margin: 7px 0 7px 0;
                 font-size: 12px;
               }
             }
           }
 
           .options {
-            padding: 15px;
+            padding: 20px;
             .option {
               text-decoration: none;
               color: white;
               display: flex;
               align-items: center;
-              margin-bottom: 12px;
+              margin-bottom: 20px;
 
               .icon {
                 width: 18px;
@@ -412,7 +460,7 @@ header {
 
               p {
                 font-size: 14px;
-                margin-left: 12px;
+                margin: 0 0 0 12px;
               }
 
               &:last-child {

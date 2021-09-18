@@ -1019,15 +1019,11 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
   .container {
     position: relative;
     height: 100%;
-    padding: 25px 20px;
+    padding: 50px 20px;
 
     & > h2 {
-      text-transform: uppercase;
-      @include fluid-type($viewThreshold1, $viewThreshold2, 16px, 26px);
-      color: $buttonColor2;
-      letter-spacing: 3px;
-      font-weight: 700;
-      margin: 5px 0 5px 0;
+      @include pageTitle;
+      margin-bottom: 10px;
     }
   }
 

@@ -44,7 +44,7 @@
             })
           }}
         </h6>
-        <h6>Author:{{ username }}</h6>
+        <h6>Author: {{ username }}</h6>
         <router-link
           class="link"
           :to="{ name: 'ViewBlog', params: { blogid: this.post.blogID } }"
@@ -109,6 +109,7 @@ export default {
   computed: {
     editPost() {
       let allowEditDelete
+
       if (
         this.username == this.$store.state.profileUserName &&
         this.$store.state.editPost == true
