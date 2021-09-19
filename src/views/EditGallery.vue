@@ -2,7 +2,12 @@
   <div>
     <Loading v-show="loading" />
     <div class="accordion accordion-flush" id="accordionFlushExample">
-      <draggable v-model="requiredPhotoData" ghost-class="ghost" @end="onEnd">
+      <draggable
+        v-model="requiredPhotoData"
+        ghost-class="ghost"
+        @end="onEnd"
+        handle=".drag-handle"
+      >
         <!--  <draggable ghost-class="ghost" @end="onEnd"> -->
         <transition-group type="transition" name="flip-list">
           <div
@@ -11,10 +16,6 @@
             v-for="item in requiredPhotoData"
           >
             <h2 class="accordion-header" :id="`flush-heading-${item.photoId}`">
-              <div class="title-container">
-                <input type="text" v-model="item.photoTitle" />
-              </div>
-              <div class="image-container"><img :src="item.photoURL" /></div>
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -23,7 +24,16 @@
                 aria-expanded="false"
                 :aria-controls="`#flush-collapse-${item.photoId}`"
               >
-                <dropDownArrow />
+                <div class="drag-container">
+                  <div class="drag-handle"><dragSquare /></div>
+                </div>
+                <div class="image-container"><img :src="item.photoURL" /></div>
+                <div class="title-container">
+                  <p>{{ item.photoTitle }}</p>
+                </div>
+                <div class="arrow-container">
+                  <dropDownArrow />
+                </div>
               </button>
             </h2>
 
@@ -33,9 +43,9 @@
               :aria-labelledby="`flush-heading-${item.photoId}`"
             >
               <div class="accordion-body">
-                <span>{{ item.photoShortDesc }}</span>
-
-                <span>{{ item.photoCreator }}</span>
+                <input type="text" v-model="item.photoTitle" />
+                <textarea type="text" v-model="item.photoShortDesc"></textarea>
+                <div><button>Save</button><button>Delete</button></div>
               </div>
             </div>
           </div>
@@ -151,12 +161,13 @@ import draggable from "vuedraggable"
 import Loading from "../components/Loading"
 
 import dropDownArrow from "../assets/Icons/swipe-arrow.svg?inline"
+import dragSquare from "../assets/Icons/four-square.svg?inline"
 
 //import sortGallery from "../mixins/sortGalleryData"
 
 export default {
   name: "EditGallery",
-  components: { draggable, Loading, dropDownArrow },
+  components: { draggable, Loading, dropDownArrow, dragSquare },
   // mixins: [sortGallery],
   data() {
     return {
@@ -445,11 +456,11 @@ export default {
 <style lang="scss" scoped>
 .accordion {
   width: 100%;
-  max-width: 1000px;
+  max-width: $viewThreshold5;
   margin: 0 auto;
 
   .accordion-item {
-    margin: 0 5px 5px 5px;
+    margin: 0 10px 10px 10px;
     border: 0;
 
     background: $inputColor1;
@@ -457,73 +468,20 @@ export default {
     box-shadow: none;
     overflow: hidden;
     h2 {
-      //display: flex;
-      display: grid;
-      //grid-template-columns: 8fr 1fr 50px;
-      grid-template-columns: 5fr 2fr 50px;
-
-      .title-container {
-        margin: 25px 15px;
-        display: flex;
-        align-items: center;
-        input {
-          width: 100%;
-
-          line-height: 0px;
-          padding: 5px;
-          border: none;
-          border-bottom: 1px solid #ccc;
-          background: transparent;
-          color: #969696;
-
-          @include fluid-type($viewThreshold1, $viewThreshold2, 22px, 30px);
-
-          font-size: 22px;
-
-          &:focus {
-            outline: none !important;
-            border-bottom: 1px solid $buttonColor1;
-          }
-        }
-      }
-
-      .image-container {
-        padding: 10px 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        img {
-          width: 100%;
-          max-width: 100px;
-          height: auto;
-          border-radius: 7px;
-        }
-      }
-
       .accordion-button {
+        display: grid;
+        grid-template-columns: 30px 1fr 5fr 25px;
         background: transparent;
-        // flex: 2;
-        /*     display: flex;
-        background: $inputColor1;
-        border-radius: 7px 7px 0 0;
-        box-shadow: none;
-        padding: 5px 20px; */
+        padding: 10px 15px;
 
-        padding: 15px;
+        @media (min-width: $viewThreshold1) {
+          grid-template-columns: 35px 1fr 5fr 25px;
+        }
 
         &:focus {
           outline: 0;
           border: none;
           box-shadow: none;
-        }
-
-        svg {
-          width: 100%;
-          transition: 0.3s ease all;
-          path {
-            fill: $buttonColor1;
-          }
         }
 
         &::after {
@@ -540,12 +498,116 @@ export default {
             transform: rotate(90deg);
           }
         }
+
+        .drag-handle {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          padding-right: 15px;
+
+          svg {
+            path {
+              fill: $inputColor2;
+            }
+          }
+        }
+
+        .image-container {
+          padding: 0px 10px 0px 0;
+
+          img {
+            width: 100%;
+            min-width: 60px;
+            height: auto;
+            border-radius: 5px;
+          }
+        }
+      }
+
+      .title-container {
+        text-overflow: ellipsis;
+        color: #969696;
+        white-space: nowrap;
+        overflow: hidden;
+        p {
+          @include fluid-type($viewThreshold1, $viewThreshold2, 16px, 25px);
+          color: #969696;
+          display: inline;
+          margin: 0;
+        }
+      }
+
+      .arrow-container {
+        display: flex;
+        justify-content: flex-end;
+        svg {
+          max-width: 18px;
+          width: 100%;
+          transition: 0.3s ease all;
+          path {
+            fill: $inputColor2;
+          }
+        }
       }
     }
     .accordion-collapse {
       .accordion-body {
         border-radius: 0 0 7px 7px;
         background: #ccc;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+
+        input {
+          width: 100%;
+          margin-bottom: 8px;
+          line-height: 0px;
+          padding: 0;
+          border: none;
+          border-bottom: 1px solid #ccc;
+          background: transparent;
+          color: #969696;
+
+          @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
+
+          font-size: 22px;
+
+          &:focus {
+            outline: none !important;
+            border-bottom: 1px solid $buttonColor1;
+          }
+        }
+
+        textarea {
+          @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
+          border-radius: 3px;
+          border: 0;
+
+          &:focus {
+            outline: none !important;
+            border: 1px solid $buttonColor1;
+          }
+        }
+
+        div {
+          display: flex;
+          margin-top: 15px;
+          button {
+            @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
+            margin-right: 15px;
+            transition: 500ms ease-in-out all;
+            align-self: center;
+            cursor: pointer;
+            border-radius: 7px;
+            border: none;
+            background: none;
+            padding: 5px 10px;
+            color: white;
+            background-color: #3c4f6f;
+            text-decoration: none;
+          }
+        }
       }
     }
   }
