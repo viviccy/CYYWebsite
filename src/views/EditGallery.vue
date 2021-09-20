@@ -13,7 +13,7 @@
           <div
             class="accordion-item"
             v-bind:key="item.photoId"
-            v-for="item in requiredPhotoData"
+            v-for="(item, index) in requiredPhotoData"
           >
             <h2 class="accordion-header" :id="`flush-heading-${item.photoId}`">
               <button
@@ -43,9 +43,23 @@
               :aria-labelledby="`flush-heading-${item.photoId}`"
             >
               <div class="accordion-body">
-                <input type="text" v-model="item.photoTitle" />
+                <input
+                  type="text"
+                  :name="`title-${index}`"
+                  v-model="item.photoTitle"
+                />
                 <textarea type="text" v-model="item.photoShortDesc"></textarea>
-                <div><button>Save</button><button>Delete</button></div>
+                <div>
+                  <button
+                    @click="saveSingleItem(`${item.photoId}`, `${index}`)"
+                  >
+                    Save</button
+                  ><button
+                    @click="deleteSingleItem(`${item.photoId}`, `${index}`)"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -116,7 +130,7 @@
           </a>
         </li>
         <li class="page-item">
-          <a class="page-link" @click="changeRecordNumber(7)" aria-label="7">
+          <a class="page-link" @click="changeRecordNumber(20)" aria-label="7">
             <span aria-hidden="true">7</span>
           </a>
         </li>
@@ -202,11 +216,11 @@ export default {
       this.galleryCurrentOrder.splice(evt.oldIndex, 1)
       this.galleryCurrentOrder.splice(evt.newIndex, 0, elementToMove)
 
-      /*    const galleryOrderDatabase = await db
+      const galleryOrderDatabase = await db
         .collection("galleryOrder")
         .doc("galleryOrder")
- */
-      /*  var self = this
+
+      var self = this
 
       galleryOrderDatabase
         .set({
@@ -215,23 +229,21 @@ export default {
           ),
         })
         .then(function() {
+          this.$store.commit(
+            "updateGalleryOrderState",
+            this.galleryCurrentOrder
+          )
           console.log("Document successfully written!")
+
           self.loading = false
         })
         .catch(function(error) {
           console.error("Error writing document: ", error)
-        }) */
+        })
     },
 
     loadRecord(index) {
-      console.log("this.countTotalPage=" + this.countTotalPage)
       this.paginationCurrentPageNumber = index
-
-      console.log(
-        "this.paginationCurrentPageNumber start=" +
-          this.paginationCurrentPageNumber
-      )
-
       if (this.paginationCurrentPageNumber > this.countTotalPage) {
         this.paginationCurrentPageNumber = this.countTotalPage
       }
@@ -241,10 +253,11 @@ export default {
       }
 
       console.log(
-        "this.paginationCurrentPageNumber end=" +
-          this.paginationCurrentPageNumber
+        "this.paginationCurrentPageNumber=" + this.paginationCurrentPageNumber
       )
-
+      console.log(
+        "this.paginationRecordPerPage=" + this.paginationRecordPerPage
+      )
       this.paginationStartIndex =
         this.paginationCurrentPageNumber * this.paginationRecordPerPage -
         this.paginationRecordPerPage
@@ -253,16 +266,11 @@ export default {
     },
 
     changeRecordNumber(num) {
-      this.paginationRecordPerPage = num
+      if (num) {
+        this.paginationRecordPerPage = num
+      }
       this.paginationStartIndex = 0
     },
-
-    /*  async updateOrder(){
-
-        let reference_array = this.$store.state.galOrder
-
-
-    }, */
 
     async updateDatabaseBatch() {
       const dataBase = await db.collection("gallery").limit(1)
@@ -426,6 +434,84 @@ export default {
 
       //tempArray
     },
+    async saveSingleItem(photoId, index) {
+      this.loading = true
+      var batch = db.batch()
+
+      const galleryDatabase = db.collection("gallery").doc(photoId)
+
+      batch.update(galleryDatabase, {
+        blogTitle: this.requiredPhotoData[index].photoTitle,
+        blogShortDescription: this.requiredPhotoData[index].photoShortDesc,
+      })
+
+      let blogId
+      await galleryDatabase
+        .get()
+        .then(async (doc) => {
+          if (doc.exists) {
+            blogId = await doc.data().blogID
+            console.log("ok")
+          } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!")
+          }
+        })
+        .catch((error) => {
+          console.log("Error getting document:", error)
+        })
+
+      const blogDatabase = db.collection("blogPosts").doc(blogId)
+
+      batch.update(blogDatabase, {
+        blogTitle: this.requiredPhotoData[index].photoTitle,
+        blogShortDescription: this.requiredPhotoData[index].photoShortDesc,
+      })
+
+      // Commit the batch
+      batch.commit().then(() => {
+        this.loading = false
+        console.log("success")
+      })
+    },
+    async deleteSingleItem(photoId, index) {
+      this.loading = true
+      var batch = db.batch()
+
+      const galleryDatabase = db.collection("gallery").doc(photoId)
+
+      batch.delete(galleryDatabase)
+
+      const orderIndex = this.galleryCurrentOrder.indexOf(photoId)
+
+      this.galleryCurrentOrder.splice(orderIndex, 1)
+
+      const galleryOrderDatabase = await db.collection("galleryOrder")
+      let galleryOrderDocument
+
+      await galleryOrderDatabase.get().then(async (docSnapshot) => {
+        if (docSnapshot.size >= 1) {
+          galleryOrderDocument = await db
+            .collection("galleryOrder")
+            .doc(docSnapshot.docs[0].id)
+        }
+      })
+
+      batch.update(galleryOrderDocument, {
+        order: this.galleryCurrentOrder,
+      })
+
+      batch.commit().then(() => {
+        this.loading = false
+        this.requiredPhotoData.splice(index, 1)
+
+        console.log(
+          "this.paginationRecordPerPage=" + this.paginationRecordPerPage
+        )
+
+        this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
+      })
+    },
   },
   computed: {
     countTotalPage() {
@@ -438,11 +524,14 @@ export default {
       get() {
         //get all the gallery data after sorted in the Store's getter 'photoDataSorted'
         let allPhotoData = this.$store.getters.photoDataSorted
+
         // show only the ones needed
         allPhotoData = allPhotoData.slice(
           this.paginationStartIndex,
           this.paginationStartIndex + this.paginationRecordPerPage
         )
+
+        console.log("allPhotoData=" + JSON.stringify(allPhotoData))
         return allPhotoData
       },
       set() {},
@@ -561,7 +650,7 @@ export default {
 
         input {
           width: 100%;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
           line-height: 0px;
           padding: 0;
           border: none;
@@ -583,6 +672,7 @@ export default {
           @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
           border-radius: 3px;
           border: 0;
+          padding: 0 5px;
 
           &:focus {
             outline: none !important;
