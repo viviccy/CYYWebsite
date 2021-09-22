@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="content-container">
     <Loading v-show="loading" />
     <div class="accordion accordion-flush" id="accordionFlushExample">
       <draggable
@@ -7,6 +7,7 @@
         ghost-class="ghost"
         @end="onEnd"
         handle=".drag-handle"
+        :options="{ disabled: !this.$store.state.profileSuperAdmin }"
       >
         <!--  <draggable ghost-class="ghost" @end="onEnd"> -->
         <transition-group type="transition" name="flip-list">
@@ -15,7 +16,11 @@
             v-bind:key="item.photoId"
             v-for="(item, index) in requiredPhotoData"
           >
-            <h2 class="accordion-header" :id="`flush-heading-${item.photoId}`">
+            <h2
+              class="accordion-header"
+              :class="{ 'grey-out': !checkUser(item.photoCreator) }"
+              :id="`flush-heading-${item.photoId}`"
+            >
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -24,14 +29,22 @@
                 aria-expanded="false"
                 :aria-controls="`#flush-collapse-${item.photoId}`"
               >
-                <div class="drag-container">
+                <div
+                  class="drag-container"
+                  :class="{ 'grey-out': checkDragOption(item.photoCreator) }"
+                >
                   <div class="drag-handle"><dragSquare /></div>
                 </div>
-                <div class="image-container"><img :src="item.photoURL" /></div>
+                <div class="image-container">
+                  <img :src="item.photoURL" @load="checkImageHeight" />
+                </div>
                 <div class="title-container">
                   <p>{{ item.photoTitle }}</p>
                 </div>
-                <div class="arrow-container">
+                <div
+                  class="arrow-container"
+                  :class="{ 'hide-arrow': !checkUser(item.photoCreator) }"
+                >
                   <dropDownArrow />
                 </div>
               </button>
@@ -41,6 +54,7 @@
               :id="`flush-collapse-${item.photoId}`"
               class="accordion-collapse collapse"
               :aria-labelledby="`flush-heading-${item.photoId}`"
+              v-if="checkUser(item.photoCreator)"
             >
               <div class="accordion-body">
                 <input
@@ -66,31 +80,8 @@
         </transition-group>
       </draggable>
     </div>
-    <!-- 
-    <ul class="list-group gallery-list">
-      <draggable v-model="photoDataSorted" ghost-class="ghost" @end="onEnd">
-        <transition-group type="transition" name="flip-list">
-          <li
-            class="list-group-item sortable"
-            v-bind:key="item.photoId"
-            v-for="item in photoDataSorted"
-          >
-            <span>{{ item.photoId }}</span>
-
-            <span><input type="text" v-model="item.photoTitle"/></span>
-
-            <span>{{ item.photoURL }}</span>
-            <span>{{ item.photoName }}</span>
-
-            <span>{{ item.photoCreator }}</span>
-          </li>
-        </transition-group>
-      </draggable>
-      <p><strong>Previous Index:</strong>{{ oldIndex }}</p>
-      <p><strong>new Index:</strong>{{ newIndex }}</p>
-    </ul> -->
-    <nav aria-label="Page navigation">
-      <ul class="pagination">
+    <nav aria-label="Page navigation" class="navigation">
+      <ul class="page-number pagination">
         <li class="page-item">
           <a
             class="page-link"
@@ -105,7 +96,12 @@
           :key="'pagination' + index"
           v-for="index in countTotalPage"
         >
-          <a class="page-link" @click="loadRecord(index)">{{ index }}</a>
+          <a
+            class="page-link"
+            :class="checkClass(index)"
+            @click="loadRecord(index)"
+            ><span>{{ index }}</span></a
+          >
         </li>
 
         <li class="page-item">
@@ -118,19 +114,27 @@
           </a>
         </li>
       </ul>
-      <ul class="page-number pagination">
+      <ul class="item-total pagination">
         <li class="page-item">
-          <a class="page-link" @click="changeRecordNumber(2)" aria-label="2">
-            <span aria-hidden="true">2</span>
+          <a
+            class="page-link selected"
+            @click="changeRecordNumber(3, 1)"
+            aria-label="2"
+          >
+            <span aria-hidden="true">3</span>
           </a>
         </li>
         <li class="page-item">
-          <a class="page-link" @click="changeRecordNumber(5)" aria-label="5">
+          <a class="page-link" @click="changeRecordNumber(5, 2)" aria-label="5">
             <span aria-hidden="true">5</span>
           </a>
         </li>
         <li class="page-item">
-          <a class="page-link" @click="changeRecordNumber(20)" aria-label="7">
+          <a
+            class="page-link"
+            @click="changeRecordNumber(20, 3)"
+            aria-label="7"
+          >
             <span aria-hidden="true">7</span>
           </a>
         </li>
@@ -139,9 +143,6 @@
     <div class="collapse py-2" id="collapseTarget">
       This is the toggle-able content!
     </div>
-
-    <p><strong>Previous Index:</strong>{{ oldIndex }}</p>
-    <p><strong>new Index:</strong>{{ newIndex }}</p>
     <!--   <table class="galleryTable">
       <tbody>
         <tr v-bind:key="index" v-for="(item, index) in photoDataSorted">
@@ -192,7 +193,10 @@ export default {
       paginationStartIndex: 0,
       paginationRecordPerPage: 3,
       paginationCurrentPageNumber: 1,
+      paginationCurrentRecordIndex: 1,
       loading: null,
+      thumbnailHeight: 0,
+      thumbnailWidth: 0,
     }
   },
   destroyed() {
@@ -203,6 +207,44 @@ export default {
   },
 
   methods: {
+    checkDragOption(user) {
+      console.log("user=" + user)
+      console.log(
+        "this.$store.state.profileUserName=" + this.$store.state.profileUserName
+      )
+      console.log(
+        " this.$store.state.profileSuperAdmin=" +
+          this.$store.state.profileSuperAdmin
+      )
+      if (
+        user == this.$store.state.profileUserName &&
+        !this.$store.state.profileSuperAdmin
+      ) {
+        return true
+      }
+      return false
+    },
+    checkUser(user) {
+      if (user == this.$store.state.profileUserName) {
+        return true
+      }
+      return false
+    },
+    checkClass(index) {
+      if (index == 1) {
+        return { selected: true }
+      }
+    },
+    checkImageHeight(evt) {
+      if (evt.target.clientWidth > evt.target.clientHeight) {
+        if (evt.target.clientHeight > this.thumbnailHeight) {
+          this.thumbnailHeight = evt.target.clientHeight
+          this.thumbnailWidth = evt.target.clientWidth
+        }
+      } else {
+        evt.target.classList.add("vertical-image")
+      }
+    },
     onEnd: async function(evt) {
       // this.loading = true
 
@@ -243,7 +285,30 @@ export default {
     },
 
     loadRecord(index) {
+      console.log("total number = " + index)
+
+      if (index <= this.countTotalPage && index > 0) {
+        document
+          .querySelector(
+            ".navigation .page-number .page-item:nth-child(" +
+              (this.paginationCurrentPageNumber + 1) +
+              ") .page-link"
+          )
+          .classList.remove("selected")
+      }
+
       this.paginationCurrentPageNumber = index
+
+      if (index <= this.countTotalPage && index > 0) {
+        document
+          .querySelector(
+            ".navigation .page-number .page-item:nth-child(" +
+              (this.paginationCurrentPageNumber + 1) +
+              ") .page-link"
+          )
+          .classList.add("selected")
+      }
+
       if (this.paginationCurrentPageNumber > this.countTotalPage) {
         this.paginationCurrentPageNumber = this.countTotalPage
       }
@@ -252,24 +317,49 @@ export default {
         this.paginationCurrentPageNumber = 1
       }
 
-      console.log(
-        "this.paginationCurrentPageNumber=" + this.paginationCurrentPageNumber
-      )
-      console.log(
-        "this.paginationRecordPerPage=" + this.paginationRecordPerPage
-      )
       this.paginationStartIndex =
         this.paginationCurrentPageNumber * this.paginationRecordPerPage -
         this.paginationRecordPerPage
-
-      console.log(" this.paginationStartIndex=" + this.paginationStartIndex)
     },
 
-    changeRecordNumber(num) {
-      if (num) {
-        this.paginationRecordPerPage = num
-      }
+    changeRecordNumber(num, index) {
+      document
+        .querySelector(
+          ".navigation .page-number .page-item:nth-child(" +
+            (this.paginationCurrentPageNumber + 1) +
+            ") .page-link"
+        )
+        .classList.remove("selected")
+
+      this.paginationCurrentPageNumber = 1
+
+      document
+        .querySelector(
+          ".navigation .page-number .page-item:nth-child(" +
+            (this.paginationCurrentPageNumber + 1) +
+            ") .page-link"
+        )
+        .classList.add("selected")
+
+      document
+        .querySelector(
+          ".navigation .item-total .page-item:nth-child(" +
+            this.paginationCurrentRecordIndex +
+            ") .page-link"
+        )
+        .classList.remove("selected")
+
+      this.paginationCurrentRecordIndex = index
+      this.paginationRecordPerPage = num
       this.paginationStartIndex = 0
+
+      document
+        .querySelector(
+          ".navigation .item-total .page-item:nth-child(" +
+            this.paginationCurrentRecordIndex +
+            ") .page-link"
+        )
+        .classList.add("selected")
     },
 
     async updateDatabaseBatch() {
@@ -504,11 +594,6 @@ export default {
       batch.commit().then(() => {
         this.loading = false
         this.requiredPhotoData.splice(index, 1)
-
-        console.log(
-          "this.paginationRecordPerPage=" + this.paginationRecordPerPage
-        )
-
         this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
       })
     },
@@ -531,172 +616,302 @@ export default {
           this.paginationStartIndex + this.paginationRecordPerPage
         )
 
-        console.log("allPhotoData=" + JSON.stringify(allPhotoData))
         return allPhotoData
       },
       set() {},
     },
   },
 
-  watch: {},
+  watch: {
+    thumbnailHeight: function() {
+      document.documentElement.style.setProperty(
+        "--image-height",
+        this.thumbnailHeight + "px"
+      )
+
+      document.documentElement.style.setProperty(
+        "--image-width",
+        this.thumbnailWidth + "px"
+      )
+    },
+    requiredPhotoData: function() {
+      // let thisPointer = this
+      /*   this.$nextTick(() => {
+        const elements = document.querySelectorAll(".accordion-header")
+
+        Array.from(elements).forEach((element, index, arr) => {
+          if (element.clientHeight > thisPointer.itemHeight) {
+            thisPointer.itemHeight = element.clientHeight
+          }
+
+          if (index === arr.length - 1) {
+            Array.from(elements).forEach((element) => {
+              element.style.height = thisPointer.itemHeight + "px"
+              console.log(
+                "element.style.height=" + element.getAttribute("style")
+              )
+            })
+          }
+        })
+      }) */
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
-.accordion {
-  width: 100%;
+:root {
+  --image-height: auto;
+  --image-width: 100%;
+}
+
+.content-container {
   max-width: $viewThreshold5;
-  margin: 0 auto;
+  margin: 40px auto;
 
-  .accordion-item {
-    margin: 0 10px 10px 10px;
-    border: 0;
+  .accordion {
+    width: 100%;
 
-    background: $inputColor1;
-    border-radius: 7px;
-    box-shadow: none;
-    overflow: hidden;
-    h2 {
-      .accordion-button {
-        display: grid;
-        grid-template-columns: 30px 1fr 5fr 25px;
-        background: transparent;
-        padding: 10px 15px;
+    margin: 0 auto;
 
-        @media (min-width: $viewThreshold1) {
-          grid-template-columns: 35px 1fr 5fr 25px;
+    .accordion-item {
+      margin: 0 10px 10px 10px;
+      border: 0;
+      background: $inputColor1;
+      border-radius: 7px;
+      box-shadow: none;
+      overflow: hidden;
+
+      h2 {
+        &.grey-out {
+          opacity: 0.6;
+          pointer-events: none;
         }
+        .accordion-button {
+          display: grid;
+          grid-template-columns: 30px 1fr 5fr 25px;
+          background: transparent;
+          padding: 10px 15px;
 
-        &:focus {
-          outline: 0;
-          border: none;
-          box-shadow: none;
-        }
+          @media (min-width: $viewThreshold1) {
+            grid-template-columns: 35px 1fr 5fr 25px;
+          }
 
-        &::after {
-          content: none;
-        }
+          &:focus {
+            outline: 0;
+            border: none;
+            box-shadow: none;
+          }
 
-        &.collapsed svg {
-          transform: rotate(180deg);
-        }
+          &::after {
+            content: none;
+          }
 
-        &:not(.collapsed) {
-          box-shadow: none;
-          svg {
-            transform: rotate(90deg);
+          &.collapsed svg {
+            transform: rotate(180deg);
+          }
+
+          &:not(.collapsed) {
+            box-shadow: none;
+            svg {
+              transform: rotate(90deg);
+            }
+          }
+
+          .drag-container {
+            &.grey-out {
+              opacity: 0.6;
+              pointer-events: none;
+            }
+
+            .drag-handle {
+              width: 100%;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              padding-right: 15px;
+
+              svg {
+                path {
+                  fill: $inputColor2;
+                }
+              }
+            }
+          }
+
+          .image-container {
+            height: var(--image-height);
+            width: var(--image-width);
+            display: grid;
+            align-items: center;
+            margin-right: 10px;
+            position: relative;
+
+            //vertical image
+            /*      display: flex;
+            flex-direction: column;
+            align-items: center; */
+
+            img {
+              width: 100%;
+              min-width: 60px;
+              border-radius: 5px;
+
+              &.vertical-image {
+                position: absolute;
+                width: auto;
+                height: 100%;
+                left: 50%;
+                top: 50%;
+                -webkit-transform: translate(-50%, -50%);
+                transform: translate(-50%, -50%);
+              }
+            }
           }
         }
 
-        .drag-handle {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          padding-right: 15px;
+        .title-container {
+          text-overflow: ellipsis;
+          color: #969696;
+          white-space: nowrap;
+          overflow: hidden;
+          p {
+            @include fluid-type($viewThreshold1, $viewThreshold2, 16px, 25px);
+            color: #969696;
+            display: inline;
+            margin: 0;
+          }
+        }
 
+        .arrow-container {
+          display: flex;
+          justify-content: flex-end;
+
+          &.hide-arrow {
+            visibility: hidden;
+          }
           svg {
+            max-width: 18px;
+            width: 100%;
+            transition: 0.3s ease all;
             path {
               fill: $inputColor2;
             }
           }
         }
+      }
+      .accordion-collapse {
+        .accordion-body {
+          border-radius: 0 0 7px 7px;
+          background: #ccc;
+          display: flex;
+          flex-direction: column;
+          padding: 15px;
 
-        .image-container {
-          padding: 0px 10px 0px 0;
-
-          img {
+          input {
             width: 100%;
-            min-width: 60px;
-            height: auto;
-            border-radius: 5px;
+            margin-bottom: 10px;
+            line-height: 0px;
+            padding: 0;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            background: transparent;
+            color: #969696;
+
+            @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
+
+            font-size: 22px;
+
+            &:focus {
+              outline: none !important;
+              border-bottom: 1px solid $buttonColor1;
+            }
           }
-        }
-      }
 
-      .title-container {
-        text-overflow: ellipsis;
-        color: #969696;
-        white-space: nowrap;
-        overflow: hidden;
-        p {
-          @include fluid-type($viewThreshold1, $viewThreshold2, 16px, 25px);
-          color: #969696;
-          display: inline;
-          margin: 0;
-        }
-      }
+          textarea {
+            @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
+            border-radius: 3px;
+            border: 0;
+            padding: 0 5px;
 
-      .arrow-container {
-        display: flex;
-        justify-content: flex-end;
-        svg {
-          max-width: 18px;
-          width: 100%;
-          transition: 0.3s ease all;
-          path {
-            fill: $inputColor2;
+            &:focus {
+              outline: none !important;
+              border: 1px solid $buttonColor1;
+            }
+          }
+
+          div {
+            display: flex;
+            margin-top: 15px;
+            button {
+              @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
+              margin-right: 15px;
+              transition: 500ms ease-in-out all;
+              align-self: center;
+              cursor: pointer;
+              border-radius: 7px;
+              border: none;
+              background: none;
+              padding: 5px 10px;
+              color: white;
+              background-color: #3c4f6f;
+              text-decoration: none;
+            }
           }
         }
       }
     }
-    .accordion-collapse {
-      .accordion-body {
-        border-radius: 0 0 7px 7px;
-        background: #ccc;
-        display: flex;
-        flex-direction: column;
-        padding: 15px;
+  }
+}
 
-        input {
-          width: 100%;
-          margin-bottom: 10px;
-          line-height: 0px;
-          padding: 0;
-          border: none;
-          border-bottom: 1px solid #ccc;
-          background: transparent;
-          color: #969696;
+.navigation {
+  display: flex;
+  padding: 10px;
+  margin-top: 30px;
+  .page-number {
+    flex: 1;
+    .page-item {
+      &:first {
+        padding-left: 0;
+      }
+      .page-link {
+        border-radius: 5px;
+        background: $inputColor1;
+        margin: 0 4px;
+        color: $inputColor2;
 
-          @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
-
-          font-size: 22px;
-
-          &:focus {
-            outline: none !important;
-            border-bottom: 1px solid $buttonColor1;
-          }
+        &.selected {
+          background: $inputColor2;
+          color: $inputColor1;
         }
 
-        textarea {
-          @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
-          border-radius: 3px;
-          border: 0;
-          padding: 0 5px;
+        span {
+          cursor: default;
+        }
+      }
+    }
+  }
 
-          &:focus {
-            outline: none !important;
-            border: 1px solid $buttonColor1;
-          }
+  .item-total {
+    flex: 0 1 auto;
+
+    .page-item {
+      &:last {
+        padding-left: 0;
+      }
+      .page-link {
+        border-radius: 5px;
+        background: $inputColor1;
+        margin: 0 4px;
+        color: $inputColor2;
+
+        &.selected {
+          background: $inputColor2;
+          color: $inputColor1;
         }
 
-        div {
-          display: flex;
-          margin-top: 15px;
-          button {
-            @include fluid-type($viewThreshold1, $viewThreshold2, 13px, 16px);
-            margin-right: 15px;
-            transition: 500ms ease-in-out all;
-            align-self: center;
-            cursor: pointer;
-            border-radius: 7px;
-            border: none;
-            background: none;
-            padding: 5px 10px;
-            color: white;
-            background-color: #3c4f6f;
-            text-decoration: none;
-          }
+        span {
+          cursor: default;
         }
       }
     }

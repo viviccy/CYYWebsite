@@ -551,6 +551,8 @@ export default {
       )
     },
     async uploadBlog() {
+      let thisPointer = this
+
       //if title and textarea are filled, then pass the condition
       if (this.blogTitle.length !== 0 && this.blogHTML.length !== 0) {
         //'this.file' is the cover photo. If uploaded, then pass the condition
@@ -641,6 +643,8 @@ export default {
                       date: timestamp,
                     })
 
+                    let tempArray
+
                     await db
                       .collection("users")
                       .doc(thisContextPointer.profileId)
@@ -687,7 +691,7 @@ export default {
                             await galleryOrderDocument
                               .get()
                               .then(async (snap) => {
-                                let tempArray = await snap.data().order
+                                tempArray = await snap.data().order
 
                                 tempArray.unshift(snapshot.id)
 
@@ -704,9 +708,16 @@ export default {
                           })
                       })
 
+                    console.log("tempArray1=" + tempArray)
+
                     // Commit the batch
                     batch.commit().then(() => {
                       console.log("success")
+                      console.log("tempArray33333=" + tempArray)
+                      thisPointer.$store.commit(
+                        "updateGalleryOrderState",
+                        tempArray
+                      )
                     })
 
                     /* we need to call 'getPost' action in store to update the latest 'blogPosts' values in firebase to 'blogPosts' object in store.

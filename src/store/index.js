@@ -40,6 +40,7 @@ export default new Vuex.Store({
     profileFirstName: null,
     profileLastName: null,
     profileUserName: null,
+    profileSuperAdmin: null,
     profileId: null,
     profileInitials: null,
   },
@@ -94,6 +95,7 @@ export default new Vuex.Store({
       state.profileFirstName = doc.data().firstName
       state.profileLastName = doc.data().lastName
       state.profileUserName = doc.data().userName
+      state.profileSuperAdmin = doc.data().superAdmin
     },
     setProfileInitials(state) {
       state.profileInitials =
