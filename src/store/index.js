@@ -106,11 +106,25 @@ export default new Vuex.Store({
     /* To check if the user is login or not.
 The call is from App.vue under 'firebase.auth().onAuthStateChanged'.
 The argument for this function is state follow by the payload from the caller e.g. updateUser(state, payload from caller). */
-
+    //to perform store variable update
     updateState(state, payload) {
       for (const variable in payload) {
         state[variable] = payload[variable]
       }
+    },
+    //to perform store array update
+    //Object.keys(payload)[0] = array name
+    //Object.keys(payload)[1] = object to be pushed in the array
+    addArrayState(state, payload) {
+      state[Object.values(payload)[0]].push(Object.values(payload)[1])
+    },
+
+    updateArrayState(state, payload) {
+      state[Object.values(payload)[0]][Object.values(payload)[1]]
+      let item = state[Object.values(payload)[0]].find(
+        (item) => item[Object.values(payload)[1]] === Object.values(payload)[2]
+      )
+      Object.assign(item, Object.values(payload)[3])
     },
 
     changeFirstName(state, payload) {
@@ -123,24 +137,6 @@ The argument for this function is state follow by the payload from the caller e.
       state.profileUserName = payload
     },
 
-    /*     <to be deleted> */
-    /*   newBlogPost(state, payload) {
-      state.blogHTML = payload
-    },
-    updateBlogTitle(state, payload) {
-      state.blogTitle = payload
-    },
-    updateblogShortDesc(state, payload) {
-      state.blogShortDesc = payload
-    },
-   
-    fileNameChange(state, payload) {
-      state.blogPhotoName = payload
-    },
-    createFileURL(state, payload) {
-      state.blogPhotoFileURL = payload
-    }, */
-    /*     </to be deleted> */
     /*  To reverse the value of variable 'blogPhotoPreview' whenever function below is called.
     This function will be called by 'openPreview' function in 'CreatePost.vue' and in the modal 'BlogCoverPreview.vue'. */
     openPhotoPreview(state) {
@@ -235,7 +231,7 @@ To use other methods of 'context', they can be written like this:
     /*   
   App.vue need to call this because it need state.blogPosts to have values before can render correctly.
   CreatePost.vue needs to call this when publish button is clicked because it needed state.blogPosts updated values to be ready before can redirect to 'ViewBlog.vue'  */
-    async getPost({ state }) {
+    async getPost({ commit, state }) {
       //reference to the collection 'blogPosts' in firestore.
       /*    
       Order the record by date in descending order.
@@ -262,44 +258,40 @@ To use other methods of 'context', they can be written like this:
         Putting ! in !(state.blogPosts.some((post) => post.blogID === doc.id)) evaluate as pass if no record in 'state.blogPosts' is the same as current iteration record in 'dbResults'. This means the current iteration record in Firebase database is not in state.blogPosts hence need to be put in.
         
         This will be evaluated again for the next 'dbResults' record */
-        if (!state.blogPosts.some((post) => post.blogID === doc.id)) {
-          //assign the current iteration record from Firebase to state.blogPosts since it does not exist in state.blogPosts.
 
-          console.log(
-            "any short description??" + doc.data().blogShortDescription
-          )
-
-          const data = {
-            //id for current post
-            blogID: doc.data().blogID,
-            //the html code for current post
-            blogHTML: doc.data().blogHTML,
-            //the url of the cover photo for current post
-            blogCoverPhoto: doc.data().blogCoverPhoto,
-            //the url of the cover photo thumbnail for current post
-            blogCoverPhotoThumb: doc.data().blogCoverPhotoThumbnail,
-            //title for current post
-            blogTitle: doc.data().blogTitle,
-            //short description for current post
-            blogShortDesc: doc.data().blogShortDescription,
-            //date for current post. Note that firebase '.date' return a timestamp which has a different format than conventional date. E.g. 1627883023527 is the format.
-            blogDate: doc.data().date,
-            //the name of the cover photo
-            blogCoverPhotoName: doc.data().blogCoverPhotoName,
-            //author ID
-            profileId: doc.data().profileId,
-          }
-
-          //add all the latest records to state.blogPosts
-          state.blogPosts.push(data)
-
-          /*
-     NOTE: once added all the post data to state.blogPosts, this data will be used by 'Home.vue' and 'BlogPost.vue' to show the posts on page */
+        const data = {
+          //id for current post
+          blogID: doc.data().blogID,
+          //the html code for current post
+          blogHTML: doc.data().blogHTML,
+          //the url of the cover photo for current post
+          blogCoverPhoto: doc.data().blogCoverPhoto,
+          //the url of the cover photo thumbnail for current post
+          blogCoverPhotoThumb: doc.data().blogCoverPhotoThumbnail,
+          //title for current post
+          blogTitle: doc.data().blogTitle,
+          //short description for current post
+          blogShortDesc: doc.data().blogShortDescription,
+          //date for current post. Note that firebase '.date' return a timestamp which has a different format than conventional date. E.g. 1627883023527 is the format.
+          blogDate: doc.data().date,
+          //the name of the cover photo
+          blogCoverPhotoName: doc.data().blogCoverPhotoName,
+          //author ID
+          profileId: doc.data().profileId,
         }
+
+        //add all the latest records to state.blogPosts
+        // state.blogPosts.push(data)
+
+        commit("addArrayState", {
+          blogPosts: "blogPosts",
+          blogData: data,
+        })
+
+        /*
+     NOTE: once added all the post data to state.blogPosts, this data will be used by 'Home.vue' and 'BlogPost.vue' to show the posts on page */
       })
       state.postLoaded = true
-
-      console.log("post ready")
     },
 
     // delete post. Caller is from 'BlogCard.vue'.

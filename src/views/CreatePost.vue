@@ -17,7 +17,7 @@
           Please fill up the fields below and add a cover photo for your blog
         </p>
         <div class="break"></div>
-        <input type="text" placeholder="Enter Blog Title" v-model="blogTitle" />
+        <input type="text" placeholder="Enter blog title" v-model="blogTitle" />
         <div class="upload-file">
           <label for="blog-photo">Upload Cover Photo</label>
           <input
@@ -41,7 +41,7 @@
           <textarea
             id="shortDesc"
             v-model="blogShortDesc"
-            placeholder="Short Description"
+            placeholder="Enter short description"
           />
         </div>
         <div class="break"></div>
@@ -247,7 +247,7 @@
             v-model="blogHTML"
             useCustomImageHandler
             @image-added="imageHandler"
-            placeholder="Content"
+            placeholder="Enter content"
           />
         </div>
         <div class="break"></div>
@@ -280,6 +280,7 @@ import VTooltip from "v-tooltip"
 Vue.use(VTooltip)
 
 import LoadImageToCanvas from "../mixins/loadImageToCanvas"
+import ChangeUploadedFileName from "../mixins/changeUploadedFileName"
 
 import BlogCoverPreview from "../components/BlogCoverPreview"
 import firebase from "firebase/app"
@@ -333,7 +334,7 @@ Quill.register(Font, true)
 export default {
   name: "CreatePost",
   components: { BlogCoverPreview, Loading },
-  mixins: [LoadImageToCanvas],
+  mixins: [LoadImageToCanvas, ChangeUploadedFileName],
   data() {
     return {
       msg: "This is a button.",
@@ -560,14 +561,19 @@ export default {
           //start loading animation
           this.loading = true
 
+          // reference to 'this'
           const thisContextPointer = this
+
+          //point to the collection 'blogPosts' with an auto generated document by firebase.
+          //Need to put this early in the code so that we can use 'dataBAse.id' to create blog Id folder in the storage.
+          const dataBase = await db.collection("blogPosts").doc()
 
           //first half of the reference to the firebase storage
           const storageRef = firebase.storage().ref()
           /* concatenate the reference with 'child(...) to point to the image location with image name after loading complete.
           In this case it will be something like example 'documents/BlogCoverPhotos/blogPhoto.jpg'. */
           const docRef = storageRef.child(
-            `documents/BlogCoverPhotos/${this.$store.state.blogPhotoName}`
+            `documents/BlogCoverPhotos/${dataBase.id}/${this.$store.state.blogPhotoName}`
           )
 
           //this.file is the file objected assigned at #anchorFile.
@@ -590,11 +596,9 @@ export default {
 
               var canvas = document.getElementById("imageCanvas")
 
-              var storePointer = this.$store.state.blogPhotoName
-
               canvas.toBlob(async function(blob) {
                 const docRefThumbnail = await storageRef.child(
-                  `documents/BlogCoverPhotos_Thumbnail/${storePointer}`
+                  `documents/BlogCoverPhotos_Thumbnail/${dataBase.id}/${thisContextPointer.$store.state.blogPhotoName}`
                 )
 
                 await docRefThumbnail.put(blob).on(
@@ -615,21 +619,12 @@ export default {
                     // Get a new write batch
                     var batch = db.batch()
 
-                    //point to the collection 'blogPosts' with an auto generated document by firebase
-                    const dataBase = await db.collection("blogPosts").doc()
+                    let blogData
+                    let galleryData
 
                     //set the data to the auto generated document
                     //'.set' will replace everything in the record with whatever specified below.
                     ///use '.update' if want to only update a certain fields in a record.
-                    /*         await dataBase.set({
-                blogID: dataBase.id,
-                blogHTML: this.blogHTML,
-                blogCoverPhoto: downloadURL,
-                blogCoverPhotoName: this.blogCoverPhotoName,
-                blogTitle: this.blogTitle,
-                profileId: this.profileId,
-                date: timestamp,
-              }) */
 
                     batch.set(dataBase, {
                       blogID: dataBase.id,
@@ -642,6 +637,18 @@ export default {
                       profileId: thisContextPointer.profileId,
                       date: timestamp,
                     })
+
+                    blogData = {
+                      blogID: dataBase.id,
+                      blogHTML: thisContextPointer.blogHTML,
+                      blogCoverPhoto: downloadURL,
+                      blogCoverPhotoThumb: thumbnailDownloadURL,
+                      blogTitle: thisContextPointer.blogTitle,
+                      blogShortDesc: thisContextPointer.blogShortDesc,
+                      blogDate: timestamp,
+                      blogCoverPhotoName: thisContextPointer.blogCoverPhotoName,
+                      profileId: thisContextPointer.profileId,
+                    }
 
                     let tempArray
 
@@ -669,6 +676,18 @@ export default {
                             userName: userDoc.data().userName,
                           }
                         )
+
+                        galleryData = {
+                          photoId: galleryDataBase.id,
+                          blogId: dataBase.id,
+                          photoTitle: thisContextPointer.blogTitle,
+                          photoURL: downloadURL,
+                          thumbPhotoURL: thumbnailDownloadURL,
+                          photoName: thisContextPointer.blogCoverPhotoName,
+                          photoShortDesc: thisContextPointer.blogShortDesc,
+                          photoCreator: userDoc.data().userName,
+                        }
+                        //add all the latest records to state.blogPosts
 
                         await galleryDataBase
                           .get()
@@ -708,25 +727,28 @@ export default {
                           })
                       })
 
-                    console.log("tempArray1=" + tempArray)
-
                     // Commit the batch
                     batch.commit().then(() => {
-                      console.log("success")
-                      console.log("tempArray33333=" + tempArray)
                       thisPointer.$store.commit(
                         "updateGalleryOrderState",
                         tempArray
                       )
-                    })
 
-                    /* we need to call 'getPost' action in store to update the latest 'blogPosts' values in firebase to 'blogPosts' object in store.
-Await is used to make sure 'blogPosts' object in store is completely ready first before run the router redirect. */
-                    await thisContextPointer.$store.dispatch("getPost")
-                    //redirect to ViewBlog once the data update to firebase is completed
-                    thisContextPointer.$router.push({
-                      name: "ViewBlog",
-                      params: { blogid: dataBase.id },
+                      thisPointer.$store.commit("addArrayState", {
+                        blogPosts: "blogPosts",
+                        blogData: blogData,
+                      })
+
+                      thisPointer.$store.commit("addArrayState", {
+                        galleryPhotos: "galleryPhotos",
+                        galleryData: galleryData,
+                      })
+
+                      //redirect to ViewBlog once the data update to firebase is completed
+                      thisContextPointer.$router.push({
+                        name: "ViewBlog",
+                        params: { blogid: dataBase.id },
+                      })
                     })
                   }
                 )

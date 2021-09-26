@@ -97,8 +97,12 @@ export default {
         .doc(this.post.profileId)
         .get()
 
+      console.log("this.post.profileId=" + JSON.stringify(this.post))
+
       //access the author 'userName' in the object by using "data().userName"
       this.username = await dataBase.data().userName
+
+      console.log("dataBase.data().userName=" + dataBase.data().userName)
     },
   },
   created() {

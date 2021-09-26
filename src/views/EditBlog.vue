@@ -276,6 +276,7 @@
 
 <script>
 import LoadImageToCanvas from "../mixins/loadImageToCanvas"
+import ChangeUploadedFileName from "../mixins/changeUploadedFileName"
 
 import BlogCoverPreview from "../components/BlogCoverPreview"
 import firebase from "firebase/app"
@@ -320,7 +321,7 @@ Quill.register(Font, true)
 export default {
   name: "CreatePost",
   components: { BlogCoverPreview, Loading },
-  mixins: [LoadImageToCanvas],
+  mixins: [LoadImageToCanvas, ChangeUploadedFileName],
   data() {
     return {
       //the file object for the big cover image
@@ -581,6 +582,8 @@ export default {
       //this is a pointer to the root location of the images
       const storageRef = firebase.storage().ref()
 
+      const fileName = this.changeUploadedFileName(file.name)
+
       /*
       To access the folder in the root location, use '.child' and give the name of the folder name (in this case documents).
       If the folder or file do not exist, firebase will automatically create it.
@@ -588,7 +591,7 @@ export default {
       E.g. documents/blogPostPhotos/testImage.jpg
       */
       //use '.name' to acces the name of the file object
-      const docRef = storageRef.child(`documents/blogPostPhotos/${file.name}`)
+      const docRef = storageRef.child(`documents/blogPostPhotos/${fileName}`)
 
       //use '.put' to put the file into firebase storage
       //use '.on("state_changed") to track the progress of the file upload
@@ -633,9 +636,6 @@ export default {
         this.routeID
       )
 
-      // Use write batch to update a few firestore collection at one go
-      var batch = db.batch()
-
       //if title and textarea are filled, then pass the condition
       if (this.blogTitle.length !== 0 && this.blogHTML.length !== 0) {
         //'this.file' is the cover photo. If a new photo is uploaded, then pass the condition.
@@ -646,12 +646,18 @@ export default {
 
           const thisContextPointer = this
 
+          // Use write batch to update a few firestore collection at one go
+          var batch = db.batch()
+
+          let blogData
+          let galleryData
+
           //first half of the reference to the firebase storage
           const storageRef = firebase.storage().ref()
           /* concatenate the reference with 'child(...) to point to the image location with image name after loading complete.
           In this case it will be something like example 'documents/BlogCoverPhotos/blogPhoto.jpg'. */
           const docRef = storageRef.child(
-            `documents/BlogCoverPhotos/${this.$store.state.blogPhotoName}`
+            `documents/BlogCoverPhotos/${dataBase.id}/${this.$store.state.blogPhotoName}`
           )
 
           //this.file is the file objected assigned at #anchorFile.
@@ -678,7 +684,7 @@ export default {
 
               canvas.toBlob(async function(blob) {
                 const docRefThumbnail = await storageRef.child(
-                  `documents/BlogCoverPhotos_Thumbnail/${storePointer}`
+                  `documents/BlogCoverPhotos_Thumbnail/${dataBase.id}/${storePointer}`
                 )
 
                 await docRefThumbnail.put(blob).on(
@@ -705,6 +711,15 @@ export default {
                       blogShortDescription: thisContextPointer.blogShortDesc,
                     })
 
+                    blogData = {
+                      blogHTML: thisContextPointer.blogHTML,
+                      blogCoverPhoto: downloadURL,
+                      blogCoverPhotoThumb: thumbnailDownloadURL,
+                      blogTitle: thisContextPointer.blogTitle,
+                      blogShortDesc: thisContextPointer.blogShortDesc,
+                      blogCoverPhotoName: thisContextPointer.blogCoverPhotoName,
+                    }
+
                     //update the updated data in 'blogPosts' collection to 'gallery' collection
                     await galleryDataBaseFiltered
                       .get()
@@ -724,6 +739,14 @@ export default {
                               thisContextPointer.blogShortDesc,
                           }
                         )
+
+                        galleryData = {
+                          photoURL: downloadURL,
+                          thumbPhotoURL: thumbnailDownloadURL,
+                          photoName: thisContextPointer.blogCoverPhotoName,
+                          photoTitle: thisContextPointer.blogTitle,
+                          photoShortDesc: thisContextPointer.blogShortDesc,
+                        }
 
                         // Commit the batch
                         batch.commit().then(() => {
@@ -749,10 +772,32 @@ export default {
                         'routeID' is to specify which blog to update in store's 'blogPosts'.
 Await is used to make sure 'blogPosts' object in store is completely ready first before run the router redirect.
 */
-                        await thisContextPointer.$store.dispatch(
+                        /*  await thisContextPointer.$store.dispatch(
                           "updatePost",
                           thisContextPointer.routeID
+                        ) */
+
+                        thisContextPointer.$store.commit("updateArrayState", {
+                          array: "blogPosts",
+                          property: "blogID",
+                          searchedValue: dataBase.id,
+                          object: blogData,
+                        })
+
+                        thisContextPointer.$store.commit("updateArrayState", {
+                          array: "galleryPhotos",
+                          property: "photoId",
+                          searchedValue: querySnapshot.docs[0].id,
+                          object: galleryData,
+                        })
+
+                        console.log(
+                          "what gallery array=" +
+                            JSON.stringify(
+                              thisContextPointer.$store.state.galleryPhotos
+                            )
                         )
+
                         //redirect to ViewBlog once the data update to firebase is completed
                         thisContextPointer.$router.push({
                           name: "ViewBlog",

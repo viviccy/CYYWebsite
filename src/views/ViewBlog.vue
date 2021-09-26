@@ -33,8 +33,9 @@ export default {
   async mounted() {
     //Check to see if 'blogPosts' values in Store are ready.
     //If yes the find the blog wanted.
+
     if (this.$store.state.blogPosts.length) {
-      this.findBlog()
+      await this.findBlog()
     }
 
     //watch for 'state.blogPosts' to get all values first before rendering the whole page

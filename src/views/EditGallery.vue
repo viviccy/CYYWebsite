@@ -1,6 +1,25 @@
 <template>
   <div class="content-container">
+    <h2>Manage Gallery</h2>
     <Loading v-show="loading" />
+
+    <vue-dropzone
+      ref="imgDropzone"
+      id="dropzone"
+      :options="dropzoneOptions"
+      @vdropzone-complete="afterComplete"
+    >
+    </vue-dropzone>
+
+    <div class="preview-container dropzone"></div>
+    <button
+      ref="imageUploadButton"
+      @click="uploadImage"
+      class="upload-image-button"
+    >
+      Upload Image
+    </button>
+    <div></div>
     <div class="accordion accordion-flush" id="accordionFlushExample">
       <draggable
         v-model="requiredPhotoData"
@@ -13,14 +32,11 @@
         <transition-group type="transition" name="flip-list">
           <div
             class="accordion-item"
+            :class="{ 'grey-out': !checkUser(item.photoCreator) }"
             v-bind:key="item.photoId"
             v-for="(item, index) in requiredPhotoData"
           >
-            <h2
-              class="accordion-header"
-              :class="{ 'grey-out': !checkUser(item.photoCreator) }"
-              :id="`flush-heading-${item.photoId}`"
-            >
+            <h2 class="accordion-header" :id="`flush-heading-${item.photoId}`">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -39,7 +55,7 @@
                   <img :src="item.photoURL" @load="checkImageHeight" />
                 </div>
                 <div class="title-container">
-                  <p>{{ item.photoTitle }}</p>
+                  <p placeholder="Enter blog title">{{ item.photoTitle }}</p>
                 </div>
                 <div
                   class="arrow-container"
@@ -61,8 +77,13 @@
                   type="text"
                   :name="`title-${index}`"
                   v-model="item.photoTitle"
+                  placeholder="Enter blog title"
                 />
-                <textarea type="text" v-model="item.photoShortDesc"></textarea>
+                <textarea
+                  type="text"
+                  v-model="item.photoShortDesc"
+                  placeholder="Enter short description"
+                ></textarea>
                 <div>
                   <button
                     @click="saveSingleItem(`${item.photoId}`, `${index}`)"
@@ -79,6 +100,7 @@
           </div>
         </transition-group>
       </draggable>
+      <button class="save-all" @click="saveGallery">Save</button>
     </div>
     <nav aria-label="Page navigation" class="navigation">
       <ul class="page-number pagination">
@@ -157,8 +179,6 @@
         </tr>
       </tbody>
     </table> -->
-
-    <button @click="saveGallery">Save</button>
   </div>
 </template>
 
@@ -178,14 +198,85 @@ import Loading from "../components/Loading"
 import dropDownArrow from "../assets/Icons/swipe-arrow.svg?inline"
 import dragSquare from "../assets/Icons/four-square.svg?inline"
 
-//import sortGallery from "../mixins/sortGalleryData"
+import vue2Dropzone from "vue2-dropzone"
+import "vue2-dropzone/dist/vue2Dropzone.min.css"
+let uuid = require("uuid")
 
 export default {
   name: "EditGallery",
-  components: { draggable, Loading, dropDownArrow, dragSquare },
+  components: {
+    draggable,
+    Loading,
+    dropDownArrow,
+    dragSquare,
+    vueDropzone: vue2Dropzone,
+  },
   // mixins: [sortGallery],
   data() {
+    let thisPointer = this
     return {
+      images: [],
+      dropzoneObj: null,
+      dropzoneOptions: {
+        url: "https://httpbin.org/post",
+        thumbnailWidth: 250,
+        thumbnailHeight: 250,
+        dictDefaultMessage: "Drop images here to upload",
+        previewsContainer: ".preview-container",
+        addRemoveLinks: true,
+        acceptedFiles: ".jpg, .jpeg, .png",
+        autoProcessQueue: false,
+        init: function() {
+          thisPointer.dropzoneObj = this
+
+          this.on("removedfile", function(file) {
+            let index = thisPointer.images.indexOf(file.name)
+
+            if (index !== -1) {
+              thisPointer.images.splice(index, 1)
+            }
+          })
+
+          this.on("addedfile", (file) => {
+            thisPointer.images.push(file.name)
+
+            let index = thisPointer.images.indexOf(file.name) + 1
+            console.log("file name=" + file.name)
+            console.log("index=" + index)
+
+            document.querySelector(
+              ".dropzone .dz-preview:nth-child(" + index + ") .dz-progress"
+            ).style.opacity = 0
+
+            if (this.files.length) {
+              var _i, _len
+              for (
+                _i = 0, _len = this.files.length;
+                _i < _len - 1;
+                _i++ // -1 to exclude current file
+              ) {
+                if (
+                  this.files[_i].name === file.name &&
+                  this.files[_i].size === file.size &&
+                  this.files[_i].lastModifiedDate.toString() ===
+                    file.lastModifiedDate.toString()
+                ) {
+                  this.removeFile(file)
+                }
+              }
+            }
+          })
+
+          this.on("success", function(file) {
+            let index = thisPointer.images.indexOf(file.name) + 1
+
+            document.querySelector(
+              ".dropzone .dz-preview:nth-child(" + index + ") .dz-progress"
+            ).style.opacity = 0
+          })
+        },
+      },
+
       oldIndex: "",
       testing: [{ test: 0 }, { test: 1 }],
       newIndex: "",
@@ -197,6 +288,7 @@ export default {
       loading: null,
       thumbnailHeight: 0,
       thumbnailWidth: 0,
+      files: [],
     }
   },
   destroyed() {
@@ -207,15 +299,202 @@ export default {
   },
 
   methods: {
+    uploadImage() {
+      this.dropzoneObj.processQueue()
+
+      let el = document.querySelectorAll(".dropzone .dz-preview .dz-progress")
+
+      for (var i = 0; i < el.length; i++) {
+        var currentEl = el[i]
+        currentEl.style.opacity = 1
+      }
+
+      this.$refs.imgDropzone.processQueue()
+    },
+    async afterComplete(file) {
+      let imageURL
+      let thumbnailURL
+
+      let thisPointer2 = this
+
+      try {
+        let ext =
+          file.name.substring(
+            file.name.lastIndexOf(".") + 1,
+            file.name.length
+          ) || file.name
+
+        let fileName = file.name.substr(0, file.name.lastIndexOf("."))
+
+        let newFileName = fileName + uuid.v1() + ext
+
+        const storageRef = firebase.storage().ref()
+
+        const imageRef = storageRef.child(
+          `documents/BlogCoverPhotos/${newFileName}`
+        )
+
+        //this.file is the file objected assigned at #anchorFile.
+        //execute the task to put the cover image in firebase storarge.
+        await imageRef.put(file).on(
+          "state_changed",
+          (snapshot) => {
+            console.log(snapshot)
+          },
+          (err) => {
+            console.log(err)
+            this.loading = false
+          },
+          // this is triggered if the upload is completed
+          async () => {
+            console.log("upload success")
+
+            imageURL = await imageRef.getDownloadURL()
+
+            var canvas = document.createElement("canvas")
+
+            let ctx = canvas.getContext("2d")
+
+            var reader = new FileReader()
+
+            reader.onload = function(event) {
+              let img = new Image()
+
+              //to put the base64 image to canvas
+              img.onload = function() {
+                canvas.width = 400
+                canvas.height = (img.height * canvas.width) / img.width
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+
+                canvas.toBlob(async function(blob) {
+                  console.log("blob=" + blob)
+
+                  const storageRef = firebase.storage().ref()
+
+                  const docRefThumbnail = await storageRef.child(
+                    `documents/BlogCoverPhotos_Thumbnail/${newFileName}`
+                  )
+
+                  await docRefThumbnail.put(blob).on(
+                    "state_changed",
+                    (snapshot) => {
+                      console.log(snapshot)
+                    },
+                    (err) => {
+                      console.log(err)
+                      this.loading = false
+                    },
+                    async () => {
+                      console.log("load thumbnail success")
+                      thumbnailURL = await imageRef.getDownloadURL()
+
+                      // Get a new write batch
+                      var batch = db.batch()
+
+                      const galleryDataBase = await db
+                        .collection("gallery")
+                        .doc()
+
+                      batch.set(
+                        //get the id of the document in gallery collection with the matched blog id
+                        galleryDataBase,
+                        {
+                          blogCoverPhoto: imageURL,
+                          blogCoverPhotoThumbnail: thumbnailURL,
+                          blogCoverPhotoName: newFileName,
+
+                          blogID: "",
+                          blogTitle: "Dream Destination Awaits!",
+                          blogShortDescription:
+                            "Immerse yourself with a world of worder in Malaysia",
+                          userName: thisPointer2.$store.state.profileUserName,
+                        }
+                      )
+
+                      const data = {
+                        photoId: galleryDataBase.id,
+                        blogId: "",
+                        photoTitle: "Dream Destination Awaits!",
+                        photoURL: imageURL,
+                        thumbPhotoURL: thumbnailURL,
+                        photoName: newFileName,
+                        photoShortDesc:
+                          "Immerse yourself with a world of worder in Malaysia",
+                        photoCreator: thisPointer2.$store.state.profileUserName,
+                      }
+                      //add all the latest records to state.blogPosts
+
+                      let tempArray
+
+                      await galleryDataBase
+                        .get()
+                        .then(async function(snapshot) {
+                          let galleryOrderDocument
+
+                          const galleryOrderDatabase = await db.collection(
+                            "galleryOrder"
+                          )
+                          await galleryOrderDatabase
+                            .get()
+                            .then(async (docSnapshot) => {
+                              if (docSnapshot.size >= 1) {
+                                galleryOrderDocument = await db
+                                  .collection("galleryOrder")
+                                  .doc(docSnapshot.docs[0].id)
+                              }
+                            })
+
+                          await galleryOrderDocument
+                            .get()
+                            .then(async (snap) => {
+                              tempArray = await snap.data().order
+
+                              tempArray.unshift(snapshot.id)
+
+                              batch.set(
+                                //get the id of the document in gallery collection with the matched blog id
+                                galleryOrderDocument,
+                                {
+                                  order: firebase.firestore.FieldValue.arrayUnion(
+                                    ...tempArray
+                                  ),
+                                }
+                              )
+                            })
+                        })
+
+                      // Commit the batch
+                      batch.commit().then(() => {
+                        thisPointer2.$store.commit("updateGalleryState", data)
+                        thisPointer2.$store.commit(
+                          "updateGalleryOrderState",
+                          tempArray
+                        )
+
+                        thisPointer2.$refs.imgDropzone.removeFile(file)
+                        //this.images.push({src:imageURL})
+                      })
+                    }
+                  )
+                })
+              }
+
+              //'event.target.result' will produce base64 URL of the image.
+              img.src = event.target.result
+            }
+
+            //to use 'FileReader' to read an object of type File.
+            //using method 'readAsDataURL' will produce a an output of base64 URL when 'reader.result' or 'event.target.result' is used.
+            reader.readAsDataURL(file)
+          }
+        )
+
+        // this.$ref.imgDropzone.removeFile(file)
+      } catch (error) {
+        console.log(error)
+      }
+    },
     checkDragOption(user) {
-      console.log("user=" + user)
-      console.log(
-        "this.$store.state.profileUserName=" + this.$store.state.profileUserName
-      )
-      console.log(
-        " this.$store.state.profileSuperAdmin=" +
-          this.$store.state.profileSuperAdmin
-      )
       if (
         user == this.$store.state.profileUserName &&
         !this.$store.state.profileSuperAdmin
@@ -659,34 +938,43 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 :root {
   --image-height: auto;
   --image-width: 100%;
 }
 
 .content-container {
+  width: 100%;
   max-width: $viewThreshold5;
-  margin: 40px auto;
+  margin: 50px auto;
+  padding: 0 10px;
+
+  & > h2 {
+    @include pageTitle;
+    margin-bottom: 40px;
+  }
 
   .accordion {
     width: 100%;
-
+    display: flex;
+    flex-direction: column;
     margin: 0 auto;
 
     .accordion-item {
-      margin: 0 10px 10px 10px;
+      margin: 0 0 10px 0;
       border: 0;
       background: $inputColor1;
       border-radius: 7px;
       box-shadow: none;
       overflow: hidden;
 
+      &.grey-out {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
       h2 {
-        &.grey-out {
-          opacity: 0.6;
-          pointer-events: none;
-        }
         .accordion-button {
           display: grid;
           grid-template-columns: 30px 1fr 5fr 25px;
@@ -720,7 +1008,7 @@ export default {
 
           .drag-container {
             &.grey-out {
-              opacity: 0.6;
+              opacity: 0.3;
               pointer-events: none;
             }
 
@@ -780,6 +1068,10 @@ export default {
             color: #969696;
             display: inline;
             margin: 0;
+          }
+
+          p:empty:not(:focus)::before {
+            content: attr(placeholder);
           }
         }
 
@@ -861,18 +1153,26 @@ export default {
         }
       }
     }
+    .save-all {
+      @include formButton;
+      margin-left: auto;
+    }
   }
 }
 
 .navigation {
   display: flex;
-  padding: 10px;
+  flex-wrap: wrap;
+  padding: 10px 0;
   margin-top: 30px;
   .page-number {
     flex: 1;
     .page-item {
-      &:first {
+      &:first-child {
         padding-left: 0;
+        a {
+          margin-left: 0;
+        }
       }
       .page-link {
         border-radius: 5px;
@@ -896,8 +1196,18 @@ export default {
     flex: 0 1 auto;
 
     .page-item {
-      &:last {
+      &:last-child {
+        padding-right: 0;
+        a {
+          margin-right: 0;
+        }
+      }
+
+      &:first-child {
         padding-left: 0;
+        a {
+          margin-left: 0;
+        }
       }
       .page-link {
         border-radius: 5px;
@@ -956,5 +1266,69 @@ strong {
     margin-left: -50px;
     background-image:
   } */
+}
+
+.img-div {
+  display: flex;
+  margin: 25px;
+}
+
+.dropzone {
+  min-height: 180px;
+  background-color: #3c4f6f;
+  margin: 0 0 10px 0;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0 !important;
+
+  &.vue-dropzone:hover {
+    background-color: #3c4f6f;
+  }
+
+  .dz-message {
+    span {
+      color: white;
+    }
+  }
+
+  .dz-preview {
+    margin: 10px;
+    .dz-image {
+      border-radius: 0;
+    }
+    .dz-remove {
+      color: #3c4f6f;
+      text-decoration: none;
+      padding: 7px;
+      font-weight: bold;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
+  .dz-image-preview {
+    background: none !important;
+  }
+
+  img {
+    max-width: 180px;
+    margin: 0 15px 0 0;
+  }
+}
+
+.upload-image-button {
+  @include formButton;
+  margin: 0 auto 50px auto;
+  display: block;
+}
+
+.preview-container {
+  background: #969696;
+  border: 0;
+  min-height: auto;
 }
 </style>

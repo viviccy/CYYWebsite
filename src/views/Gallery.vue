@@ -53,13 +53,22 @@ export default {
     }
   },
   async mounted() {
+    console.log("mounteddddddddddddddddd")
     //if no value in 'galleryPhotos' array variable from store, then load the data from 'gallery' collection in firestore.
     if (this.$store.state.galleryPhotos.length == 0) {
       await this.loadGallery()
     }
 
     //load all image details to 'currentImageList' after sorted properly with store getter function 'photoDataSorted'
+    console.log(
+      "this.$store.getters.photoDataSorted = " +
+        JSON.stringify(this.$store.getters.photoDataSorted)
+    )
 
+    console.log(
+      "this.$store.state.galleryPhotos = " +
+        JSON.stringify(this.$store.state.galleryPhotos)
+    )
     this.currentImageList.push(...this.$store.getters.photoDataSorted)
 
     /*  let tempMaxRowHeight = this.maxRowHeight
