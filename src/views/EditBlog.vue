@@ -791,13 +791,6 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
                           object: galleryData,
                         })
 
-                        console.log(
-                          "what gallery array=" +
-                            JSON.stringify(
-                              thisContextPointer.$store.state.galleryPhotos
-                            )
-                        )
-
                         //redirect to ViewBlog once the data update to firebase is completed
                         thisContextPointer.$router.push({
                           name: "ViewBlog",

@@ -120,11 +120,21 @@ The argument for this function is state follow by the payload from the caller e.
     },
 
     updateArrayState(state, payload) {
-      state[Object.values(payload)[0]][Object.values(payload)[1]]
+
       let item = state[Object.values(payload)[0]].find(
         (item) => item[Object.values(payload)[1]] === Object.values(payload)[2]
       )
       Object.assign(item, Object.values(payload)[3])
+    },
+
+    deleteArrayState(state,payload){
+
+     
+
+       state[Object.values(payload)[0]].splice(Object.values(payload)[1],1)
+
+   
+
     },
 
     changeFirstName(state, payload) {
@@ -433,8 +443,9 @@ To use other methods of 'context', they can be written like this:
       await dispatch("getPost")
     },
 
-    //load gallery data from Firestore to store
+    //load gallery data from Firestore to Store array variable 'galleryPhotos' and load gallery order data from Firestore to Store array variable 'galOrder'.
     async loadGalleryData({ commit }) {
+
       //reference to 'gallery' collection in firestore
       const dataBase = await db.collection("gallery")
 
@@ -451,10 +462,8 @@ To use other methods of 'context', they can be written like this:
               photoShortDesc: doc.data().blogShortDescription,
               photoCreator: doc.data().userName,
             }
-            //add all the latest records to state.blogPosts
-
+            //mutate each iteration of record from 'gallery' firestore to Store array variable 'galleryPhotos'
             commit("updateGalleryState", data)
-            // })
           }
         } else {
           console.log("not exist")

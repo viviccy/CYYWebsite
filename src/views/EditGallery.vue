@@ -449,7 +449,13 @@ export default {
                             .then(async (snap) => {
                               tempArray = await snap.data().order
 
+                              console.log("array from firesoter=" + tempArray)
+
+                               console.log("snapshot.id=" + snapshot.id)
+
                               tempArray.unshift(snapshot.id)
+
+
 
                               batch.set(
                                 //get the id of the document in gallery collection with the matched blog id
@@ -465,11 +471,20 @@ export default {
 
                       // Commit the batch
                       batch.commit().then(() => {
-                        thisPointer2.$store.commit("updateGalleryState", data)
-                        thisPointer2.$store.commit(
+                         thisPointer2.$store.commit(
                           "updateGalleryOrderState",
                           tempArray
                         )
+                        thisPointer2.$store.commit("updateGalleryState", data)
+                       
+
+
+                        console.log("thisPointer2.galleryCurrentOrder=" + thisPointer2.galleryCurrentOrder)
+ console.log("thisPointer2.$store.state.galOrder=" + thisPointer2.$store.state.galOrder)
+ console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                     //  thisPointer2.galleryCurrentOrder = thisPointer2.$store.state.galOrder
+                        console.log("thisPointer2.galleryCurrentOrder after=" + thisPointer2.galleryCurrentOrder)
+ console.log("thisPointer2.$store.state.galOrder after=" + thisPointer2.$store.state.galOrder)
 
                         thisPointer2.$refs.imgDropzone.removeFile(file)
                         //this.images.push({src:imageURL})
@@ -642,39 +657,53 @@ export default {
     },
 
     async updateDatabaseBatch() {
+
+      //get 1 record from 'gallery' collection for testing
       const dataBase = await db.collection("gallery").limit(1)
 
       await dataBase.get().then(async (docSnapshot) => {
-        /////gohere
-
+      //if one 'gallery' document exists then execute the following
         if (docSnapshot.size >= 1) {
-          // this.$store.commit("resetGalleryState")
 
+          //check if 'galleryPhotos' array from Store is 0. If yes then call Store action 'loadGalleryData' to load gallery data to Store array variable 'galleryPhotos' and to load gallery order data to Store array variable 'galOrder'
           if (this.$store.state.galleryPhotos.length === 0) {
             await this.$store.dispatch("loadGalleryData")
           }
 
+          //Store's 'galOrder' array will be populated after above code.
           this.galleryCurrentOrder = [...this.$store.state.galOrder]
+
+        //If no gallery document exists in Firestore's Gallery collection then create a new 'gallery' collection.
         } else {
+
+//<-----grab data from 'blogPosts' and 'users' collection and join them to create 'gallery' collection----->
+
+          //reference to Firestore 'blogPosts' collection
           const blogDatabase = await db
             .collection("blogPosts")
             .orderBy("date", "desc")
 
           await blogDatabase.get().then(async (docSnaps) => {
+
+            //iterate to all blogs in 'blogPosts'
             for (const doc of docSnaps.docs) {
-              // await docSnaps.forEach(async (doc) => {
 
               let tempUserData
 
+              // reference to 'users' collection based on the 'profileId' retrived from 'blogPosts'
               await db
                 .collection("users")
                 .doc(doc.data().profileId)
                 .get()
                 .then((userDoc) => {
+
+                  //get the username of the current blog iteration
                   tempUserData = userDoc.data().username
 
+                  //create a new 'gallery' collection's document. A new document id will be generated with '.doc()'
                   const galleryDatabase = db.collection("gallery").doc()
 
+                  //set the needed blog data from 'blogPosts' and username from 'users' collection to the new 'gallery' document 
                   galleryDatabase.set({
                     blogID: doc.data().blogID,
                     blogTitle: doc.data().blogTitle,
@@ -684,58 +713,70 @@ export default {
                     userName: tempUserData,
                   })
                 })
-
-              //})
             }
+            
           })
+//</-----grab data from 'blogPosts' and 'users' collection and join them to create 'gallery' collection----->
 
+//<-----create 'galleryOrder' collection and put the newly created 'gallery' records order to 'galleryOrder'----->
+
+          //reference to the newly created 'galleryOrder' document named 'galleryOrder'
           const galleryOrder = await db
             .collection("galleryOrder")
             .doc("galleryOrder")
-
+  
+          //reference to 'gallery' collection
           const galleryDatabase = db.collection("gallery")
 
+          //create an empty array served as the gallery order array
           let tempArray = []
+
+          //reference to 'this'
+          let thisPointer = this
 
           await galleryDatabase.get().then((docSnapshot) => {
             if (docSnapshot.size >= 1) {
+
+              //iterate to all the documents in 'gallery' collection
               for (const doc of docSnapshot.docs) {
-                // docSnapshot.forEach(async (doc) => {
+    
+                //add each 'gallery' record id to 'tempArray'
                 tempArray.push(doc.id)
                 //})
               }
 
+              //assign the 'tempArray' values to 'galleryOrder' property named 'order'
               galleryOrder.set({
                 order: firebase.firestore.FieldValue.arrayUnion(...tempArray),
               })
 
-              console.log("order ok")
+              //Store's 'galOrder' array will be populated after above code.
+              thisPointer.galleryCurrentOrder = [...thisPointer.$store.state.galOrder]
             }
           })
+//</-----create 'galleryOrder' collection and put the newly created 'gallery' records order to 'galleryOrder'----->
         }
       })
     },
     async saveGallery() {
       //var tbodyRowCount = table.tBodies[0].rows.length
 
-      let content = document.querySelectorAll(".gallery-list li")
+     // let content = document.querySelectorAll(".gallery-list li")
+
+     let content = this.$store.getters.photoDataSorted
 
       // Get a new write batch
       var batch = db.batch()
 
-      for (let i = 0; i < content.length; ++i) {
+      for (let i = 0; i < content.length ; ++i) {
+
         const galleryDatabase = db
           .collection("gallery")
-          .doc(content[i].getElementsByTagName("span")[0].innerHTML)
+          .doc(content[i].photoId)
 
         batch.update(galleryDatabase, {
-          blogTitle: content[i]
-            .getElementsByTagName("span")[1]
-            .getElementsByTagName("input")[0].value,
-          blogCoverPhoto: content[i].getElementsByTagName("span")[2].innerHTML,
-          blogCoverPhotoName: content[i].getElementsByTagName("span")[3]
-            .innerHTML,
-          userName: content[i].getElementsByTagName("span")[4].innerHTML,
+          blogTitle: content[i].photoTitle,
+          blogShortDescription: content[i].photoShortDesc
         })
 
         let blogId
@@ -744,7 +785,7 @@ export default {
           .then(async (doc) => {
             if (doc.exists) {
               blogId = await doc.data().blogID
-              console.log("ok")
+            
             } else {
               // doc.data() will be undefined in this case
               console.log("No such document!")
@@ -754,31 +795,17 @@ export default {
             console.log("Error getting document:", error)
           })
 
+
+          if(blogId){
+
         const blogDatabase = db.collection("blogPosts").doc(blogId)
 
         batch.update(blogDatabase, {
-          blogTitle: content[i]
-            .getElementsByTagName("span")[1]
-            .getElementsByTagName("input")[0].value,
-          blogCoverPhoto: content[i].getElementsByTagName("span")[2].innerHTML,
-          blogCoverPhotoName: content[i].getElementsByTagName("span")[3]
-            .innerHTML,
+          blogTitle: content[i].blogId,
+          blogShortDescription: content[i].photoShortDesc
         })
-
-        //  blogDatabase.update({
-
-        //   })
-
-        // tempArray.push({
-        // photoID: content[i].getElementsByTagName("td")[0].innerHTML,
-        /*   blogTitle: content[i]
-            .getElementsByTagName("td")[1]
-            .getElementsByTagName("input")[0].value,
-          blogCoverPhoto: content[i].getElementsByTagName("td")[2].innerHTML,
-          blogCoverPhotoName: content[i].getElementsByTagName("td")[3]
-            .innerHTML,
-          userName: content[i].getElementsByTagName("td")[4].innerHTML, */
-        //  })
+        }
+       
       }
 
       const galleryOrderDatabase = await db.collection("galleryOrder")
@@ -804,23 +831,33 @@ export default {
       //tempArray
     },
     async saveSingleItem(photoId, index) {
+
+
+    
       this.loading = true
-      var batch = db.batch()
+      let batch = db.batch()
+
+      let thisPointer = this
 
       const galleryDatabase = db.collection("gallery").doc(photoId)
+
+     
+      
 
       batch.update(galleryDatabase, {
         blogTitle: this.requiredPhotoData[index].photoTitle,
         blogShortDescription: this.requiredPhotoData[index].photoShortDesc,
       })
 
+      
       let blogId
+
       await galleryDatabase
         .get()
         .then(async (doc) => {
           if (doc.exists) {
             blogId = await doc.data().blogID
-            console.log("ok")
+          
           } else {
             // doc.data() will be undefined in this case
             console.log("No such document!")
@@ -830,6 +867,10 @@ export default {
           console.log("Error getting document:", error)
         })
 
+  let blogData
+
+if(blogId){
+
       const blogDatabase = db.collection("blogPosts").doc(blogId)
 
       batch.update(blogDatabase, {
@@ -837,10 +878,32 @@ export default {
         blogShortDescription: this.requiredPhotoData[index].photoShortDesc,
       })
 
+    
+
+        blogData = {
+                     
+                      blogTitle: thisPointer.blogTitle,
+                      blogShortDesc: thisPointer.blogShortDesc,
+                    
+                    }
+
+                    }
+                    
+
       // Commit the batch
       batch.commit().then(() => {
         this.loading = false
-        console.log("success")
+
+if(blogId){
+
+                thisPointer.$store.commit("updateArrayState", {
+                          array: "blogPosts",
+                          property: "blogID",
+                          searchedValue: blogId,
+                          object: blogData,
+                        })
+}
+      
       })
     },
     async deleteSingleItem(photoId, index) {
@@ -872,8 +935,23 @@ export default {
 
       batch.commit().then(() => {
         this.loading = false
-        this.requiredPhotoData.splice(index, 1)
-        this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
+      
+
+          /*  this.$store.commit("deleteArrayState", {
+                          array: "galleryPhotos",
+                          index: index,
+                        }) */
+
+              
+           
+            // this.$store.state.galleryPhotos.splice(index,1)
+             this.$store.commit("deleteArrayState", {
+                          array: "galleryPhotos",
+                          index: index,
+                        })
+                 
+
+              this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
       })
     },
   },
@@ -897,7 +975,10 @@ export default {
 
         return allPhotoData
       },
-      set() {},
+      set(what) {
+
+        console.log("what=" + JSON.stringify(what))
+      },
     },
   },
 
@@ -913,7 +994,11 @@ export default {
         this.thumbnailWidth + "px"
       )
     },
-    requiredPhotoData: function() {
+    requiredPhotoData: {
+      handler: function(){
+      },
+      deep: true
+   
       // let thisPointer = this
       /*   this.$nextTick(() => {
         const elements = document.querySelectorAll(".accordion-header")
