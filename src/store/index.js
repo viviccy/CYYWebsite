@@ -52,8 +52,8 @@ export default new Vuex.Store({
       return state.blogPosts.slice(0, 2)
     },
     blogPostCards(state) {
-      //Use '.slice' method to get the object value from a start index to an end index. In this case is to get the value of state.blogPosts from index 2 to index 5 (putting number 6 specify until index 5 and not index 6), which is the third post until fifth post in the object. The three posts will be shown as the bottom card section of the page.
-      return state.blogPosts.slice(2, 6)
+      //Use '.slice' method to get the object value from a start index to an end index. In this case is to get the value of state.blogPosts from index 2 to index 4 (putting number 5 specify until index 4 and not index 5), which is the third post until fifth post in the object. The three posts will be shown as the bottom card section of the page.
+      return state.blogPosts.slice(2, 5)
     },
 
     photoDataSorted(state) {
@@ -116,27 +116,27 @@ The argument for this function is state follow by the payload from the caller e.
     //Object.keys(payload)[0] = array name
     //Object.keys(payload)[1] = object to be pushed in the array
     addArrayState(state, payload) {
-      state[Object.values(payload)[0]].push(Object.values(payload)[1])
+      state[Object.values(payload)[0]].unshift(Object.values(payload)[1])
     },
 
     updateArrayState(state, payload) {
-
       let item = state[Object.values(payload)[0]].find(
         (item) => item[Object.values(payload)[1]] === Object.values(payload)[2]
       )
       Object.assign(item, Object.values(payload)[3])
     },
 
-    deleteArrayState(state,payload){
+    deleteArrayState(state, payload) {
+      let item = state[Object.values(payload)[0]].findIndex(
+        (item) => item[Object.values(payload)[1]] === Object.values(payload)[2]
+      )
 
-     
-
-       state[Object.values(payload)[0]].splice(Object.values(payload)[1],1)
-
-   
-
+      state[Object.values(payload)[0]].splice(item, 1)
     },
 
+    clearArrayState(state, payload) {
+      state[payload] = []
+    },
     changeFirstName(state, payload) {
       state.profileFirstName = payload
     },
@@ -179,11 +179,12 @@ The argument for this function is state follow by the payload from the caller e.
     },
 
     resetGalleryState(state) {
+      console.log("reset gallery")
       state.galleryPhotos = []
     },
 
     updateGalleryOrderState(state, payload) {
-      //update 'order' array from firestore 'galleryOrder' collection the the Store array 'galOrder'
+      //update 'order' array from firestore 'galleryOrder' collection the the Store array 'galOrder.
       state.galOrder = [...payload]
     },
   },
@@ -253,10 +254,13 @@ To use other methods of 'context', they can be written like this:
     Hence if the order is descending, then the order is
     February 2021 show first, then January 2021 
     '.orderBy' is a Firebase method.*/
-      const dataBase = await db.collection("blogPosts").orderBy("date", "desc")
+      const dataBase = await db.collection("blogPosts").orderBy("date")
 
       //grab the data from collection and assign them to a temporary object named 'dbResults'
       const dbResults = await dataBase.get()
+
+      //clear 'blogPosts' array before adding latest ones from Firestore
+      commit("clearArrayState", "blogPosts")
 
       //Loop through each record in 'dbResults'
       dbResults.forEach((doc) => {
@@ -291,8 +295,6 @@ To use other methods of 'context', they can be written like this:
         }
 
         //add all the latest records to state.blogPosts
-        // state.blogPosts.push(data)
-
         commit("addArrayState", {
           blogPosts: "blogPosts",
           blogData: data,
@@ -312,7 +314,7 @@ To use other methods of 'context', they can be written like this:
 
       //reference to the firebase document 'blogPosts' of property id based on routeID from #anchorID
       //#anchorDataBase
-      const dataBase = await db.collection("blogPosts").doc(payload)
+      const dataBase = await db.collection("blogPosts").doc(payload.blogID)
 
       //add blog going to be deleted to batch
       batch.delete(dataBase)
@@ -320,61 +322,78 @@ To use other methods of 'context', they can be written like this:
       //reference to the firebase document 'gallery'
       const galleryDataBase = await db.collection("gallery")
 
+      console.log(" payload.blogID=" + payload.blogID)
+
       // Search for the blog id reference based on routeID using 'where'. Note that blog id in this collection is unique too.
       const galleryDataBaseFiltered = await galleryDataBase.where(
         "blogID",
         "==",
-        payload
+        payload.blogID
       )
 
-      //the variable to store gallery id corresponding to current blog id
       let galleryDocumentId
+
+      let tempArray
+      console.log(
+        "galleryDataBaseFiltered=" + JSON.stringify(galleryDataBaseFiltered)
+      )
+      ///////////////////////////
+      //the variable to store gallery id corresponding to current blog id
 
       //update the updated data in 'blogPosts' collection to 'gallery' collection
       await galleryDataBaseFiltered.get().then(async (querySnapshot) => {
-        //get the id of the document in gallery collection with the matched blog id.
-        //'galleryDataBase' is pointing to the document that has the currently used 'blogID'.
-        //'querySnapshot.docs[0].id' will give the current document id (the name of the document).
+        if (querySnapshot.size > 0) {
+          //get the id of the document in gallery collection with the matched blog id.
+          //'galleryDataBase' is pointing to the document that has the currently used 'blogID'.
+          //'querySnapshot.docs[0].id' will give the current document id (the name of the document).
 
-        //assign gallery id to variable 'galleryDocumentId'
-        galleryDocumentId = await querySnapshot.docs[0].id
-      })
+          //assign gallery id to variable 'galleryDocumentId'
+          galleryDocumentId = await querySnapshot.docs[0].id
+          batch.delete(galleryDataBase.doc(galleryDocumentId))
 
-      batch.delete(galleryDataBase.doc(galleryDocumentId))
+          //reference to the firebase collection 'galleryOrder'
+          const galleryOrderDatabase = await db.collection("galleryOrder")
 
-      //reference to the firebase collection 'galleryOrder'
-      const galleryOrderDatabase = await db.collection("galleryOrder")
+          //variable to hold the reference to the firebase document 'galleryOrder'
+          let galleryOrderDocument
 
-      //variable to hold the reference to the firebase document 'galleryOrder'
-      let galleryOrderDocument
+          //to retrive the document id of the 'galleryOrder' collection
+          await galleryOrderDatabase.get().then(async (docSnapshot) => {
+            if (docSnapshot.size >= 1) {
+              console.log("snapshot=")
+              //assign the reference to the single document of 'galleryOrder' once the document id is identified
+              galleryOrderDocument = await db
+                .collection("galleryOrder")
+                .doc(docSnapshot.docs[0].id)
+            }
+          })
 
-      //to retrive the document id of the 'galleryOrder' collection
-      await galleryOrderDatabase.get().then(async (docSnapshot) => {
-        if (docSnapshot.size >= 1) {
-          //assign the reference to the single document of 'galleryOrder' once the document id is identified
-          galleryOrderDocument = await db
-            .collection("galleryOrder")
-            .doc(docSnapshot.docs[0].id)
+          await galleryOrderDocument.get().then(async (snap) => {
+            //tempArray = the array 'order' in document 'galleryOrder' of collection 'galleryOrder'
+            tempArray = await snap.data().order
+
+            const index = tempArray.indexOf(galleryDocumentId)
+            if (index > -1) {
+              tempArray.splice(index, 1)
+            }
+
+            console.log("tempArray after splice=" + tempArray)
+
+            batch.update(galleryOrderDocument, {
+              order: firebase.firestore.FieldValue.delete(),
+            })
+
+            batch.set(
+              //get the id of the document in gallery collection with the matched blog id
+              galleryOrderDocument,
+              {
+                order: firebase.firestore.FieldValue.arrayUnion(...tempArray),
+              }
+            )
+          })
         }
       })
-
-      await galleryOrderDocument.get().then(async (snap) => {
-        //tempArray = the array 'order' in document 'galleryOrder' of collection 'galleryOrder'
-        let tempArray = await snap.data().order
-
-        const index = tempArray.indexOf(galleryDocumentId)
-        if (index > -1) {
-          tempArray.splice(index, 1)
-        }
-
-        batch.set(
-          //get the id of the document in gallery collection with the matched blog id
-          galleryOrderDocument,
-          {
-            order: firebase.firestore.FieldValue.arrayUnion(...tempArray),
-          }
-        )
-      })
+      ///////////////////
 
       batch.commit().then(() => {
         let obj = {
@@ -389,6 +408,16 @@ To use other methods of 'context', they can be written like this:
         }
 
         commit("updateState", obj)
+
+        if (galleryDocumentId) {
+          commit("deleteArrayState", {
+            array: "galleryPhotos",
+            property: "photoId",
+            value: galleryDocumentId,
+          })
+
+          commit("updateGalleryOrderState", tempArray)
+        }
       })
 
       //first half of the reference to the firebase storage
@@ -396,7 +425,7 @@ To use other methods of 'context', they can be written like this:
       /* concatenate the reference with 'child(...) to point to the image location with image name after loading complete.
           In this case it will be something like example 'documents/BlogCoverPhotos/blogPhoto.jpg'. */
       const docRef = storageRef.child(
-        `documents/BlogCoverPhotos/${this.state.blogPhotoName}`
+        `documents/BlogCoverPhotos/${payload.blogID}/${payload.blogCoverPhotoName}`
       )
 
       docRef
@@ -414,7 +443,7 @@ To use other methods of 'context', they can be written like this:
         .catch(() => {})
 
       const docRef2 = storageRef.child(
-        `documents/BlogCoverPhotos_Thumbnail/${this.state.blogPhotoName}`
+        `documents/BlogCoverPhotos_Thumbnail/${payload.blogID}/${payload.blogCoverPhotoName}`
       )
 
       docRef2
@@ -432,7 +461,12 @@ To use other methods of 'context', they can be written like this:
         .catch(() => {})
 
       //remove the data from state.blogPosts that has the id indicated by 'payload'
-      commit("filterBlogPost", payload)
+
+      commit("deleteArrayState", {
+        array: "blogPosts",
+        property: "blogID",
+        value: payload.blogID,
+      })
     },
 
     async updatePost({ commit, dispatch }, payload) {
@@ -445,7 +479,6 @@ To use other methods of 'context', they can be written like this:
 
     //load gallery data from Firestore to Store array variable 'galleryPhotos' and load gallery order data from Firestore to Store array variable 'galOrder'.
     async loadGalleryData({ commit }) {
-
       //reference to 'gallery' collection in firestore
       const dataBase = await db.collection("gallery")
 

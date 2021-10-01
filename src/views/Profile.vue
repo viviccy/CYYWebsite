@@ -1,35 +1,56 @@
 <template>
-  <div class="profile">
+  <div>
     <Modal
       v-if="modalActive"
-      :modalMessage="modalMessage"
+      :modalProperties="modalProperties"
       v-on:close-modal="closeModal"
     />
-    <div class="container">
-      <h2>Account Settings</h2>
-      <div class="profile-info">
-        <div class="initials">{{ $store.state.profileInitials }}</div>
-        <div class="admin-badge">
-          <adminIcon class="icon" />
-          <span>Admin</span>
+
+    <div class="profile-section">
+      <div class="container">
+        <h2>Account Settings</h2>
+        <div class="profile-info">
+          <div class="initials">{{ $store.state.profileInitials }}</div>
+          <div class="admin-badge">
+            <adminIcon class="icon" />
+            <span>Admin</span>
+          </div>
+          <div class="input">
+            <input
+              type="text"
+              id="firstName"
+              placeholder="First Name"
+              v-model="firstName"
+            />
+          </div>
+          <div class="input">
+            <input
+              type="text"
+              id="lastName"
+              placeholder="Last Name"
+              v-model="lastName"
+            />
+          </div>
+          <div class="input">
+            <input
+              type="text"
+              id="username"
+              placeholder="Username"
+              v-model="username"
+            />
+          </div>
+          <div class="input">
+            <input
+              disabled
+              type="text"
+              id="email"
+              placeholder="Email"
+              v-model="email"
+              style="opacity:0.6"
+            />
+          </div>
+          <button @click="updateProfile">Save Changes</button>
         </div>
-        <div class="input">
-          <label for="firstName">First Name:</label>
-          <input type="text" id="firstName" v-model="firstName" />
-        </div>
-        <div class="input">
-          <label for="lastName">Last Name:</label>
-          <input type="text" id="lastName" v-model="lastName" />
-        </div>
-        <div class="input">
-          <label for="username">Username:</label>
-          <input type="text" id="username" v-model="username" />
-        </div>
-        <div class="input">
-          <label for="email">Email:</label>
-          <input disabled type="text" id="email" v-model="email" />
-        </div>
-        <button @click="updateProfile">Save Changes</button>
       </div>
     </div>
   </div>
@@ -37,7 +58,7 @@
 
 <script>
 import Modal from "../components/Modal"
-import adminIcon from "../assets/Icons/user-crown-light.svg"
+import adminIcon from "../assets/Icons/user-crown-light.svg?inline"
 export default {
   name: "Profile",
   components: {
@@ -46,7 +67,11 @@ export default {
   },
   data() {
     return {
-      modalMessage: "Changes were saved!",
+      modalProperties: {
+        message: "Changes were saved!",
+        task: "",
+        blogId: null,
+      },
       modalActive: null,
     }
   },
@@ -93,7 +118,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.profile {
+.profile-section {
   .container {
     max-width: 1000px;
     padding: 60px 25px;
@@ -101,8 +126,7 @@ export default {
     h2 {
       text-align: center;
       margin-bottom: 16px;
-      font-weight: 300;
-      font-size: 32px;
+      @include pageTitle;
     }
 
     .profile-info {
@@ -113,7 +137,8 @@ export default {
       display: flex;
       flex-direction: column;
       max-width: 600px;
-      margin: 32px auto;
+      margin: 40px auto;
+      padding: 20px;
 
       .initials {
         position: initial;
@@ -158,11 +183,7 @@ export default {
         }
 
         input {
-          width: 100%;
-          border: none;
-          background-color: #f2f7f6;
-          padding: 8px;
-          height: 50px;
+          @include inputField;
           @media (min-width: 900px) {
           }
 
@@ -174,6 +195,8 @@ export default {
 
       button {
         align-self: center;
+        margin: 20px 0 20px 0;
+        @include formButton;
       }
     }
   }

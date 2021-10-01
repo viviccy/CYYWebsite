@@ -8,8 +8,13 @@
       :options="swiperOptions"
     >
       <swiper-slide>
+        <router-link
+          class="link-block"
+          :to="{ name: 'ViewBlog', params: { blogid: '9ts4Nqn3HnN1eHJ1eb4N' } }"
+        >
+        </router-link>
         <div class="desc">
-          <transition enter-active-class="animate__animated animate__backInUp">
+          <transition enter-active-class="animate__animated animate__fadeInUp">
             <div v-if="this.showDesc[0]">
               <h3>Kuala Lumpur</h3>
 
@@ -20,7 +25,7 @@
               <a href="#">Get to know more! &raquo;</a>
             </div>
           </transition>
-          <div class="whiteBg"></div>
+          <div class="whiteBg" v-if="this.showDesc[0]"></div>
         </div>
 
         <img
@@ -34,8 +39,15 @@
         </div>
       </swiper-slide>
       <swiper-slide>
+        <router-link
+          class="link-block"
+          :to="{ name: 'ViewBlog', params: { blogid: 'L2x7fNwpy2WbFy0GznZz' } }"
+        >
+        </router-link>
         <div class="desc">
-          <transition enter-active-class="animate__animated animate__fadeInUp">
+          <transition
+            enter-active-class="animate__animated animate__fadeInRight"
+          >
             <div v-if="this.showDesc[1]">
               <h3>Pulau Tioman</h3>
               <p>
@@ -46,7 +58,7 @@
               <a href="#">Get to know more! &raquo;</a>
             </div></transition
           >
-          <div class="whiteBg"></div>
+          <div class="whiteBg" v-if="this.showDesc[1]"></div>
         </div>
         <img
           class="img2 swiper-lazy"
@@ -58,6 +70,11 @@
         </div>
       </swiper-slide>
       <swiper-slide>
+        <router-link
+          class="link-block"
+          :to="{ name: 'ViewBlog', params: { blogid: '0DEZJlFZrkXNpsCfm7o8' } }"
+        >
+        </router-link>
         <div class="desc">
           <transition enter-active-class="animate__animated animate__zoomIn">
             <div v-if="this.showDesc[2]">
@@ -69,7 +86,7 @@
               <a href="#">Get to know more! &raquo;</a>
             </div></transition
           >
-          <div class="whiteBg"></div>
+          <div class="whiteBg" v-if="this.showDesc[2]"></div>
         </div>
         <img
           class="img3 swiper-lazy"
@@ -138,7 +155,7 @@ export default {
         lazy: true,
         spaceBetween: 0,
         autoplay: {
-          delay: 5000,
+          delay: 5000000,
           disableOnInteraction: false,
         },
         //Bottom dot buttons
@@ -155,12 +172,7 @@ export default {
           init: function() {
             //to fix a bug in Swiper that the last image on the list (duplicate of first image) not removing the 'data-src' attribute even the lazy loading is done.
           },
-          lazyImageLoad: function() {
-            // if (lastChild.getAttribute("data-src")) {
-            //    console.log("last child")
-            //  }
-            // document.querySelector(".swiperDiv .swiper-slide.swiper-slide-active img").getAttribute("data-src")
-          },
+          lazyImageLoad: function() {},
           lazyImageReady: (swiper) => {
             let k = swiper.activeIndex - 1
 
@@ -206,7 +218,6 @@ export default {
       console.log(swiper)
     },
     onSlideChange(swiper) {
-      console.log("slide change")
       swiper.autoplay.start()
     },
   },
@@ -231,16 +242,14 @@ export default {
 </script>
 
 <style lang="scss">
-//@import "https://cdn.jsdelivr.net/npm/animate.css@3.5.1";
-
 @import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css";
 
-.animate__animated.animate__backInUp {
-  --animate-duration: 0.8s;
+.animate__animated.animate__fadeInUp {
+  --animate-duration: 1s;
 }
 
-.animate__animated.animate__fadeInUp {
-  --animate-duration: 0.8s;
+.animate__animated.animate__fadeInRight {
+  --animate-duration: 1s;
 }
 
 .animate__animated.animate__zoomIn {
@@ -272,20 +281,24 @@ export default {
           overflow-x: hidden;
           object-fit: cover;
 
+          @media (min-width: $viewThreshold3) {
+            width: 100%;
+          }
+
           &.img1 {
             @include mediaProcess(800px, none, 40%, 80%);
             @include mediaProcess(930px, none, 0%, 90%);
-            @include mediaProcess(1000px, none, 0%, 100%);
+            @include mediaProcess(1000px, cover, 0%, 0%, 37%);
           }
 
           &.img2 {
-            @include mediaProcess(700px, none, 0% 40%);
-            @include mediaProcess(1030px, none, 50% 550%);
+            @include mediaProcess(700px, none, 0%, 40%);
+            @include mediaProcess(1030px, cover, 0%, 0%);
           }
 
           &.img3 {
             @include mediaProcess(900px, none, 0% 95%);
-            @include mediaProcess(1030px, none, 50% 220%);
+            @include mediaProcess(1030px, cover, 0%, 0%);
           }
         }
 
@@ -372,6 +385,16 @@ export default {
   overflow: hidden;
   display: flex;
   align-items: center;
+  position: relative;
+
+  .link-block {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 999;
+  }
 
   @media (min-width: $viewThreshold3) {
     display: flex;
@@ -399,17 +422,18 @@ export default {
       text-transform: uppercase;
       @include fluid-type($viewThreshold1, $viewThreshold2, 22px, 35px);
       margin-bottom: 10px;
+      color: $color1;
     }
 
     p {
       z-index: 55;
       @include fluid-type($viewThreshold1, $viewThreshold2, 12px, 20px);
       margin-bottom: 8px;
-      color: #606060;
+      color: $color1;
     }
 
     a {
-      color: #606060;
+      color: $color1;
       font-weight: 700;
       @include fluid-type($viewThreshold1, $viewThreshold2, 11px, 19px);
       text-decoration: none;
@@ -428,8 +452,8 @@ export default {
       transform: rotate(0deg);
       background-image: linear-gradient(
         90deg,
-        rgba(255, 255, 255, 0.8) 0%,
-        rgba(255, 255, 255, 0.5) 85%,
+        rgba(0, 0, 0, 0.6) 0%,
+        rgba(0, 0, 0, 0.3) 65%,
         rgba(0, 0, 0, 0) 100%
       );
 

@@ -15,7 +15,7 @@
         </div>
         <!-- This "icon" is the container for icon delete -->
         <div class="icon">
-          <Delete class="delete" @click="deletePost" />
+          <Delete class="delete" @click="showModal" />
         </div>
       </div>
       <!-- The image for each blog box -->
@@ -80,9 +80,16 @@ export default {
   },
 
   methods: {
+    showModal() {
+      this.$emit("show-hide-modal", this.post.blogID)
+    },
     deletePost() {
       //this.post.blogID is the ID of this post taken from store
-      this.$store.dispatch("deletePost", this.post.blogID)
+      this.$store.dispatch("deletePost", {
+        blogID: this.post.blogID,
+        blogCoverPhotoName: this.post.blogCoverPhotoName,
+      })
+      this.$emit("show-hide-modal")
     },
     editBlog() {
       this.$router.push({
@@ -115,8 +122,9 @@ export default {
       let allowEditDelete
 
       if (
-        this.username == this.$store.state.profileUserName &&
-        this.$store.state.editPost == true
+        (this.username == this.$store.state.profileUserName &&
+          this.$store.state.editPost == true) ||
+        this.$store.state.profileSuperAdmin
       ) {
         allowEditDelete = true
       } else {

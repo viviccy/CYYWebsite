@@ -125,11 +125,8 @@ export default {
         margin-bottom: 8px;
 
         input {
-          width: 100%;
-          border: none;
-          background-color: #f2f7f6;
+          @include inputField;
           padding: 4px 4px 4px 30px;
-          height: 50px;
 
           &:focus {
             outline: none;
@@ -158,6 +155,10 @@ export default {
       }
     }
 
+    button {
+      @include formButton;
+    }
+
     .angle {
       display: none;
       position: absolute;
@@ -177,7 +178,7 @@ export default {
     display: none;
     flex: 2;
     background-size: cover;
-    background-image: url("../assets/background.png");
+    background-image: url("../assets/background.jpg");
     width: 100%;
     height: 100;
 

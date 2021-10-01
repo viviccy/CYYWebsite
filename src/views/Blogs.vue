@@ -1,5 +1,11 @@
 <template>
   <div class="blog-card-wrap">
+    <Modal
+      v-if="modalActive"
+      :modalProperties="modalProperties"
+      v-on:close-modal="closeModal"
+      v-on:Delete="runDelete"
+    />
     <!-- "Blogs.vue" is the blog page that has all the article boxes -->
     <div class="blog-cards container">
       <h1>Blogs</h1>
@@ -12,17 +18,49 @@
       :post="post"
       :post means the prop name to pass to child
       ="post" measn the value to pass to child. In this case is the iteration call of function 'blogPosts' which return the each record of state.blogPosts from the store -->
-      <BlogCard :post="post" v-for="(post, index) in blogPosts" :key="index" />
+      <BlogCard
+        :post="post"
+        v-for="(post, index) in blogPosts"
+        :key="index"
+        v-on:show-hide-modal="showHideModal"
+        ref="blogCard"
+        :data-key="post.blogID"
+      />
     </div>
   </div>
 </template>
 
 <script>
 import BlogCard from "../components/BlogCard"
+import Modal from "../components/Modal"
 
 export default {
   name: "blogs",
-  components: { BlogCard },
+  components: { BlogCard, Modal },
+  data() {
+    return {
+      modalActive: false,
+      modalProperties: {
+        message: "Are you sure you want to delete this blog?",
+        task: "Delete",
+        blogId: null,
+      },
+    }
+  },
+  methods: {
+    showHideModal(blogId) {
+      this.modalActive = !this.modalActive
+      this.modalProperties.blogId = blogId
+    },
+    runDelete() {
+      this.$refs.blogCard
+        .find((el) => el.$attrs["data-key"] === this.modalProperties.blogId)
+        .deletePost()
+    },
+    closeModal() {
+      this.modalActive = !this.modalActive
+    },
+  },
   computed: {
     blogPosts() {
       //grab the values from 'state.blogPosts' in store.

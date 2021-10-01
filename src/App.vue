@@ -40,14 +40,14 @@ export default {
   mounted() {},
   methods: {
     checkRoute() {
-      if (
+      /*   if (
         this.$route.name === "Login" ||
         this.$route.name === "Register" ||
         this.$route.name === "ForgotPassword"
       ) {
         this.navigation = true
         return
-      }
+      } */
       this.navigation = false
     },
   },
@@ -124,10 +124,6 @@ export default {
 
     @media (min-width: 900px) {
       grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (min-width: 1200px) {
-      grid-template-column: repeat(4, 1fr);
     }
   }
 }

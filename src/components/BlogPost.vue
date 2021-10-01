@@ -1,6 +1,6 @@
 <template>
   <!-- 'BlogPost' component is the big post section on the page. Caller is from "Home.vue" -->
-  <div class="blog-wrapper" :class="{ 'no-user': !user }" ref="blogSection">
+  <div class="blog-wrapper" ref="blogSection">
     <div class="blog-content">
       <div>
         <!--   Child way of using a prop 
@@ -54,10 +54,12 @@ export default {
       this.divSizeCheck()
     },
   },
-  destroyed() {
+  beforeDestroy() {
     console.log("destroyed been here")
     window.removeEventListener("resize", this.divSizeCheck)
   },
+
+  destroyed() {},
   computed: {
     user() {
       return this.$store.state.user

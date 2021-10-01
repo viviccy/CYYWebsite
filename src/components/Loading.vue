@@ -13,7 +13,7 @@ export default {
 <style lang="scss" scoped>
 .loading {
   top: 0;
-  z-index: 101;
+  z-index: 99999;
   height: 100%;
   width: 100%;
   background-color: rgba(0, 0, 0, 0.5);

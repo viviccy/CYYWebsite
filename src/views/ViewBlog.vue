@@ -68,6 +68,7 @@ export default {
   .shortDesc {
     font-style: italic;
     @include fluid-type($viewThreshold1, $viewThreshold2, 18px, 24px);
+    margin-bottom: 25px;
   }
   h4 {
     font-weight: 400;

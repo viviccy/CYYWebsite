@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="app-container">
-      <h1>Blogs</h1>
+      <h1>Gallery</h1>
       <div id="lightgallery">
         <a
           class="gallery-item"
@@ -15,6 +15,7 @@
             <p>{{ item.photoShortDesc }}</p>
             <router-link
               class="link"
+              v-if="item.blogId"
               :to="{ name: 'ViewBlog', params: { blogid: `${item.blogId}` } }"
               >Explore More</router-link
             >
@@ -53,50 +54,29 @@ export default {
     }
   },
   async mounted() {
-    console.log("mounteddddddddddddddddd")
     //if no value in 'galleryPhotos' array variable from store, then load the data from 'gallery' collection in firestore.
     if (this.$store.state.galleryPhotos.length == 0) {
       await this.loadGallery()
     }
 
     //load all image details to 'currentImageList' after sorted properly with store getter function 'photoDataSorted'
-    console.log(
-      "this.$store.getters.photoDataSorted = " +
-        JSON.stringify(this.$store.getters.photoDataSorted)
-    )
-
-    console.log(
-      "this.$store.state.galleryPhotos = " +
-        JSON.stringify(this.$store.state.galleryPhotos)
-    )
     this.currentImageList.push(...this.$store.getters.photoDataSorted)
 
-    /*  let tempMaxRowHeight = this.maxRowHeight
-
-    if(){
-
-    } */
-
-    console.log("$(window).height()=" + $(window).height())
-    console.log("this.maxRowHeight=" + this.maxRowHeight)
-
+    //imageRow = estimated total images for 1 column
     let imageRow = $(window).height() / this.maxRowHeight
 
     if (imageRow < 1) {
       imageRow = 1
     }
 
-    console.log("imageRow=" + imageRow)
-
+    //imageCol = estimated total images for 1 row
     let imageCol = $(window).width() / ((this.maxRowHeight / 2) * 3)
 
     if (imageCol < 1) {
       imageCol = 1
     }
 
-    console.log("imageCol=" + imageCol)
-
-    let allowedImage = Math.floor(imageCol * imageRow)
+    let allowedImage = Math.floor(imageCol * imageRow + imageCol)
 
     if (allowedImage <= this.$store.getters.photoDataSorted.length) {
       this.imageStartTotal = allowedImage
@@ -107,8 +87,6 @@ export default {
     this.currentImageList = this.currentImageList.slice(0, this.imageStartTotal)
 
     this.currentImageIndex = this.imageStartTotal
-
-    console.log("mounted")
 
     let thisPointer = this
 
@@ -131,6 +109,10 @@ export default {
       ) {
         let countLoop = 0
 
+        console.log(
+          "thisPointer.currentImageIndex=" + thisPointer.currentImageIndex
+        )
+
         for (
           let i = thisPointer.currentImageIndex;
           i < thisPointer.$store.getters.photoDataSorted.length;
@@ -140,6 +122,11 @@ export default {
           if (countLoop > 3) {
             break
           }
+
+          console.log(
+            " thisPointer.$store.getters.photoDataSorted[i]=" +
+              thisPointer.$store.getters.photoDataSorted[i]
+          )
           thisPointer.currentImageList.push(
             thisPointer.$store.getters.photoDataSorted[i]
           )

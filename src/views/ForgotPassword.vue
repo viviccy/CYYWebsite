@@ -3,7 +3,7 @@
     <!--  Trigger "closeModal" function when the alert box modal is clicked. -->
     <Modal
       v-if="modalActive"
-      :modalMessage="modalMessage"
+      :modalProperties="modalProperties"
       v-on:close-modal="closeModal"
     />
     <Loading v-if="loading" />
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import email from "../assets/Icons/envelope-regular.svg"
+import email from "../assets/Icons/envelope-regular.svg?inline"
 import Modal from "../components/Modal"
 import Loading from "../components/Loading"
 import firebase from "firebase/app"
@@ -49,30 +49,28 @@ export default {
     return {
       email: null,
       modalActive: null,
-      modalMessage: "",
+      modalProperties: { message: "", task: "" },
       loading: null,
     }
   },
   methods: {
     closeModal() {
-      console.log("test")
       this.modalActive = !this.modalActive
       this.email = ""
     },
     resetPassword() {
       this.loading = true
-      console.log("email=" + this.email)
       firebase
         .auth()
         .sendPasswordResetEmail(this.email)
         .then(() => {
-          this.modalMessage =
+          this.modalProperties.message =
             "If your account exists, you will receive an email"
           this.loading = false
           this.modalActive = true
         })
         .catch((err) => {
-          this.modalMessage = err.message
+          this.modalProperties.message = err.message
           this.loading = false
           this.modalActive = true
         })

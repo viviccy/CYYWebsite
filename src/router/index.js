@@ -64,7 +64,7 @@ const routes = [
     path: "/edit-gallery",
     name: "EditGallery",
     component: EditGallery,
-    meta: { title: "Edit Gallery", requiresAuth: false },
+    meta: { title: "Edit Gallery", requiresAuth: true },
   },
   {
     path: "/create-post",
@@ -94,6 +94,12 @@ const routes = [
     name: "EditBlog",
     component: EditBlog,
     meta: { title: "Edit Blog Post", requiresAuth: true },
+  },
+  {
+    path: "*",
+    name: "Home",
+    component: Home,
+    meta: { title: "Home", requiresAuth: false },
   },
 ]
 

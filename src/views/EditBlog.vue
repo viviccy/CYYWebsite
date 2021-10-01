@@ -1,5 +1,11 @@
 <template>
   <div class="create-post">
+    <Modal
+      v-if="modalActive"
+      :modalProperties="modalProperties"
+      v-on:close-modal="closeModal"
+      v-on:Delete="deleteBlog"
+    />
     <!-- 'BlogCoverPreview' component is used to show the user cover photo once it uploaded.
      If 'blogPhotoPreview' variable in store is false, close this modal. -->
     <BlogCoverPreview v-show="this.$store.state.blogPhotoPreview" />
@@ -264,7 +270,7 @@
           <button
             class="standardBtn"
             :class="{ 'button-inactive': this.errorMsg }"
-            @click="deleteBlog"
+            @click="showModal"
           >
             Delete Blog
           </button>
@@ -279,6 +285,7 @@ import LoadImageToCanvas from "../mixins/loadImageToCanvas"
 import ChangeUploadedFileName from "../mixins/changeUploadedFileName"
 
 import BlogCoverPreview from "../components/BlogCoverPreview"
+import Modal from "../components/Modal"
 import firebase from "firebase/app"
 
 //to allow to use of upload and download images from firebase
@@ -320,10 +327,16 @@ Quill.register(Font, true)
 
 export default {
   name: "CreatePost",
-  components: { BlogCoverPreview, Loading },
+  components: { BlogCoverPreview, Loading, Modal },
   mixins: [LoadImageToCanvas, ChangeUploadedFileName],
   data() {
     return {
+      modalActive: false,
+      modalProperties: {
+        message: "Are you sure you want to delete this blog?",
+        task: "Delete",
+        blogId: null,
+      },
       //the file object for the big cover image
       file: null,
       error: null,
@@ -436,7 +449,7 @@ export default {
       const thumbnailStorageRef = firebase.storage().ref()
 
       const docRef = thumbnailStorageRef.child(
-        `documents/BlogCoverPhotos_Thumbnail/${this.$store.state.blogPhotoName}`
+        `documents/BlogCoverPhotos_Thumbnail/${this.routeID}/${this.$store.state.blogPhotoName}`
       )
 
       docRef
@@ -463,7 +476,7 @@ export default {
       const mainImageStorageRef = firebase.storage().ref()
 
       const docRef2 = mainImageStorageRef.child(
-        `documents/BlogCoverPhotos/${this.$store.state.blogPhotoName}`
+        `documents/BlogCoverPhotos/${this.routeID}/${this.$store.state.blogPhotoName}`
       )
 
       docRef2
@@ -724,50 +737,37 @@ export default {
                     await galleryDataBaseFiltered
                       .get()
                       .then(async (querySnapshot) => {
-                        batch.update(
-                          //get the id of the document in gallery collection with the matched blog id.
-                          //'galleryDataBase' is pointing to the document that has the currently used 'blogID'.
-                          //'querySnapshot.docs[0].id' will give the current document id (the name of the document).
-                          galleryDataBase.doc(await querySnapshot.docs[0].id),
-                          {
-                            blogCoverPhoto: downloadURL,
-                            blogCoverPhotoThumbnail: thumbnailDownloadURL,
-                            blogCoverPhotoName:
-                              thisContextPointer.blogCoverPhotoName,
-                            blogTitle: thisContextPointer.blogTitle,
-                            blogShortDescription:
-                              thisContextPointer.blogShortDesc,
-                          }
-                        )
+                        let galleryDocumentId
 
-                        galleryData = {
-                          photoURL: downloadURL,
-                          thumbPhotoURL: thumbnailDownloadURL,
-                          photoName: thisContextPointer.blogCoverPhotoName,
-                          photoTitle: thisContextPointer.blogTitle,
-                          photoShortDesc: thisContextPointer.blogShortDesc,
-                        }
+                        if (querySnapshot.size > 0) {
+                          galleryDocumentId = await querySnapshot.docs[0].id
 
-                        // Commit the batch
-                        batch.commit().then(() => {
-                          let payload = {
-                            currentBlogReady: "",
-                            blogTitle: "",
-                            blogShortDesc: "",
-                            blogHTML: "",
-                            blogPhotoFileURL: "",
-                            blogPhotoFileThumbnailURL: "",
-                            blogPhotoName: "",
-                            blogDate: "",
-                          }
-                          thisContextPointer.$store.commit(
-                            "updateState",
-                            payload
+                          batch.update(
+                            //get the id of the document in gallery collection with the matched blog id.
+                            //'galleryDataBase' is pointing to the document that has the currently used 'blogID'.
+                            //'querySnapshot.docs[0].id' will give the current document id (the name of the document).
+                            galleryDataBase.doc(galleryDocumentId),
+                            {
+                              blogCoverPhoto: downloadURL,
+                              blogCoverPhotoThumbnail: thumbnailDownloadURL,
+                              blogCoverPhotoName:
+                                thisContextPointer.blogCoverPhotoName,
+                              blogTitle: thisContextPointer.blogTitle,
+                              blogShortDescription:
+                                thisContextPointer.blogShortDesc,
+                            }
                           )
 
-                          sessionStorage.clear()
-                        })
+                          galleryData = {
+                            photoURL: downloadURL,
+                            thumbPhotoURL: thumbnailDownloadURL,
+                            photoName: thisContextPointer.blogCoverPhotoName,
+                            photoTitle: thisContextPointer.blogTitle,
+                            photoShortDesc: thisContextPointer.blogShortDesc,
+                          }
+                        }
 
+                        ///////////////////////////////
                         /* we need to call 'updatePost' action in store to update the latest blog data changes in firestore to 'blogPosts' object in store.
                         'routeID' is to specify which blog to update in store's 'blogPosts'.
 Await is used to make sure 'blogPosts' object in store is completely ready first before run the router redirect.
@@ -784,19 +784,38 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
                           object: blogData,
                         })
 
-                        thisContextPointer.$store.commit("updateArrayState", {
-                          array: "galleryPhotos",
-                          property: "photoId",
-                          searchedValue: querySnapshot.docs[0].id,
-                          object: galleryData,
-                        })
-
-                        //redirect to ViewBlog once the data update to firebase is completed
-                        thisContextPointer.$router.push({
-                          name: "ViewBlog",
-                          params: { blogid: dataBase.id },
-                        })
+                        if (galleryDocumentId) {
+                          thisContextPointer.$store.commit("updateArrayState", {
+                            array: "galleryPhotos",
+                            property: "photoId",
+                            searchedValue: galleryDocumentId,
+                            object: galleryData,
+                          })
+                        }
                       })
+
+                    // Commit the batch
+                    batch.commit().then(() => {
+                      let payload = {
+                        currentBlogReady: "",
+                        blogTitle: "",
+                        blogShortDesc: "",
+                        blogHTML: "",
+                        blogPhotoFileURL: "",
+                        blogPhotoFileThumbnailURL: "",
+                        blogPhotoName: "",
+                        blogDate: "",
+                      }
+                      thisContextPointer.$store.commit("updateState", payload)
+
+                      sessionStorage.clear()
+
+                      //redirect to ViewBlog once the data update to firebase is completed
+                      thisContextPointer.$router.push({
+                        name: "ViewBlog",
+                        params: { blogid: dataBase.id },
+                      })
+                    })
                   }
                 )
               })
@@ -867,10 +886,24 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
         }
       }
     },
+    showModal() {
+      this.modalActive = !this.modalActive
+      this.modalProperties.blogId = this.routeID
+
+      //this.$emit("show-hide-modal", this.post.blogID)
+    },
+    closeModal() {
+      this.modalActive = !this.modalActive
+    },
     async deleteBlog() {
       //show loading icon
       this.loading = true
-      await this.$store.dispatch("deletePost", this.routeID)
+      //await this.$store.dispatch("deletePost", this.routeID)
+
+      this.$store.dispatch("deletePost", {
+        blogID: this.routeID,
+        blogCoverPhotoName: this.blogCoverPhotoName,
+      })
 
       this.loading = false
 
@@ -1110,11 +1143,7 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
 
     input {
       flex: 3;
-      line-height: 0px;
-      height: 40px;
-      padding: 10px 4px;
-      border: none;
-      border-bottom: 1px solid $inputColor3;
+      @include inputField;
 
       &:focus {
         outline: none !important;

@@ -68,7 +68,7 @@
                     <p>Profile</p>
                   </router-link>
                 </div>
-                <div class="option">
+                <!--   <div class="option">
                   <router-link
                     @click.native="resetProfileMenu"
                     class="option"
@@ -77,7 +77,7 @@
                     <adminIcon class="icon" />
                     <p>Admin</p>
                   </router-link>
-                </div>
+                </div> -->
                 <!--  '@' and 'v-on' are the same -->
                 <div v-if="user" @click="signOut" class="option">
                   <signOutIcon class="icon" />
@@ -147,7 +147,6 @@
 <script>
 import menuIcon from "../assets/Icons/bars-regular.svg?inline"
 import userIcon from "../assets/Icons/user-alt-light.svg?inline"
-import adminIcon from "../assets/Icons/user-crown-light.svg?inline"
 import signOutIcon from "../assets/Icons/sign-out-alt-regular.svg?inline"
 
 import puzzle from "../assets/Icons/puzzle.svg?inline"
@@ -161,7 +160,6 @@ export default {
   components: {
     menuIcon,
     userIcon,
-    adminIcon,
     signOutIcon,
     puzzle,
   },
@@ -251,12 +249,15 @@ export default {
       }
     },
     checkProfileClick(event) {
+      console.log(event.target)
       // If user clicks inside the element, do nothing
       if (
         event.target.closest(".profile-menu") ||
         event.target.closest(".profile")
-      )
+      ) {
+        console.log("profile here")
         return
+      }
 
       // If user clicks outside the element, hide it!
       this.profileMenu = false
@@ -298,13 +299,13 @@ header {
       align-items: center;
 
       .header {
-        @include fluid-type($viewThreshold1, $viewThreshold2, 15px, 25px);
+        @include fluid-type($viewThreshold1, $viewThreshold2, 14px, 23px);
         font-weight: 600;
         color: black;
         text-decoration: none;
 
         .puzzle {
-          width: 20%;
+          width: 17%;
           max-width: 100px;
           margin-right: 10px;
           position: relative;
@@ -352,6 +353,7 @@ header {
         li {
           flex: 1;
           text-align: center;
+          padding: 0 3px;
 
           .link {
             text-align: center;

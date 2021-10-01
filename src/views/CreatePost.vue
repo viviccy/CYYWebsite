@@ -714,6 +714,10 @@ export default {
 
                                 tempArray.unshift(snapshot.id)
 
+                                batch.update(galleryOrderDocument, {
+                                  order: firebase.firestore.FieldValue.delete(),
+                                })
+
                                 batch.set(
                                   //get the id of the document in gallery collection with the matched blog id
                                   galleryOrderDocument,

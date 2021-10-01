@@ -1,171 +1,183 @@
 <template>
-  <div class="content-container">
-    <h2>Manage Gallery</h2>
+  <div>
     <Loading v-show="loading" />
+    <div class="content-container">
+      <h2>Manage Gallery</h2>
 
-    <vue-dropzone
-      ref="imgDropzone"
-      id="dropzone"
-      :options="dropzoneOptions"
-      @vdropzone-complete="afterComplete"
-    >
-    </vue-dropzone>
-
-    <div class="preview-container dropzone"></div>
-    <button
-      ref="imageUploadButton"
-      @click="uploadImage"
-      class="upload-image-button"
-    >
-      Upload Image
-    </button>
-    <div></div>
-    <div class="accordion accordion-flush" id="accordionFlushExample">
-      <draggable
-        v-model="requiredPhotoData"
-        ghost-class="ghost"
-        @end="onEnd"
-        handle=".drag-handle"
-        :options="{ disabled: !this.$store.state.profileSuperAdmin }"
+      <vue-dropzone ref="imgDropzone" id="dropzone" :options="dropzoneOptions">
+        <!--   @vdropzone-complete="afterComplete" -->
+      </vue-dropzone>
+      <p class="task-message"></p>
+      <div class="preview-container dropzone"></div>
+      <button
+        ref="imageUploadButton"
+        @click="uploadImage"
+        class="upload-image-button disabled"
+        disabled
       >
-        <!--  <draggable ghost-class="ghost" @end="onEnd"> -->
-        <transition-group type="transition" name="flip-list">
-          <div
-            class="accordion-item"
-            :class="{ 'grey-out': !checkUser(item.photoCreator) }"
-            v-bind:key="item.photoId"
-            v-for="(item, index) in requiredPhotoData"
-          >
-            <h2 class="accordion-header" :id="`flush-heading-${item.photoId}`">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                :data-bs-target="`#flush-collapse-${item.photoId}`"
-                aria-expanded="false"
-                :aria-controls="`#flush-collapse-${item.photoId}`"
-              >
-                <div
-                  class="drag-container"
-                  :class="{ 'grey-out': checkDragOption(item.photoCreator) }"
-                >
-                  <div class="drag-handle"><dragSquare /></div>
-                </div>
-                <div class="image-container">
-                  <img :src="item.photoURL" @load="checkImageHeight" />
-                </div>
-                <div class="title-container">
-                  <p placeholder="Enter blog title">{{ item.photoTitle }}</p>
-                </div>
-                <div
-                  class="arrow-container"
-                  :class="{ 'hide-arrow': !checkUser(item.photoCreator) }"
-                >
-                  <dropDownArrow />
-                </div>
-              </button>
-            </h2>
-
+        Upload Image
+      </button>
+      <div></div>
+      <div class="accordion accordion-flush" id="accordionFlushExample">
+        <draggable
+          v-model="requiredPhotoData"
+          ghost-class="ghost"
+          @end="onEnd"
+          handle=".drag-handle"
+          :options="{ disabled: !this.$store.state.profileSuperAdmin }"
+        >
+          <!--  <draggable ghost-class="ghost" @end="onEnd"> -->
+          <transition-group type="transition" name="flip-list">
             <div
-              :id="`flush-collapse-${item.photoId}`"
-              class="accordion-collapse collapse"
-              :aria-labelledby="`flush-heading-${item.photoId}`"
-              v-if="checkUser(item.photoCreator)"
+              class="accordion-item"
+              :class="{ 'grey-out': !checkUser(item.photoCreator) }"
+              v-bind:key="item.photoId"
+              v-for="(item, index) in requiredPhotoData"
             >
-              <div class="accordion-body">
-                <input
-                  type="text"
-                  :name="`title-${index}`"
-                  v-model="item.photoTitle"
-                  placeholder="Enter blog title"
-                />
-                <textarea
-                  type="text"
-                  v-model="item.photoShortDesc"
-                  placeholder="Enter short description"
-                ></textarea>
-                <div>
-                  <button
-                    @click="saveSingleItem(`${item.photoId}`, `${index}`)"
+              <h2
+                class="accordion-header"
+                :id="`flush-heading-${item.photoId}`"
+              >
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  :data-bs-target="`#flush-collapse-${item.photoId}`"
+                  aria-expanded="false"
+                  :aria-controls="`#flush-collapse-${item.photoId}`"
+                >
+                  <div
+                    class="drag-container"
+                    :class="{ 'grey-out': checkDragOption(item.photoCreator) }"
                   >
-                    Save</button
-                  ><button
-                    @click="deleteSingleItem(`${item.photoId}`, `${index}`)"
+                    <div class="drag-handle"><dragSquare /></div>
+                  </div>
+                  <div class="image-container">
+                    <img :src="item.photoURL" @load="checkImageHeight" />
+                  </div>
+                  <div class="title-container">
+                    <p placeholder="Enter blog title">{{ item.photoTitle }}</p>
+                  </div>
+                  <div
+                    class="arrow-container"
+                    :class="{ 'hide-arrow': !checkUser(item.photoCreator) }"
                   >
-                    Delete
-                  </button>
+                    <dropDownArrow />
+                  </div>
+                </button>
+              </h2>
+
+              <div
+                :id="`flush-collapse-${item.photoId}`"
+                class="accordion-collapse collapse"
+                :aria-labelledby="`flush-heading-${item.photoId}`"
+                v-if="checkUser(item.photoCreator)"
+              >
+                <div class="accordion-body">
+                  <input
+                    type="text"
+                    :name="`title-${index}`"
+                    v-model="item.photoTitle"
+                    placeholder="Enter blog title"
+                  />
+                  <textarea
+                    type="text"
+                    v-model="item.photoShortDesc"
+                    placeholder="Enter short description"
+                  ></textarea>
+                  <div>
+                    <button
+                      @click="saveSingleItem(`${item.photoId}`, `${index}`)"
+                    >
+                      Save</button
+                    ><button
+                      @click="
+                        deleteSingleItem(
+                          `${item.photoId}`,
+                          `${item.photoURL}`,
+                          `${item.thumbPhotoURL}`,
+                          `${item.blogId}`
+                        )
+                      "
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </transition-group>
-      </draggable>
-      <button class="save-all" @click="saveGallery">Save</button>
-    </div>
-    <nav aria-label="Page navigation" class="navigation">
-      <ul class="page-number pagination">
-        <li class="page-item">
-          <a
-            class="page-link"
-            @click="loadRecord(paginationCurrentPageNumber - 1)"
-            aria-label="Previous"
+          </transition-group>
+        </draggable>
+        <button class="save-all" @click="saveGallery">Save</button>
+      </div>
+      <nav aria-label="Page navigation" class="navigation">
+        <ul class="page-number pagination">
+          <li class="page-item">
+            <a
+              class="page-link"
+              @click="loadRecord(paginationCurrentPageNumber - 1)"
+              aria-label="Previous"
+            >
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+          <li
+            class="page-item"
+            :key="'pagination' + index"
+            v-for="index in countTotalPage"
           >
-            <span aria-hidden="true">&laquo;</span>
-          </a>
-        </li>
-        <li
-          class="page-item"
-          :key="'pagination' + index"
-          v-for="index in countTotalPage"
-        >
-          <a
-            class="page-link"
-            :class="checkClass(index)"
-            @click="loadRecord(index)"
-            ><span>{{ index }}</span></a
-          >
-        </li>
+            <a
+              class="page-link"
+              :class="checkClass(index)"
+              @click="loadRecord(index)"
+              ><span>{{ index }}</span></a
+            >
+          </li>
 
-        <li class="page-item">
-          <a
-            class="page-link"
-            @click="loadRecord(paginationCurrentPageNumber + 1)"
-            aria-label="Next"
-          >
-            <span aria-hidden="true">&raquo;</span>
-          </a>
-        </li>
-      </ul>
-      <ul class="item-total pagination">
-        <li class="page-item">
-          <a
-            class="page-link selected"
-            @click="changeRecordNumber(3, 1)"
-            aria-label="2"
-          >
-            <span aria-hidden="true">3</span>
-          </a>
-        </li>
-        <li class="page-item">
-          <a class="page-link" @click="changeRecordNumber(5, 2)" aria-label="5">
-            <span aria-hidden="true">5</span>
-          </a>
-        </li>
-        <li class="page-item">
-          <a
-            class="page-link"
-            @click="changeRecordNumber(20, 3)"
-            aria-label="7"
-          >
-            <span aria-hidden="true">7</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    <div class="collapse py-2" id="collapseTarget">
-      This is the toggle-able content!
-    </div>
-    <!--   <table class="galleryTable">
+          <li class="page-item">
+            <a
+              class="page-link"
+              @click="loadRecord(paginationCurrentPageNumber + 1)"
+              aria-label="Next"
+            >
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        </ul>
+        <ul class="item-total pagination">
+          <li class="page-item">
+            <a
+              class="page-link selected"
+              @click="changeRecordNumber(10, 1)"
+              aria-label="2"
+            >
+              <span aria-hidden="true">10</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a
+              class="page-link"
+              @click="changeRecordNumber(20, 2)"
+              aria-label="5"
+            >
+              <span aria-hidden="true">20</span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a
+              class="page-link"
+              @click="changeRecordNumber(30, 3)"
+              aria-label="7"
+            >
+              <span aria-hidden="true">30</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="collapse py-2" id="collapseTarget">
+        This is the toggle-able content!
+      </div>
+      <!--   <table class="galleryTable">
       <tbody>
         <tr v-bind:key="index" v-for="(item, index) in photoDataSorted">
           <td>{{ item.photoId }}</td>
@@ -179,6 +191,7 @@
         </tr>
       </tbody>
     </table> -->
+    </div>
   </div>
 </template>
 
@@ -216,18 +229,34 @@ export default {
     let thisPointer = this
     return {
       images: [],
+      totalAcceptedFiles: 0,
       dropzoneObj: null,
       dropzoneOptions: {
         url: "https://httpbin.org/post",
         thumbnailWidth: 250,
-        thumbnailHeight: 250,
-        dictDefaultMessage: "Drop images here to upload",
+        thumbnailHeight: null,
+        dictDefaultMessage:
+          "Drop images here to upload. <br/> Only allowed to upload maximum 8 images at a time.",
         previewsContainer: ".preview-container",
         addRemoveLinks: true,
         acceptedFiles: ".jpg, .jpeg, .png",
         autoProcessQueue: false,
+        maxFiles: 12,
+        maxFilesize: 5,
+        parallelUploads: 3,
+
         init: function() {
           thisPointer.dropzoneObj = this
+
+          this.on("error", function() {
+            thisPointer.onOffUploadButton(this)
+          })
+
+          this.on("queuecomplete", function() {
+            document.querySelector(
+              ".content-container .task-message"
+            ).textContent = ""
+          })
 
           this.on("removedfile", function(file) {
             let index = thisPointer.images.indexOf(file.name)
@@ -235,20 +264,33 @@ export default {
             if (index !== -1) {
               thisPointer.images.splice(index, 1)
             }
+
+            thisPointer.onOffUploadButton(this)
+          })
+
+          this.on("maxfilesexceeded", function(file) {
+            this.removeFile(file)
           })
 
           this.on("addedfile", (file) => {
             thisPointer.images.push(file.name)
 
             let index = thisPointer.images.indexOf(file.name) + 1
-            console.log("file name=" + file.name)
-            console.log("index=" + index)
 
             document.querySelector(
               ".dropzone .dz-preview:nth-child(" + index + ") .dz-progress"
             ).style.opacity = 0
 
+            document.querySelector(
+              ".content-container .upload-image-button"
+            ).disabled = false
+
+            document
+              .querySelector(".content-container .upload-image-button")
+              .classList.remove("disabled")
+
             if (this.files.length) {
+              console.log("file has length")
               var _i, _len
               for (
                 _i = 0, _len = this.files.length;
@@ -262,9 +304,21 @@ export default {
                     file.lastModifiedDate.toString()
                 ) {
                   this.removeFile(file)
+
+                  let index = thisPointer.images.indexOf(file.name)
+
+                  if (index !== -1) {
+                    thisPointer.images.splice(index, 1)
+                  }
+
+                  thisPointer.onOffUploadButton(this)
                 }
               }
             }
+          })
+
+          this.on("sending", function(file) {
+            thisPointer.afterComplete(file)
           })
 
           this.on("success", function(file) {
@@ -282,7 +336,7 @@ export default {
       newIndex: "",
       galleryCurrentOrder: [],
       paginationStartIndex: 0,
-      paginationRecordPerPage: 3,
+      paginationRecordPerPage: 10,
       paginationCurrentPageNumber: 1,
       paginationCurrentRecordIndex: 1,
       loading: null,
@@ -299,8 +353,21 @@ export default {
   },
 
   methods: {
+    onOffUploadButton(dropzoneObj) {
+      if (dropzoneObj.getRejectedFiles().length == dropzoneObj.files.length) {
+        document.querySelector(
+          ".content-container .upload-image-button"
+        ).disabled = true
+
+        document
+          .querySelector(".content-container .upload-image-button")
+          .classList.add("disabled")
+      }
+    },
     uploadImage() {
-      this.dropzoneObj.processQueue()
+      // this.dropzoneObj.processQueue()
+
+      this.totalAcceptedFiles = this.dropzoneObj.getAcceptedFiles().length
 
       let el = document.querySelectorAll(".dropzone .dz-preview .dz-progress")
 
@@ -312,6 +379,9 @@ export default {
       this.$refs.imgDropzone.processQueue()
     },
     async afterComplete(file) {
+      document.querySelector(".content-container .task-message").textContent =
+        "Uploading images..."
+
       let imageURL
       let thumbnailURL
 
@@ -326,12 +396,12 @@ export default {
 
         let fileName = file.name.substr(0, file.name.lastIndexOf("."))
 
-        let newFileName = fileName + uuid.v1() + ext
+        let newFileName = fileName + "_" + uuid.v1() + ext
 
         const storageRef = firebase.storage().ref()
 
         const imageRef = storageRef.child(
-          `documents/BlogCoverPhotos/${newFileName}`
+          `documents/GalleryPhotos/PrimaryPhoto/${newFileName}`
         )
 
         //this.file is the file objected assigned at #anchorFile.
@@ -367,12 +437,10 @@ export default {
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
 
                 canvas.toBlob(async function(blob) {
-                  console.log("blob=" + blob)
-
                   const storageRef = firebase.storage().ref()
 
                   const docRefThumbnail = await storageRef.child(
-                    `documents/BlogCoverPhotos_Thumbnail/${newFileName}`
+                    `documents/GalleryPhotos/Thumbnail/${newFileName}`
                   )
 
                   await docRefThumbnail.put(blob).on(
@@ -386,7 +454,7 @@ export default {
                     },
                     async () => {
                       console.log("load thumbnail success")
-                      thumbnailURL = await imageRef.getDownloadURL()
+                      thumbnailURL = await docRefThumbnail.getDownloadURL()
 
                       // Get a new write batch
                       var batch = db.batch()
@@ -424,7 +492,7 @@ export default {
                       }
                       //add all the latest records to state.blogPosts
 
-                      let tempArray
+                      //let tempArray
 
                       await galleryDataBase
                         .get()
@@ -444,50 +512,41 @@ export default {
                               }
                             })
 
-                          await galleryOrderDocument
-                            .get()
-                            .then(async (snap) => {
-                              tempArray = await snap.data().order
+                          await galleryOrderDocument.get().then(async () => {
+                            //tempArray = await snap.data().order
 
-                              console.log("array from firesoter=" + tempArray)
+                            thisPointer2.galleryCurrentOrder.unshift(
+                              snapshot.id
+                            )
 
-                               console.log("snapshot.id=" + snapshot.id)
+                            //tempArray.unshift(snapshot.id)
 
-                              tempArray.unshift(snapshot.id)
-
-
-
-                              batch.set(
-                                //get the id of the document in gallery collection with the matched blog id
-                                galleryOrderDocument,
-                                {
-                                  order: firebase.firestore.FieldValue.arrayUnion(
-                                    ...tempArray
-                                  ),
-                                }
-                              )
+                            batch.update(galleryOrderDocument, {
+                              order: firebase.firestore.FieldValue.delete(),
                             })
+
+                            batch.set(
+                              //get the id of the document in gallery collection with the matched blog id
+                              galleryOrderDocument,
+                              {
+                                order: firebase.firestore.FieldValue.arrayUnion(
+                                  ...thisPointer2.galleryCurrentOrder
+                                ),
+                              }
+                            )
+                          })
                         })
 
                       // Commit the batch
                       batch.commit().then(() => {
-                         thisPointer2.$store.commit(
+                        thisPointer2.$store.commit(
                           "updateGalleryOrderState",
-                          tempArray
+                          thisPointer2.galleryCurrentOrder
                         )
+
                         thisPointer2.$store.commit("updateGalleryState", data)
-                       
-
-
-                        console.log("thisPointer2.galleryCurrentOrder=" + thisPointer2.galleryCurrentOrder)
- console.log("thisPointer2.$store.state.galOrder=" + thisPointer2.$store.state.galOrder)
- console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                     //  thisPointer2.galleryCurrentOrder = thisPointer2.$store.state.galOrder
-                        console.log("thisPointer2.galleryCurrentOrder after=" + thisPointer2.galleryCurrentOrder)
- console.log("thisPointer2.$store.state.galOrder after=" + thisPointer2.$store.state.galOrder)
 
                         thisPointer2.$refs.imgDropzone.removeFile(file)
-                        //this.images.push({src:imageURL})
                       })
                     }
                   )
@@ -519,7 +578,10 @@ export default {
       return false
     },
     checkUser(user) {
-      if (user == this.$store.state.profileUserName) {
+      if (
+        user == this.$store.state.profileUserName ||
+        this.$store.state.profileSuperAdmin
+      ) {
         return true
       }
       return false
@@ -540,7 +602,7 @@ export default {
       }
     },
     onEnd: async function(evt) {
-      // this.loading = true
+      this.loading = true
 
       this.oldIndex = evt.oldIndex
       this.newIndex = evt.newIndex
@@ -558,18 +620,21 @@ export default {
 
       var self = this
 
-      galleryOrderDatabase
+      await galleryOrderDatabase.update({
+        order: firebase.firestore.FieldValue.delete(),
+      })
+
+      await galleryOrderDatabase
         .set({
           order: firebase.firestore.FieldValue.arrayUnion(
             ...this.galleryCurrentOrder
           ),
         })
         .then(function() {
-          this.$store.commit(
+          self.$store.commit(
             "updateGalleryOrderState",
-            this.galleryCurrentOrder
+            self.galleryCurrentOrder
           )
-          console.log("Document successfully written!")
 
           self.loading = false
         })
@@ -579,8 +644,6 @@ export default {
     },
 
     loadRecord(index) {
-      console.log("total number = " + index)
-
       if (index <= this.countTotalPage && index > 0) {
         document
           .querySelector(
@@ -657,14 +720,12 @@ export default {
     },
 
     async updateDatabaseBatch() {
-
       //get 1 record from 'gallery' collection for testing
       const dataBase = await db.collection("gallery").limit(1)
 
       await dataBase.get().then(async (docSnapshot) => {
-      //if one 'gallery' document exists then execute the following
+        //if one 'gallery' document exists then execute the following
         if (docSnapshot.size >= 1) {
-
           //check if 'galleryPhotos' array from Store is 0. If yes then call Store action 'loadGalleryData' to load gallery data to Store array variable 'galleryPhotos' and to load gallery order data to Store array variable 'galOrder'
           if (this.$store.state.galleryPhotos.length === 0) {
             await this.$store.dispatch("loadGalleryData")
@@ -673,10 +734,9 @@ export default {
           //Store's 'galOrder' array will be populated after above code.
           this.galleryCurrentOrder = [...this.$store.state.galOrder]
 
-        //If no gallery document exists in Firestore's Gallery collection then create a new 'gallery' collection.
+          //If no gallery document exists in Firestore's Gallery collection then create a new 'gallery' collection.
         } else {
-
-//<-----grab data from 'blogPosts' and 'users' collection and join them to create 'gallery' collection----->
+          //<-----grab data from 'blogPosts' and 'users' collection and join them to create 'gallery' collection----->
 
           //reference to Firestore 'blogPosts' collection
           const blogDatabase = await db
@@ -684,10 +744,8 @@ export default {
             .orderBy("date", "desc")
 
           await blogDatabase.get().then(async (docSnaps) => {
-
             //iterate to all blogs in 'blogPosts'
             for (const doc of docSnaps.docs) {
-
               let tempUserData
 
               // reference to 'users' collection based on the 'profileId' retrived from 'blogPosts'
@@ -696,14 +754,13 @@ export default {
                 .doc(doc.data().profileId)
                 .get()
                 .then((userDoc) => {
-
                   //get the username of the current blog iteration
                   tempUserData = userDoc.data().username
 
                   //create a new 'gallery' collection's document. A new document id will be generated with '.doc()'
                   const galleryDatabase = db.collection("gallery").doc()
 
-                  //set the needed blog data from 'blogPosts' and username from 'users' collection to the new 'gallery' document 
+                  //set the needed blog data from 'blogPosts' and username from 'users' collection to the new 'gallery' document
                   galleryDatabase.set({
                     blogID: doc.data().blogID,
                     blogTitle: doc.data().blogTitle,
@@ -714,17 +771,16 @@ export default {
                   })
                 })
             }
-            
           })
-//</-----grab data from 'blogPosts' and 'users' collection and join them to create 'gallery' collection----->
+          //</-----grab data from 'blogPosts' and 'users' collection and join them to create 'gallery' collection----->
 
-//<-----create 'galleryOrder' collection and put the newly created 'gallery' records order to 'galleryOrder'----->
+          //<-----create 'galleryOrder' collection and put the newly created 'gallery' records order to 'galleryOrder'----->
 
           //reference to the newly created 'galleryOrder' document named 'galleryOrder'
           const galleryOrder = await db
             .collection("galleryOrder")
             .doc("galleryOrder")
-  
+
           //reference to 'gallery' collection
           const galleryDatabase = db.collection("gallery")
 
@@ -734,49 +790,50 @@ export default {
           //reference to 'this'
           let thisPointer = this
 
-          await galleryDatabase.get().then((docSnapshot) => {
+          await galleryDatabase.get().then(async (docSnapshot) => {
             if (docSnapshot.size >= 1) {
-
               //iterate to all the documents in 'gallery' collection
               for (const doc of docSnapshot.docs) {
-    
                 //add each 'gallery' record id to 'tempArray'
                 tempArray.push(doc.id)
                 //})
               }
 
+              await galleryOrder.update({
+                order: firebase.firestore.FieldValue.delete(),
+              })
+
               //assign the 'tempArray' values to 'galleryOrder' property named 'order'
-              galleryOrder.set({
+              await galleryOrder.set({
                 order: firebase.firestore.FieldValue.arrayUnion(...tempArray),
               })
 
               //Store's 'galOrder' array will be populated after above code.
-              thisPointer.galleryCurrentOrder = [...thisPointer.$store.state.galOrder]
+              thisPointer.galleryCurrentOrder = [
+                ...thisPointer.$store.state.galOrder,
+              ]
             }
           })
-//</-----create 'galleryOrder' collection and put the newly created 'gallery' records order to 'galleryOrder'----->
+          //</-----create 'galleryOrder' collection and put the newly created 'gallery' records order to 'galleryOrder'----->
         }
       })
     },
     async saveGallery() {
       //var tbodyRowCount = table.tBodies[0].rows.length
 
-     // let content = document.querySelectorAll(".gallery-list li")
+      // let content = document.querySelectorAll(".gallery-list li")
 
-     let content = this.$store.getters.photoDataSorted
+      let content = this.$store.getters.photoDataSorted
 
       // Get a new write batch
       var batch = db.batch()
 
-      for (let i = 0; i < content.length ; ++i) {
-
-        const galleryDatabase = db
-          .collection("gallery")
-          .doc(content[i].photoId)
+      for (let i = 0; i < content.length; ++i) {
+        const galleryDatabase = db.collection("gallery").doc(content[i].photoId)
 
         batch.update(galleryDatabase, {
           blogTitle: content[i].photoTitle,
-          blogShortDescription: content[i].photoShortDesc
+          blogShortDescription: content[i].photoShortDesc,
         })
 
         let blogId
@@ -785,7 +842,6 @@ export default {
           .then(async (doc) => {
             if (doc.exists) {
               blogId = await doc.data().blogID
-            
             } else {
               // doc.data() will be undefined in this case
               console.log("No such document!")
@@ -795,17 +851,14 @@ export default {
             console.log("Error getting document:", error)
           })
 
+        if (blogId) {
+          const blogDatabase = db.collection("blogPosts").doc(blogId)
 
-          if(blogId){
-
-        const blogDatabase = db.collection("blogPosts").doc(blogId)
-
-        batch.update(blogDatabase, {
-          blogTitle: content[i].blogId,
-          blogShortDescription: content[i].photoShortDesc
-        })
+          batch.update(blogDatabase, {
+            blogTitle: content[i].blogId,
+            blogShortDescription: content[i].photoShortDesc,
+          })
         }
-       
       }
 
       const galleryOrderDatabase = await db.collection("galleryOrder")
@@ -831,9 +884,6 @@ export default {
       //tempArray
     },
     async saveSingleItem(photoId, index) {
-
-
-    
       this.loading = true
       let batch = db.batch()
 
@@ -841,15 +891,11 @@ export default {
 
       const galleryDatabase = db.collection("gallery").doc(photoId)
 
-     
-      
-
       batch.update(galleryDatabase, {
         blogTitle: this.requiredPhotoData[index].photoTitle,
         blogShortDescription: this.requiredPhotoData[index].photoShortDesc,
       })
 
-      
       let blogId
 
       await galleryDatabase
@@ -857,7 +903,6 @@ export default {
         .then(async (doc) => {
           if (doc.exists) {
             blogId = await doc.data().blogID
-          
           } else {
             // doc.data() will be undefined in this case
             console.log("No such document!")
@@ -867,46 +912,39 @@ export default {
           console.log("Error getting document:", error)
         })
 
-  let blogData
+      let blogData
 
-if(blogId){
+      console.log("blog id =" + blogId)
 
-      const blogDatabase = db.collection("blogPosts").doc(blogId)
+      if (blogId) {
+        const blogDatabase = db.collection("blogPosts").doc(blogId)
 
-      batch.update(blogDatabase, {
-        blogTitle: this.requiredPhotoData[index].photoTitle,
-        blogShortDescription: this.requiredPhotoData[index].photoShortDesc,
-      })
-
-    
+        batch.update(blogDatabase, {
+          blogTitle: this.requiredPhotoData[index].photoTitle,
+          blogShortDescription: this.requiredPhotoData[index].photoShortDesc,
+        })
 
         blogData = {
-                     
-                      blogTitle: thisPointer.blogTitle,
-                      blogShortDesc: thisPointer.blogShortDesc,
-                    
-                    }
-
-                    }
-                    
+          blogTitle: this.requiredPhotoData[index].photoTitle,
+          blogShortDesc: this.requiredPhotoData[index].photoShortDesc,
+        }
+      }
 
       // Commit the batch
       batch.commit().then(() => {
         this.loading = false
 
-if(blogId){
-
-                thisPointer.$store.commit("updateArrayState", {
-                          array: "blogPosts",
-                          property: "blogID",
-                          searchedValue: blogId,
-                          object: blogData,
-                        })
-}
-      
+        if (blogId) {
+          thisPointer.$store.commit("updateArrayState", {
+            array: "blogPosts",
+            property: "blogID",
+            searchedValue: blogId,
+            object: blogData,
+          })
+        }
       })
     },
-    async deleteSingleItem(photoId, index) {
+    async deleteSingleItem(photoId, imageURL, thumbnailURL, blogId) {
       this.loading = true
       var batch = db.batch()
 
@@ -919,6 +957,7 @@ if(blogId){
       this.galleryCurrentOrder.splice(orderIndex, 1)
 
       const galleryOrderDatabase = await db.collection("galleryOrder")
+
       let galleryOrderDocument
 
       await galleryOrderDatabase.get().then(async (docSnapshot) => {
@@ -935,24 +974,57 @@ if(blogId){
 
       batch.commit().then(() => {
         this.loading = false
-      
 
-          /*  this.$store.commit("deleteArrayState", {
-                          array: "galleryPhotos",
-                          index: index,
-                        }) */
+        // this.$store.state.galleryPhotos.splice(index,1)
+        this.$store.commit("deleteArrayState", {
+          array: "galleryPhotos",
+          property: "photoId",
+          value: photoId,
+        })
 
-              
-           
-            // this.$store.state.galleryPhotos.splice(index,1)
-             this.$store.commit("deleteArrayState", {
-                          array: "galleryPhotos",
-                          index: index,
-                        })
-                 
-
-              this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
+        this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
       })
+
+      console.log("imageURL=" + imageURL)
+      console.log("thumbnailURL=" + thumbnailURL)
+
+      console.log("blogId=" + blogId)
+      if (blogId == true) {
+        console.log("blogId is true")
+      } else {
+        console.log("blogId is false")
+      }
+
+      var storage = firebase.storage()
+
+      if (!blogId) {
+        console.log("been to no blog ID photo")
+        storage
+          .refFromURL(imageURL)
+          .delete()
+          .then(
+            () => {
+              console.log("cover file deleted")
+            },
+            (err) => {
+              console.log("main picture issue")
+              console.log(err)
+            }
+          )
+
+        storage
+          .refFromURL(thumbnailURL)
+          .delete()
+          .then(
+            () => {
+              console.log("thumbnail file deleted")
+            },
+            (err) => {
+              console.log("thumbnail issue")
+              console.log(err)
+            }
+          )
+      }
     },
   },
   computed: {
@@ -976,7 +1048,6 @@ if(blogId){
         return allPhotoData
       },
       set(what) {
-
         console.log("what=" + JSON.stringify(what))
       },
     },
@@ -995,10 +1066,9 @@ if(blogId){
       )
     },
     requiredPhotoData: {
-      handler: function(){
-      },
-      deep: true
-   
+      handler: function() {},
+      deep: true,
+
       // let thisPointer = this
       /*   this.$nextTick(() => {
         const elements = document.querySelectorAll(".accordion-header")
@@ -1040,6 +1110,11 @@ if(blogId){
     margin-bottom: 40px;
   }
 
+  .task-message {
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
   .accordion {
     width: 100%;
     display: flex;
@@ -1065,6 +1140,7 @@ if(blogId){
           grid-template-columns: 30px 1fr 5fr 25px;
           background: transparent;
           padding: 10px 15px;
+          min-height: 85px;
 
           @media (min-width: $viewThreshold1) {
             grid-template-columns: 35px 1fr 5fr 25px;
@@ -1364,6 +1440,7 @@ strong {
   margin: 0 0 10px 0;
   border-radius: 7px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   border: 0 !important;
@@ -1381,22 +1458,67 @@ strong {
   .dz-preview {
     margin: 10px;
     .dz-image {
-      border-radius: 0;
+      border-radius: 0 !important;
+      display: flex;
+      background: #ccc;
+
+      img {
+        width: 100%;
+        object-fit: contain;
+        margin: 0;
+      }
     }
     .dz-remove {
-      color: #3c4f6f;
+      color: $inputColor3;
+      background: $buttonColor1;
       text-decoration: none;
       padding: 7px;
       font-weight: bold;
+      border: 1px solid $buttonColor1;
 
       &:hover {
         text-decoration: none;
       }
     }
+
+    .dz-error-message {
+      top: 163px !important;
+    }
   }
 
   .dz-image-preview {
     background: none !important;
+
+    .dz-progress {
+      margin-top: -20px;
+    }
+
+    .dz-success-mark,
+    .dz-error-mark {
+      margin-top: -43px;
+    }
+
+    .dz-success-mark {
+      svg {
+        g {
+          path {
+            fill: $buttonColor1;
+          }
+        }
+      }
+    }
+
+    .dz-error-mark {
+      svg {
+        g {
+          g {
+            path {
+              fill: red;
+            }
+          }
+        }
+      }
+    }
   }
 
   img {
@@ -1409,6 +1531,11 @@ strong {
   @include formButton;
   margin: 0 auto 50px auto;
   display: block;
+
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
 }
 
 .preview-container {

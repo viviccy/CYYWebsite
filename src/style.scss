@@ -1,9 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
 
-@mixin mediaProcess($limit: 800px, $objectFit: none, $arg1: 0%, $arg2: 0%) {
+@mixin mediaProcess(
+  $limit: 800px,
+  $objectFit: none,
+  $arg1: 0%,
+  $arg2: 0%,
+  $top: 50%
+) {
   @media (min-width: $limit) {
     object-fit: $objectFit;
     object-position: $arg1 $arg2;
+    top: $top;
   }
 }
 
@@ -44,6 +51,8 @@ $errorColor1: #f11c30;
 /* Button color */
 $buttonColor1: #3c4f6f;
 $buttonColor2: #0a1944;
+
+$color1: white;
 
 /* The width limit for responsive view */
 $viewThreshold1: 320px;
@@ -100,6 +109,17 @@ $buttonTextSizeMin: 10px;
   }
 }
 //</-----standard form button css----->
+
+//<-----standard input field----->
+@mixin inputField {
+  height: 40px;
+  padding: 10px 4px;
+  border: none;
+  border-bottom: 1px solid $inputColor3;
+  width: 100%;
+  background: transparent;
+}
+//</-----standard input field----->
 
 //<-----line break for flex display----->
 .break {
