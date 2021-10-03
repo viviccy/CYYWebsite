@@ -53,7 +53,11 @@
                     <div class="drag-handle"><dragSquare /></div>
                   </div>
                   <div class="image-container">
-                    <img :src="item.photoURL" @load="checkImageHeight" />
+                    <img
+                      :src="item.photoURL"
+                      @load="imageLoaded(item.photoId)"
+                      :imgid="item.photoId"
+                    />
                   </div>
                   <div class="title-container">
                     <p placeholder="Enter blog title">{{ item.photoTitle }}</p>
@@ -244,9 +248,14 @@ export default {
         maxFiles: 12,
         maxFilesize: 5,
         parallelUploads: 3,
+        timeout: 180000,
 
         init: function() {
           thisPointer.dropzoneObj = this
+
+          this.on("totaluploadprogress", function(progress) {
+            console.log("progress percentage=" + progress)
+          })
 
           this.on("error", function() {
             thisPointer.onOffUploadButton(this)
@@ -317,8 +326,11 @@ export default {
             }
           })
 
-          this.on("sending", function(file) {
+          this.on("sending", function(file, xhr) {
             thisPointer.afterComplete(file)
+            xhr.ontimeout = () => {
+              console.log("Server Timeout")
+            }
           })
 
           this.on("success", function(file) {
@@ -343,13 +355,28 @@ export default {
       thumbnailHeight: 0,
       thumbnailWidth: 0,
       files: [],
+      windowScreenSize: 0,
     }
+  },
+  beforeDestroy() {
+    window.removeEventListener("resize", this.checkThumbnailHeight())
   },
   destroyed() {
     console.log("destroyed")
   },
   mounted: function() {
     this.updateDatabaseBatch()
+
+    let thisPointer = this
+
+    //window.addEventListener("resize", this.checkThumbnailHeight(), true)
+    window.addEventListener(
+      "resize",
+      function() {
+        thisPointer.checkThumbnailHeight()
+      },
+      true
+    )
   },
 
   methods: {
@@ -591,14 +618,52 @@ export default {
         return { selected: true }
       }
     },
-    checkImageHeight(evt) {
-      if (evt.target.clientWidth > evt.target.clientHeight) {
-        if (evt.target.clientHeight > this.thumbnailHeight) {
-          this.thumbnailHeight = evt.target.clientHeight
-          this.thumbnailWidth = evt.target.clientWidth
-        }
-      } else {
-        evt.target.classList.add("vertical-image")
+    imageLoaded(photoId) {
+      let thisPointer = this
+      requestAnimationFrame(function() {
+        thisPointer.render(photoId)
+      })
+    },
+    render(photoId) {
+      let thisPointer = this
+
+      requestAnimationFrame(function() {
+        thisPointer.reRender(photoId)
+      })
+    },
+    reRender(photoId) {
+      if (document.querySelector("[imgid='" + photoId + "']") !== null) {
+        this.checkImageHeight(
+          document.querySelector("[imgid='" + photoId + "']")
+        )
+      }
+    },
+    checkImageHeight(imgObj) {
+      if (imgObj.clientWidth < imgObj.clientHeight) {
+        imgObj.classList.add("vertical-image")
+
+        this.thumbnailHeight = document.querySelector(
+          ".accordion-button .image-container img:not(.vertical-image)"
+        ).clientHeight
+      }
+    },
+    checkThumbnailHeight() {
+      console.log("sdfsfssf")
+
+      if (
+        document.querySelector(
+          ".accordion-button .image-container img:not(.vertical-image)"
+        ) != null
+      ) {
+        console.log(
+          "kkkkkk=" +
+            document.querySelector(
+              ".accordion-button .image-container img:not(.vertical-image)"
+            ).clientHeight
+        )
+        this.thumbnailHeight = document.querySelector(
+          ".accordion-button .image-container img:not(.vertical-image)"
+        ).clientHeight
       }
     },
     onEnd: async function(evt) {
@@ -1055,15 +1120,11 @@ export default {
 
   watch: {
     thumbnailHeight: function() {
-      document.documentElement.style.setProperty(
-        "--image-height",
-        this.thumbnailHeight + "px"
-      )
-
-      document.documentElement.style.setProperty(
-        "--image-width",
-        this.thumbnailWidth + "px"
-      )
+      document
+        .querySelectorAll(".accordion-button .image-container .vertical-image")
+        .forEach((el) => {
+          el.parentNode.style.height = this.thumbnailHeight + "px"
+        })
     },
     requiredPhotoData: {
       handler: function() {},
@@ -1094,10 +1155,10 @@ export default {
 </script>
 
 <style lang="scss">
-:root {
+/* :root {
   --image-height: auto;
   --image-width: 100%;
-}
+} */
 
 .content-container {
   width: 100%;
@@ -1128,6 +1189,7 @@ export default {
       border-radius: 7px;
       box-shadow: none;
       overflow: hidden;
+      //display: none;
 
       &.grey-out {
         opacity: 0.5;
@@ -1137,13 +1199,12 @@ export default {
       h2 {
         .accordion-button {
           display: grid;
-          grid-template-columns: 30px 1fr 5fr 25px;
+          grid-template-columns: 30px 2fr 5fr 25px;
           background: transparent;
           padding: 10px 15px;
-          min-height: 85px;
 
-          @media (min-width: $viewThreshold1) {
-            grid-template-columns: 35px 1fr 5fr 25px;
+          @media (min-width: $viewThreshold4) {
+            grid-template-columns: 30px 1fr 4fr 25px;
           }
 
           &:focus {
@@ -1189,12 +1250,14 @@ export default {
           }
 
           .image-container {
-            height: var(--image-height);
-            width: var(--image-width);
+            /*  height: var(--image-height);
+            width: var(--image-width); */
             display: grid;
             align-items: center;
+            justify-content: center;
             margin-right: 10px;
             position: relative;
+            max-height: 70px;
 
             //vertical image
             /*      display: flex;
@@ -1205,6 +1268,7 @@ export default {
               width: 100%;
               min-width: 60px;
               border-radius: 5px;
+              max-height: 70px;
 
               &.vertical-image {
                 position: absolute;
@@ -1214,6 +1278,7 @@ export default {
                 top: 50%;
                 -webkit-transform: translate(-50%, -50%);
                 transform: translate(-50%, -50%);
+                object-fit: contain;
               }
             }
           }
@@ -1503,6 +1568,7 @@ strong {
         g {
           path {
             fill: $buttonColor1;
+            fill-opacity: 1;
           }
         }
       }

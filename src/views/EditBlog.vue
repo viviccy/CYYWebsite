@@ -1091,6 +1091,7 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
     position: relative;
     height: 100%;
     padding: 50px 20px;
+    max-width: 1320px !important;
 
     & > h2 {
       @include pageTitle;
@@ -1137,13 +1138,15 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
     flex-wrap: wrap;
     align-items: center;
 
-    input:nth-child(1) {
-      min-width: 300px;
-    }
-
     input {
       flex: 3;
       @include inputField;
+
+      &:nth-child(1) {
+        @media (max-width: $viewThreshold3) {
+          flex-basis: 100%;
+        }
+      }
 
       &:focus {
         outline: none !important;
@@ -1159,7 +1162,10 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
       /* <-----Upload Cover Photo Button-----> */
       label {
         flex: 1;
+        display: flex;
+        align-items: center;
         align-self: stretch;
+        justify-content: center;
         @include fluid-type(
           $viewThreshold1,
           $viewThreshold2,
@@ -1168,6 +1174,10 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
         );
         text-align: center;
         margin: 0 8px 0 16px;
+
+        @media (max-width: $viewThreshold3) {
+          margin: 0 8px 0 0;
+        }
       }
 
       input {
@@ -1274,10 +1284,16 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
           $buttonTextSizeMin,
           $buttonTextSizeMax
         );
-        @media (max-width: 380px) {
+
+        @media (max-width: $viewThreshold3) {
+          flex: 1;
+        }
+
+        @media (max-width: $viewThreshold6) {
           flex: 1;
           flex-basis: 100%;
           order: 3;
+          margin-right: 0;
         }
       }
 
@@ -1290,7 +1306,12 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
           $buttonTextSizeMin,
           $buttonTextSizeMax
         );
-        @media (max-width: 380px) {
+
+        @media (max-width: $viewThreshold3) {
+          flex: 1;
+        }
+
+        @media (max-width: $viewThreshold6) {
           flex: 1;
           order: 1;
           margin-bottom: 16px;
@@ -1298,7 +1319,12 @@ Await is used to make sure 'blogPosts' object in store is completely ready first
       }
 
       button:last-of-type {
-        @media (max-width: 380px) {
+        @media (max-width: $viewThreshold3) {
+          flex: 1;
+          margin-right: 0;
+        }
+
+        @media (max-width: $viewThreshold6) {
           flex: 1;
           order: 2;
           margin-bottom: 16px;

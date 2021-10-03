@@ -15,7 +15,14 @@ export default {
   components: {
     close,
   },
+  mounted() {
+    document.addEventListener("click", this.checkClick)
+  },
   methods: {
+    checkClick(event) {
+      // If user clicks inside the element, do nothing
+      if (event.target.className == "modal") this.closePreview()
+    },
     closePreview() {
       //reverse the value of variable 'blogPhotoPreview' in store to close this modal.
       this.$store.commit("openPhotoPreview")
@@ -25,6 +32,9 @@ export default {
     blogCoverPhoto() {
       return this.$store.state.blogPhotoFileURL
     },
+  },
+  beforeDestroy() {
+    document.removeEventListener("click", this.checkClick)
   },
 }
 </script>

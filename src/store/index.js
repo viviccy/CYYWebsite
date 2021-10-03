@@ -53,7 +53,7 @@ export default new Vuex.Store({
     },
     blogPostCards(state) {
       //Use '.slice' method to get the object value from a start index to an end index. In this case is to get the value of state.blogPosts from index 2 to index 4 (putting number 5 specify until index 4 and not index 5), which is the third post until fifth post in the object. The three posts will be shown as the bottom card section of the page.
-      return state.blogPosts.slice(2, 5)
+      return state.blogPosts.slice(2, 6)
     },
 
     photoDataSorted(state) {

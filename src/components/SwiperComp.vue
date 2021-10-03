@@ -155,7 +155,7 @@ export default {
         lazy: true,
         spaceBetween: 0,
         autoplay: {
-          delay: 5000000,
+          delay: 6000,
           disableOnInteraction: false,
         },
         //Bottom dot buttons
@@ -404,13 +404,13 @@ export default {
   .desc {
     position: relative;
     z-index: 50;
-
-    text-align: left;
+    text-align: center;
     width: 100%;
-    margin: 4% 12% 0 12%;
+    margin: 4% 15% 0 15%;
 
     @media (min-width: $viewThreshold4) {
       width: 40%;
+      text-align: left;
     }
 
     @media (min-width: $viewThreshold3) {

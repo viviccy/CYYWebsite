@@ -118,12 +118,12 @@ export default {
     gap: 32px;
     grid-template-columns: 1fr;
 
-    @media (min-width: 500px) {
+    @media (min-width: $viewThreshold3) {
       grid-template-columns: repeat(2, 1fr);
     }
 
-    @media (min-width: 900px) {
-      grid-template-columns: repeat(3, 1fr);
+    @media (min-width: $viewThreshold2) {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 }

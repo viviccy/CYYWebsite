@@ -12,11 +12,11 @@
       <div :class="{ invisible: !error }" class="err-message">
         <span v-html="errorMsg"></span>
       </div>
+      <p>
+        Please fill up the fields below and add a cover photo for your blog
+      </p>
+      <div class="break"></div>
       <div class="blog-info">
-        <p>
-          Please fill up the fields below and add a cover photo for your blog
-        </p>
-        <div class="break"></div>
         <input type="text" placeholder="Enter blog title" v-model="blogTitle" />
         <div class="upload-file">
           <label for="blog-photo">Upload Cover Photo</label>
@@ -251,7 +251,7 @@
           />
         </div>
         <div class="break"></div>
-        <div class="blog-actions">
+        <div class="create-blog-actions">
           <button
             class="standardBtn"
             :class="{ 'button-inactive': !formReady }"
@@ -903,7 +903,7 @@ export default {
 <style lang="scss" scoped>
 .container {
   & > h2 {
-    margin-bottom: 40px !important;
+    margin-bottom: 35px !important;
   }
 
   .blog-info {
@@ -911,6 +911,59 @@ export default {
       flex: 1;
       margin: 0;
       color: $buttonColor1;
+    }
+  }
+
+  .create-blog-actions {
+    flex: 1;
+    //display: flex;
+    margin-top: 25px;
+    //flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    @media (min-width: $viewThreshold6) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: $viewThreshold3) {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    & > button {
+      @include fluid-type(
+        $viewThreshold1,
+        $viewThreshold2,
+        $buttonTextSizeMin,
+        $buttonTextSizeMax
+      );
+      margin: 0 8px 0 0;
+
+      @media (min-width: $viewThreshold3) {
+        flex: 0 1 auto;
+      }
+    }
+
+    a {
+      text-align: center;
+      margin: 0 0 0 8px;
+
+      @include fluid-type(
+        $viewThreshold1,
+        $viewThreshold2,
+        $buttonTextSizeMin,
+        $buttonTextSizeMax
+      );
+
+      @media (min-width: $viewThreshold6) {
+        margin: 0 8px 0 8px;
+      }
+
+      @media (min-width: $viewThreshold3) {
+        flex: 0 1 auto;
+        margin-right: 16px;
+      }
     }
   }
 }

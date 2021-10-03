@@ -23,10 +23,12 @@
     </div>
     <div v-if="!user" class="updates">
       <div class="container">
-        <h2>never miss a post. Register for your free account today!</h2>
-        <router-link class="router-button" to="#"
-          >Register for FireBlogs <Arrow class="arrow arrow-light"
-        /></router-link>
+        <h2>Register for your free account today to start blogging!</h2>
+        <div>
+          <router-link class="router-button" to="#"
+            >Register <Arrow class="arrow arrow-light"
+          /></router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -91,25 +93,32 @@ export default {
       flex-direction: row;
     }
 
-    .router-button {
+    div {
       display: flex;
-      font-size: 14px;
-      text-decoration: none;
+      justify-content: center;
+      flex: 1;
+      .router-button {
+        font-size: 14px;
+        @include fluid-type($viewThreshold1, $viewThreshold2, 16px, 25px);
+        text-decoration: none;
 
-      @media (min-width: 800px) {
-        margin-left: auto;
+        @include formButton;
+
+        @media (min-width: 800px) {
+        }
       }
     }
 
     h2 {
       font-weight: 300;
       font-size: 32px;
-      max-width: 425px;
       width: 100%;
       text-align: center;
       text-transform: uppercase;
+      margin: 15px 0;
 
       @media (min-width: 800px) {
+        flex: 2;
         text-align: initial;
         font-size: 40px;
       }
