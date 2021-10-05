@@ -53,11 +53,13 @@
                     <div class="drag-handle"><dragSquare /></div>
                   </div>
                   <div class="image-container">
-                    <img
-                      :src="item.photoURL"
-                      @load="imageLoaded(item.photoId)"
-                      :imgid="item.photoId"
-                    />
+                    <div class="image-inner-container">
+                      <img
+                        :src="item.photoURL"
+                        @load="imageLoaded(item.photoId)"
+                        :imgid="item.photoId"
+                      />
+                    </div>
                   </div>
                   <div class="title-container">
                     <p placeholder="Enter blog title">{{ item.photoTitle }}</p>
@@ -233,6 +235,9 @@ export default {
     let thisPointer = this
     return {
       images: [],
+      totalImagesLoaded: 0,
+      imageHeightArray: [],
+      detectChangeCounter: 0,
       totalAcceptedFiles: 0,
       dropzoneObj: null,
       dropzoneOptions: {
@@ -352,8 +357,7 @@ export default {
       paginationCurrentPageNumber: 1,
       paginationCurrentRecordIndex: 1,
       loading: null,
-      thumbnailHeight: 0,
-      thumbnailWidth: 0,
+      thumbnailDimension: 0,
       files: [],
       windowScreenSize: 0,
     }
@@ -380,6 +384,22 @@ export default {
   },
 
   methods: {
+    mostOccurence(array) {
+      if (array.length == 0) return null
+      var modeMap = {}
+      var maxEl = array[0],
+        maxCount = 1
+      for (var i = 0; i < array.length; i++) {
+        var el = array[i]
+        if (modeMap[el] == null) modeMap[el] = 1
+        else modeMap[el]++
+        if (modeMap[el] > maxCount) {
+          maxEl = el
+          maxCount = modeMap[el]
+        }
+      }
+      return maxEl
+    },
     onOffUploadButton(dropzoneObj) {
       if (dropzoneObj.getRejectedFiles().length == dropzoneObj.files.length) {
         document.querySelector(
@@ -639,32 +659,65 @@ export default {
       }
     },
     checkImageHeight(imgObj) {
-      if (imgObj.clientWidth < imgObj.clientHeight) {
-        imgObj.classList.add("vertical-image")
+      this.totalImagesLoaded++
 
-        this.thumbnailHeight = document.querySelector(
-          ".accordion-button .image-container img:not(.vertical-image)"
-        ).clientHeight
+      let tempArray
+
+      let tempHeight
+
+      let objStyle = getComputedStyle(imgObj.parentNode.parentNode)
+
+      tempHeight = imgObj.clientHeight
+
+      if (imgObj.clientHeight > parseInt(objStyle.maxHeight, 10)) {
+        tempHeight = parseInt(objStyle.maxHeight, 10)
+      }
+
+      tempArray = imgObj.clientWidth + "_" + tempHeight
+
+      this.imageHeightArray.push(tempArray)
+
+      if (this.totalImagesLoaded == this.requiredPhotoData.length) {
+        this.thumbnailDimension = this.mostOccurence(this.imageHeightArray)
+        this.detectChangeCounter++
       }
     },
     checkThumbnailHeight() {
-      console.log("sdfsfssf")
+      this.imageHeightArray = []
 
-      if (
-        document.querySelector(
-          ".accordion-button .image-container img:not(.vertical-image)"
-        ) != null
-      ) {
-        console.log(
-          "kkkkkk=" +
-            document.querySelector(
-              ".accordion-button .image-container img:not(.vertical-image)"
-            ).clientHeight
+      let imageContainerElement = document.querySelectorAll(
+        ".accordion-item .image-container .image-inner-container img"
+      )
+
+      for (let i = 0; i < imageContainerElement.length; ++i) {
+        imageContainerElement[i].style.maxHeight = ""
+        imageContainerElement[i].style.maxWidth = ""
+
+        let tempArray
+
+        let tempHeight
+
+        let objStyle = getComputedStyle(
+          imageContainerElement[i].parentNode.parentNode
         )
-        this.thumbnailHeight = document.querySelector(
-          ".accordion-button .image-container img:not(.vertical-image)"
-        ).clientHeight
+
+        tempHeight = imageContainerElement[i].clientHeight
+
+        if (
+          imageContainerElement[i].clientHeight >
+          parseInt(objStyle.maxHeight, 10)
+        ) {
+          tempHeight = parseInt(objStyle.maxHeight, 10)
+        }
+
+        tempArray = imageContainerElement[i].clientWidth + "_" + tempHeight
+
+        this.imageHeightArray.push(tempArray)
       }
+
+      this.thumbnailDimension = this.mostOccurence(this.imageHeightArray)
+
+      this.detectChangeCounter++
     },
     onEnd: async function(evt) {
       this.loading = true
@@ -742,9 +795,18 @@ export default {
       this.paginationStartIndex =
         this.paginationCurrentPageNumber * this.paginationRecordPerPage -
         this.paginationRecordPerPage
+
+      this.totalImagesLoaded = 0
+      this.imageHeightArray = []
     },
 
     changeRecordNumber(num, index) {
+      this.imageHeightArray = this.imageHeightArray.slice(0, num)
+
+      this.totalImagesLoaded = this.imageHeightArray.length
+
+      this.detectChangeCounter++
+
       document
         .querySelector(
           ".navigation .page-number .page-item:nth-child(" +
@@ -1040,6 +1102,20 @@ export default {
       batch.commit().then(() => {
         this.loading = false
 
+        this.totalImagesLoaded--
+
+        let child = document.querySelector(
+          ".accordion-item .image-container .image-inner-container img[imgid='" +
+            photoId +
+            "']"
+        )
+
+        let parent = child.parentNode
+        // The equivalent of parent.children.indexOf(child)
+        let index = Array.prototype.indexOf.call(parent.children, child)
+
+        this.imageHeightArray.splice(index, 1)
+
         // this.$store.state.galleryPhotos.splice(index,1)
         this.$store.commit("deleteArrayState", {
           array: "galleryPhotos",
@@ -1050,10 +1126,6 @@ export default {
         this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
       })
 
-      console.log("imageURL=" + imageURL)
-      console.log("thumbnailURL=" + thumbnailURL)
-
-      console.log("blogId=" + blogId)
       if (blogId == true) {
         console.log("blogId is true")
       } else {
@@ -1119,15 +1191,24 @@ export default {
   },
 
   watch: {
-    thumbnailHeight: function() {
+    detectChangeCounter: function() {
       document
-        .querySelectorAll(".accordion-button .image-container .vertical-image")
+        .querySelectorAll(".accordion-button .image-container img")
         .forEach((el) => {
-          el.parentNode.style.height = this.thumbnailHeight + "px"
+          if (this.thumbnailDimension) {
+            console.log("this.thumbnailDimension=" + this.thumbnailDimension)
+            let averageDimension = this.thumbnailDimension.split("_")
+            el.style.maxWidth = averageDimension[0] + "px"
+            el.style.maxHeight = averageDimension[1] + "px"
+
+            el.closest(".accordion-item").style.visibility = "visible"
+          }
         })
     },
     requiredPhotoData: {
-      handler: function() {},
+      handler: function() {
+        this.detectChangeCounter++
+      },
       deep: true,
 
       // let thisPointer = this
@@ -1189,7 +1270,8 @@ export default {
       border-radius: 7px;
       box-shadow: none;
       overflow: hidden;
-      //display: none;
+      // display: none;
+      visibility: hidden;
 
       &.grey-out {
         opacity: 0.5;
@@ -1264,20 +1346,14 @@ export default {
             flex-direction: column;
             align-items: center; */
 
-            img {
-              width: 100%;
-              min-width: 60px;
+            .image-inner-container {
+              display: flex;
+              flex-wrap: wrap;
               border-radius: 5px;
-              max-height: 70px;
+              overflow: hidden;
 
-              &.vertical-image {
-                position: absolute;
-                width: auto;
-                height: 100%;
-                left: 50%;
-                top: 50%;
-                -webkit-transform: translate(-50%, -50%);
-                transform: translate(-50%, -50%);
+              img {
+                width: 100%;
                 object-fit: contain;
               }
             }
@@ -1381,7 +1457,12 @@ export default {
     }
     .save-all {
       @include formButton;
-      margin-left: auto;
+      width: 100%;
+
+      @media (min-width: $viewThreshold6) {
+        width: auto;
+        margin-left: auto;
+      }
     }
   }
 }

@@ -32,6 +32,7 @@
           class="img1 swiper-lazy"
           :data-src="require('@/assets/swiperImages/image1.jpg')"
           sizes="100vw"
+          @load="loadDescription(0)"
         />
 
         <div class="swiper-lazy-preloader">
@@ -64,6 +65,7 @@
           class="img2 swiper-lazy"
           :data-src="require('@/assets/swiperImages/image2.jpg')"
           sizes="100vw"
+          @load="loadDescription(1)"
         />
         <div class="swiper-lazy-preloader">
           <span></span>
@@ -92,6 +94,7 @@
           class="img3 swiper-lazy"
           :data-src="require('@/assets/swiperImages/image3.jpg')"
           sizes="100vw"
+          @load="loadDescription(2)"
         />
         <div class="swiper-lazy-preloader">
           <span></span>
@@ -174,9 +177,9 @@ export default {
           },
           lazyImageLoad: function() {},
           lazyImageReady: (swiper) => {
-            let k = swiper.activeIndex - 1
-
-            this.$set(this.showDesc, k, true)
+            // let k = swiper.activeIndex - 1
+            // this.$set(this.showDesc, k, true)
+            console.log(swiper)
           },
           beforeSlideChangeStart: function() {},
           reachEnd: function() {
@@ -219,6 +222,12 @@ export default {
     },
     onSlideChange(swiper) {
       swiper.autoplay.start()
+    },
+
+    loadDescription(index) {
+      if (!this.showDesc[index]) {
+        this.$set(this.showDesc, index, true)
+      }
     },
   },
   mounted() {
@@ -404,13 +413,15 @@ export default {
   .desc {
     position: relative;
     z-index: 50;
-    text-align: center;
+    text-align: justify;
+    line-height: 1.3;
     width: 100%;
     margin: 4% 15% 0 15%;
 
     @media (min-width: $viewThreshold4) {
-      width: 40%;
+      width: 55%;
       text-align: left;
+      line-height: normal;
     }
 
     @media (min-width: $viewThreshold3) {
@@ -420,15 +431,15 @@ export default {
     h3 {
       z-index: 55;
       text-transform: uppercase;
-      @include fluid-type($viewThreshold1, $viewThreshold2, 22px, 35px);
+      @include fluid-type($viewThreshold1, $viewThreshold2, 20px, 38px);
       margin-bottom: 10px;
       color: $color1;
     }
 
     p {
       z-index: 55;
-      @include fluid-type($viewThreshold1, $viewThreshold2, 12px, 20px);
-      margin-bottom: 8px;
+      @include fluid-type($viewThreshold1, $viewThreshold2, 11px, 24px);
+      margin-bottom: 3%;
       color: $color1;
     }
 

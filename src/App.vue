@@ -113,17 +113,40 @@ export default {
     padding: 100px 16px;
   }
 
-  .blog-cards {
-    display: grid;
-    gap: 32px;
-    grid-template-columns: 1fr;
+  .container {
+    .blog-cards {
+      display: grid;
+      gap: 32px;
+      grid-template-columns: 1fr;
+      grid-template-areas: "bc1" "bc2" "bc3" "bc4";
 
-    @media (min-width: $viewThreshold3) {
-      grid-template-columns: repeat(2, 1fr);
-    }
+      @media (min-width: $viewThreshold3) {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-areas: "bc1 bc2" "bc3 bc4";
+      }
 
-    @media (min-width: $viewThreshold2) {
-      grid-template-columns: repeat(4, 1fr);
+      @media (min-width: $viewThreshold5) {
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-areas: "bc1 bc1 bc1 bc2 bc2" "bc3 bc3 bc4 bc4 bc4";
+      }
+
+      @media (min-width: $viewThreshold2) {
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-areas: "bc1 bc2 bc3 bc4";
+      }
+
+      .blog-card:nth-child(1) {
+        grid-area: bc1;
+      }
+      .blog-card:nth-child(2) {
+        grid-area: bc2;
+      }
+      .blog-card:nth-child(3) {
+        grid-area: bc3;
+      }
+      .blog-card:nth-child(4) {
+        grid-area: bc4;
+      }
     }
   }
 }

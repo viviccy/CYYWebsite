@@ -99,6 +99,22 @@ export default {
 
   .blog-cards {
     position: relative;
+    display: grid;
+    max-width: $viewThreshold7;
+    gap: 32px;
+    grid-template-columns: 1fr;
+
+    @media (min-width: $viewThreshold3) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: $viewThreshold5) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (min-width: $viewThreshold2) {
+      grid-template-columns: repeat(4, 1fr);
+    }
 
     .toggle-edit {
       display: flex;

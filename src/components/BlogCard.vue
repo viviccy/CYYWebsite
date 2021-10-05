@@ -18,13 +18,14 @@
           <Delete class="delete" @click="showModal" />
         </div>
       </div>
-      <!-- The image for each blog box -->
-      <img :src="post.blogCoverPhoto" alt="" />
-      <!-- "info" is the container for each blog box information -->
-      <div class="info">
-        <h4>{{ post.blogTitle }}</h4>
-        <h6>
-          <!--   post.blogDate return a firebase format date. to convert it to conventional date format, we will have to use 'Date' object and change the information to a specific country representation by using '.toLocaleString'. 
+      <div class="blog-card-inner-container">
+        <!-- The image for each blog box -->
+        <img :src="post.blogCoverPhoto" alt="" />
+        <!-- "info" is the container for each blog box information -->
+        <div class="info">
+          <h4>{{ post.blogTitle }}</h4>
+          <h6>
+            <!--   post.blogDate return a firebase format date. to convert it to conventional date format, we will have to use 'Date' object and change the information to a specific country representation by using '.toLocaleString'. 
         e.g.
         firebase timestamp: 1627883023527
 
@@ -37,20 +38,21 @@
         medium = 2 Aug 2021
         short = 02/08/2021
         -->
-          Posted on:
-          {{
-            new Date(post.blogDate).toLocaleString("en-my", {
-              dateStyle: "long",
-            })
-          }}
-        </h6>
-        <h6>Author: {{ username }}</h6>
-        <router-link
-          class="link"
-          :to="{ name: 'ViewBlog', params: { blogid: this.post.blogID } }"
-        >
-          View The Post <Arrow class="arrow" />
-        </router-link>
+            Posted on:
+            {{
+              new Date(post.blogDate).toLocaleString("en-my", {
+                dateStyle: "long",
+              })
+            }}
+          </h6>
+          <h6>Author: {{ username }}</h6>
+          <router-link
+            class="link"
+            :to="{ name: 'ViewBlog', params: { blogid: this.post.blogID } }"
+          >
+            View The Post <Arrow class="arrow" />
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
@@ -147,7 +149,7 @@ export default {
   //box rounded corner - all corners to have radius of 8px
   border-radius: 8px;
   background-color: #fff;
-  min-height: 420px;
+
   transition: 0.2s ease all;
   @include boxShadow;
 
@@ -170,6 +172,7 @@ export default {
   .blog-card-container {
     position: relative;
     pointer-events: none;
+    height: 100%;
     z-index: 1;
 
     .icons {
@@ -215,51 +218,58 @@ export default {
       }
     }
 
-    img {
-      display: block;
-      border-radius: 8px 8px 0 0;
-      z-index: 1;
-      width: 100%;
-      min-height: 200px;
-      //fill the image will cover the whole container while maintain its aspect ratio
-      object-fit: cover;
-    }
-
-    .info {
-      display: flex;
-      flex-direction: column;
+    .blog-card-inner-container {
+      display: grid;
+      grid-template-rows: 1fr;
       height: 100%;
-      z-index: 3;
-      padding: 32px 16px;
-      color: #000;
 
-      h4 {
-        padding-bottom: 8px;
-        font-size: 20px;
-        font-weight: 300;
+      img {
+        display: block;
+        border-radius: 8px 8px 0 0;
+        z-index: 1;
+        width: 100%;
+        min-height: 200px;
+        //fill the image will cover the whole container while maintain its aspect ratio
+        object-fit: cover;
+        height: 100%;
       }
 
-      h6 {
-        font-weight: 400;
-        font-size: 12px;
-        padding-bottom: 16px;
-      }
-
-      .link {
+      .info {
         display: flex;
-        //align content to the center vertically
-        align-items: center;
-        font-weight: 500;
-        font-size: 12px;
-        padding-bottom: 4px;
-        transition: 0.5s ease-in all;
+        flex-direction: column;
+        height: 100%;
+        z-index: 3;
+        padding: 32px 16px;
+        color: #000;
 
-        &:hover {
-          color: rgba(48, 48, 48, 0.8);
+        h4 {
+          padding-bottom: 8px;
+          font-size: 20px;
+          font-weight: 300;
         }
 
-        .arrow {
-          width: 10px;
+        h6 {
+          font-weight: 400;
+          font-size: 12px;
+          padding-bottom: 16px;
+        }
+
+        .link {
+          display: flex;
+          //align content to the center vertically
+          align-items: center;
+          font-weight: 500;
+          font-size: 12px;
+          padding-bottom: 4px;
+          transition: 0.5s ease-in all;
+
+          &:hover {
+            color: rgba(48, 48, 48, 0.8);
+          }
+
+          .arrow {
+            width: 10px;
+          }
         }
       }
     }

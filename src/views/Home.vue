@@ -84,6 +84,7 @@ export default {
 
 .updates {
   .container {
+    max-width: 1400px;
     padding: 100px 25px;
     display: flex;
     flex-direction: column;
