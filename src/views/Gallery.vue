@@ -15,7 +15,7 @@
             <p>{{ item.photoShortDesc }}</p>
             <router-link
               class="link"
-              v-if="item.blogId"
+              :class="{ hideLink: !item.blogId }"
               :to="{ name: 'ViewBlog', params: { blogid: `${item.blogId}` } }"
               >Explore More</router-link
             >
@@ -108,10 +108,6 @@ export default {
         $(document).height()
       ) {
         let countLoop = 0
-
-        console.log(
-          "thisPointer.currentImageIndex=" + thisPointer.currentImageIndex
-        )
 
         for (
           let i = thisPointer.currentImageIndex;
@@ -208,6 +204,10 @@ export default {
 }
 
 .lg-sub-html {
+  .hideLink {
+    visibility: hidden;
+    pointer-events: none;
+  }
   h3 {
     @include fluid-type($viewThreshold1, $viewThreshold2, 15px, 18px);
   }
