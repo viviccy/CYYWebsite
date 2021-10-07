@@ -164,11 +164,27 @@ export default {
         //Declare an empty variable
         let tempArray = []
 
-        //'currentImageIndex' = the starting image index for the next batch
+        /*   
+        nextBatchEndIndex = The ending index number of the current batch of images
+        currentImageIndex = The starting index number of the current batch of images
+        imageStartTotal = The total image to be shown on the page on one batch 
+        */
 
+        let nextBatchEndIndex =
+          thisPointer.currentImageIndex + thisPointer.imageStartTotal
+
+        /*  
+       If 'nextBatchEndIndex' is more than total images in 'photoDataSorted', then assign it to the total images number of 'photoDataSorted', which is the number of the final image index number + 1 */
+        if (
+          nextBatchEndIndex > thisPointer.$store.getters.photoDataSorted.length
+        ) {
+          nextBatchEndIndex = thisPointer.$store.getters.photoDataSorted.length
+        }
+
+        //'currentImageIndex' = the starting image index for the next batch
         for (
           let i = thisPointer.currentImageIndex;
-          i < thisPointer.$store.getters.photoDataSorted.length;
+          i < nextBatchEndIndex;
           i++
         ) {
           //push the next image data to 'tempArray'. Once all data has been populated to 'tempArray', then only assign the final values to 'currentImageList' variable.
