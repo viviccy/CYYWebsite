@@ -57,6 +57,7 @@ export default new Vuex.Store({
     },
 
     photoDataSorted(state) {
+      console.log("state.galOrder=" + state.galOrder)
       let reference_array = state.galOrder
 
       let reference_object = {}
@@ -179,7 +180,6 @@ The argument for this function is state follow by the payload from the caller e.
     },
 
     resetGalleryState(state) {
-      console.log("reset gallery")
       state.galleryPhotos = []
     },
 

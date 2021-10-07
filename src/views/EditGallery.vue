@@ -352,8 +352,11 @@ export default {
       testing: [{ test: 0 }, { test: 1 }],
       newIndex: "",
       galleryCurrentOrder: [],
+      //the record's starting index number for current pagination number. Starting index is 0 since pagination number started with 1 once page loaded.
       paginationStartIndex: 0,
+      //the current total number of records showing on page. Starting number is 10.
       paginationRecordPerPage: 10,
+      //the current index number for the pagination button. First button is indexed 1.
       paginationCurrentPageNumber: 1,
       paginationCurrentRecordIndex: 1,
       loading: null,
@@ -638,26 +641,36 @@ export default {
         return { selected: true }
       }
     },
+    //run below when image loaded (but maybe not rendered on page yet)
     imageLoaded(photoId) {
       let thisPointer = this
+
+      //to make sure that image is RENDERED on page, we need to use 'requestAnimationFrame'. We need to use it twice to make sure that the image has completely rendered so that the image height and width can be retrieved.
       requestAnimationFrame(function() {
+        //run 'render' function, which has another 'requestAnimationFrame'
         thisPointer.render(photoId)
       })
     },
     render(photoId) {
       let thisPointer = this
 
+      //run 'requestAnimationFrame' the second time. When function 'reRender' is called, the image should have enought time to render on page.
       requestAnimationFrame(function() {
         thisPointer.reRender(photoId)
       })
     },
     reRender(photoId) {
+      //If the image still exists on page (the image might have been removed )
+
+      //We need to check if the so-called rendered images are still on page or not. Because of what happened at #anchorChangingRequiredPhotoData, the images loaded might not get rendered at all. Hence to make sure that only rendered images can access the function 'checkImageHeight', a condition 'if' statement is needed to check if the element still on page.
       if (document.querySelector("[imgid='" + photoId + "']") !== null) {
         this.checkImageHeight(
           document.querySelector("[imgid='" + photoId + "']")
         )
       }
     },
+
+    //to get each image's height and width and put them in array
     checkImageHeight(imgObj) {
       this.totalImagesLoaded++
 
@@ -800,7 +813,12 @@ export default {
       this.imageHeightArray = []
     },
 
+    //to change the total records showing on page
     changeRecordNumber(num, index) {
+      /*
+     num = total images to show on page
+    index = the index number of the button clicked (index 1 = 10 records button, index 2 = 20 records button, index 3 = 30 records button) */
+
       this.imageHeightArray = this.imageHeightArray.slice(0, num)
 
       this.totalImagesLoaded = this.imageHeightArray.length
@@ -1171,10 +1189,21 @@ export default {
       )
     },
 
+    //#anchorChangingRequiredPhotoData
+    /* When the page first load, 'requiredPhotoData' data will change three times because of below:
+- First time the page load, 'photoDataSorted' still has no value, hence 'requiredPhotoData' will have no value too.
+- Once 'photoDataSorted' has values, 'requiredPhotoData' values will be updated again. But because the value for object 'galOrder' inside Store function 'photoDataSorted' is not ready yet, another round of change for 'photoDataSorted' will happen.
+- Once 'galOrder' values are ready, it will change the values in 'photoDataSorted', hence will change the values of 'requiredPhotoData'  */
     requiredPhotoData: {
       get() {
         //get all the gallery data after sorted in the Store's getter 'photoDataSorted'
         let allPhotoData = this.$store.getters.photoDataSorted
+
+        /*
+        paginationStartIndex
+        - the record's starting index number for current pagination number
+        paginationRecordPerPage
+        - the current total number of records showing on page */
 
         // show only the ones needed
         allPhotoData = allPhotoData.slice(
@@ -1184,9 +1213,7 @@ export default {
 
         return allPhotoData
       },
-      set(what) {
-        console.log("what=" + JSON.stringify(what))
-      },
+      set() {},
     },
   },
 
@@ -1205,31 +1232,14 @@ export default {
           }
         })
     },
+
+    //trigger 'detectChangeCounter' variable every time 'requiredPhotoData' changed (meaning there is changes in the total records shown on page)
     requiredPhotoData: {
       handler: function() {
+        console.log("been here requiredPhotoData")
         this.detectChangeCounter++
       },
       deep: true,
-
-      // let thisPointer = this
-      /*   this.$nextTick(() => {
-        const elements = document.querySelectorAll(".accordion-header")
-
-        Array.from(elements).forEach((element, index, arr) => {
-          if (element.clientHeight > thisPointer.itemHeight) {
-            thisPointer.itemHeight = element.clientHeight
-          }
-
-          if (index === arr.length - 1) {
-            Array.from(elements).forEach((element) => {
-              element.style.height = thisPointer.itemHeight + "px"
-              console.log(
-                "element.style.height=" + element.getAttribute("style")
-              )
-            })
-          }
-        })
-      }) */
     },
   },
 }

@@ -35,7 +35,6 @@ export default {
     })
     this.checkRoute()
     await this.$store.dispatch("getPost")
-    console.log("getPost ended")
   },
   mounted() {},
   methods: {
