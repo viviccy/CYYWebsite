@@ -57,7 +57,6 @@ export default new Vuex.Store({
     },
 
     photoDataSorted(state) {
-      console.log("state.galOrder=" + state.galOrder)
       let reference_array = state.galOrder
 
       let reference_object = {}

@@ -121,7 +121,7 @@
           <li class="page-item">
             <a
               class="page-link"
-              @click="loadRecord(paginationCurrentPageNumber - 1)"
+              @click.prevent="loadRecord(paginationCurrentPageNumber - 1)"
               aria-label="Previous"
             >
               <span aria-hidden="true">&laquo;</span>
@@ -135,7 +135,7 @@
             <a
               class="page-link"
               :class="checkClass(index)"
-              @click="loadRecord(index)"
+              @click.prevent="loadRecord(index)"
               ><span>{{ index }}</span></a
             >
           </li>
@@ -143,7 +143,7 @@
           <li class="page-item">
             <a
               class="page-link"
-              @click="loadRecord(paginationCurrentPageNumber + 1)"
+              @click.prevent="loadRecord(paginationCurrentPageNumber + 1)"
               aria-label="Next"
             >
               <span aria-hidden="true">&raquo;</span>
@@ -154,7 +154,7 @@
           <li class="page-item">
             <a
               class="page-link selected"
-              @click="changeRecordNumber(10, 1)"
+              @click.prevent="changeRecordNumber(10, 1)"
               aria-label="2"
             >
               <span aria-hidden="true">10</span>
@@ -163,7 +163,7 @@
           <li class="page-item">
             <a
               class="page-link"
-              @click="changeRecordNumber(20, 2)"
+              @click.prevent="changeRecordNumber(20, 2)"
               aria-label="5"
             >
               <span aria-hidden="true">20</span>
@@ -172,7 +172,7 @@
           <li class="page-item">
             <a
               class="page-link"
-              @click="changeRecordNumber(30, 3)"
+              @click.prevent="changeRecordNumber(30, 3)"
               aria-label="7"
             >
               <span aria-hidden="true">30</span>
@@ -183,20 +183,6 @@
       <div class="collapse py-2" id="collapseTarget">
         This is the toggle-able content!
       </div>
-      <!--   <table class="galleryTable">
-      <tbody>
-        <tr v-bind:key="index" v-for="(item, index) in photoDataSorted">
-          <td>{{ item.photoId }}</td>
-          <td>
-            <input type="text" v-model="item.photoTitle" />
-          </td>
-          <td>{{ item.photoURL }}</td>
-          <td>{{ item.photoName }}</td>
-
-          <td>{{ item.photoCreator }}</td>
-        </tr>
-      </tbody>
-    </table> -->
     </div>
   </div>
 </template>
@@ -236,7 +222,7 @@ export default {
     return {
       images: [],
       totalImagesLoaded: 0,
-      imageHeightArray: [],
+      imageWidthHeightArray: [],
       detectChangeCounter: 0,
       totalAcceptedFiles: 0,
       dropzoneObj: null,
@@ -366,27 +352,23 @@ export default {
     }
   },
   beforeDestroy() {
-    window.removeEventListener("resize", this.checkThumbnailHeight())
+    window.removeEventListener("resize", this.checkThumbnailHeight)
   },
   destroyed() {
     console.log("destroyed")
   },
   mounted: function() {
+    //populate the gallery data from Firestore to Store
     this.updateDatabaseBatch()
 
     let thisPointer = this
 
-    //window.addEventListener("resize", this.checkThumbnailHeight(), true)
-    window.addEventListener(
-      "resize",
-      function() {
-        thisPointer.checkThumbnailHeight()
-      },
-      true
-    )
+    //Resize the image width and height whenever viewport resize happened
+    window.addEventListener("resize", thisPointer.checkThumbnailHeight)
   },
 
   methods: {
+    //This function will return the most common values in the array. If there is no common values, then it will return the first value in the array.
     mostOccurence(array) {
       if (array.length == 0) return null
       var modeMap = {}
@@ -670,39 +652,65 @@ export default {
       }
     },
 
-    //to get each image's height and width and put them in array
+    //to get each image's height and width and put them in array 'imageWidthHeightArray'
     checkImageHeight(imgObj) {
+      //every time an image is rendered, add 1 to variable 'totalImagesLoaded'
       this.totalImagesLoaded++
 
-      let tempArray
+      let tempArray = []
 
       let tempHeight
 
+      //getComputedStyle(element) = to get all the css value of the element
+      //imgObj.parentNode.parentNode = the parent of parent of the image element. The targeted element is '.image-container'
       let objStyle = getComputedStyle(imgObj.parentNode.parentNode)
 
+      //assign 'tempHeight' to the element(.image-container) css 'clientHeight' value
       tempHeight = imgObj.clientHeight
 
+      /*  
+     Because the css 'width' for image is set to 100%, certain images might overflow the parent's parent's container(.image-container). To prevent this, we will set that the max-height for the image always less than the parent's parent's container.
+
+    parseInt(value,10) 
+    this will remove the 'px' from the css max-height value */
       if (imgObj.clientHeight > parseInt(objStyle.maxHeight, 10)) {
         tempHeight = parseInt(objStyle.maxHeight, 10)
       }
 
+      //assign the joined values of image width and height to array 'tempArray'
       tempArray = imgObj.clientWidth + "_" + tempHeight
 
-      this.imageHeightArray.push(tempArray)
+      //push 'tempArray' values to 'imageWidthHeightArray' array
+      this.imageWidthHeightArray.push(tempArray)
 
+      //If the total images rendered on page are equal to the total image data in 'requiredPhotoData', then run the code
       if (this.totalImagesLoaded == this.requiredPhotoData.length) {
-        this.thumbnailDimension = this.mostOccurence(this.imageHeightArray)
+        /*  
+       'mostOccurence(array)
+       - This will get the most frequent values in the array. We need this value to determine what is the most common image width and height from all the images then adjust all images' width and height according to this common values.  */
+        this.thumbnailDimension = this.mostOccurence(this.imageWidthHeightArray)
+
+        //We will use 'detectChangeCounter' variable as a trigger to resize all the images according to the common width height values from 'thumbnailDimension'. NOTE: we cannot assign 'thumbnailDimension' as the 'watch' variable because there are cases where we need to resize new images on page but the value 'thumbnailDimension' has not changed. Therefore having a separate 'watch' variable 'detectChangeCounter' will give more control on when the images' width and height need to adjust.
         this.detectChangeCounter++
       }
     },
+
+    //To handle viewport resize. Whenever viewport width changed, readjust the images' width and height accordingly.
     checkThumbnailHeight() {
-      this.imageHeightArray = []
+      //Make 'imageWidthHeightArray' array empty as we will need to recalculate all the images common width and height.
+      this.imageWidthHeightArray = []
 
       let imageContainerElement = document.querySelectorAll(
         ".accordion-item .image-container .image-inner-container img"
       )
 
+      //Get one of the image parent's parent's CSS.
+      let objStyle = getComputedStyle(
+        imageContainerElement[0].parentNode.parentNode
+      )
+
       for (let i = 0; i < imageContainerElement.length; ++i) {
+        //Strip off the current CSS width and height for each image
         imageContainerElement[i].style.maxHeight = ""
         imageContainerElement[i].style.maxWidth = ""
 
@@ -710,12 +718,10 @@ export default {
 
         let tempHeight
 
-        let objStyle = getComputedStyle(
-          imageContainerElement[i].parentNode.parentNode
-        )
-
+        //Get the image height once the image fixed CSS height has been stripped off. This will give us the natural max height of the image when the width is 100%.
         tempHeight = imageContainerElement[i].clientHeight
 
+        //If the image height has overflown the parent's parent's container (.image-container) max height, set the max-height to equal to  parent's parent's container max height.
         if (
           imageContainerElement[i].clientHeight >
           parseInt(objStyle.maxHeight, 10)
@@ -725,11 +731,14 @@ export default {
 
         tempArray = imageContainerElement[i].clientWidth + "_" + tempHeight
 
-        this.imageHeightArray.push(tempArray)
+        //Asign 'imageWidthHeightArray' to the the updated 'tempArray' having all the images' width and height details.
+        this.imageWidthHeightArray.push(tempArray)
       }
 
-      this.thumbnailDimension = this.mostOccurence(this.imageHeightArray)
+      //Get the most common image width and height
+      this.thumbnailDimension = this.mostOccurence(this.imageWidthHeightArray)
 
+      //Trigger 'detectChangeCounter' watch function to assign the new values from 'thumbnailDimension' to each images
       this.detectChangeCounter++
     },
     onEnd: async function(evt) {
@@ -810,7 +819,7 @@ export default {
         this.paginationRecordPerPage
 
       this.totalImagesLoaded = 0
-      this.imageHeightArray = []
+      this.imageWidthHeightArray = []
     },
 
     //to change the total records showing on page
@@ -819,9 +828,9 @@ export default {
      num = total images to show on page
     index = the index number of the button clicked (index 1 = 10 records button, index 2 = 20 records button, index 3 = 30 records button) */
 
-      this.imageHeightArray = this.imageHeightArray.slice(0, num)
+      this.imageWidthHeightArray = this.imageWidthHeightArray.slice(0, num)
 
-      this.totalImagesLoaded = this.imageHeightArray.length
+      this.totalImagesLoaded = this.imageWidthHeightArray.length
 
       this.detectChangeCounter++
 
@@ -1059,8 +1068,6 @@ export default {
 
       let blogData
 
-      console.log("blog id =" + blogId)
-
       if (blogId) {
         const blogDatabase = db.collection("blogPosts").doc(blogId)
 
@@ -1132,7 +1139,7 @@ export default {
         // The equivalent of parent.children.indexOf(child)
         let index = Array.prototype.indexOf.call(parent.children, child)
 
-        this.imageHeightArray.splice(index, 1)
+        this.imageWidthHeightArray.splice(index, 1)
 
         // this.$store.state.galleryPhotos.splice(index,1)
         this.$store.commit("deleteArrayState", {
@@ -1144,16 +1151,9 @@ export default {
         this.$store.commit("updateGalleryOrderState", this.galleryCurrentOrder)
       })
 
-      if (blogId == true) {
-        console.log("blogId is true")
-      } else {
-        console.log("blogId is false")
-      }
-
       var storage = firebase.storage()
 
       if (!blogId) {
-        console.log("been to no blog ID photo")
         storage
           .refFromURL(imageURL)
           .delete()
@@ -1175,7 +1175,6 @@ export default {
               console.log("thumbnail file deleted")
             },
             (err) => {
-              console.log("thumbnail issue")
               console.log(err)
             }
           )
@@ -1218,16 +1217,21 @@ export default {
   },
 
   watch: {
+    //to give a numbered width and height to each image according to "thumbnailDimension" variable
     detectChangeCounter: function() {
       document
         .querySelectorAll(".accordion-button .image-container img")
         .forEach((el) => {
+          //if 'thumbnailDimension' has value
           if (this.thumbnailDimension) {
-            console.log("this.thumbnailDimension=" + this.thumbnailDimension)
+            //get the width and height values from 'thumbnailDimension' by spliting the character "_"
             let averageDimension = this.thumbnailDimension.split("_")
+
+            //assign width and height values to the image
             el.style.maxWidth = averageDimension[0] + "px"
             el.style.maxHeight = averageDimension[1] + "px"
 
+            //make the whole record visible on page. Intially was set to 'hidden' on the CSS.
             el.closest(".accordion-item").style.visibility = "visible"
           }
         })
@@ -1236,7 +1240,6 @@ export default {
     //trigger 'detectChangeCounter' variable every time 'requiredPhotoData' changed (meaning there is changes in the total records shown on page)
     requiredPhotoData: {
       handler: function() {
-        console.log("been here requiredPhotoData")
         this.detectChangeCounter++
       },
       deep: true,
