@@ -48,7 +48,10 @@
 import lightGallery from "lightgallery"
 
 //import "lightgallery.js/dist/css/lightgallery.css"
-import "lightgallery/css/lightgallery-bundle.css"
+import "lightgallery/css/lightgallery.css"
+import "lightgallery/css/lg-thumbnail.css"
+
+//import "lightgallery/css/lightgallery-bundle.css"
 //import lgThumbnail from "lg-thumbnail.js"
 
 //NOTE: 'lightgallery.umd.js' need to be imported first before 'thumbnail' plugin.
@@ -159,7 +162,7 @@ export default {
   */
       if (
         window.scrollY + window.innerHeight >=
-        document.documentElement.scrollHeight * 0.88
+        document.documentElement.scrollHeight * 0.8
       ) {
         //Declare an empty variable
         let tempArray = []

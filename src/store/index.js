@@ -76,6 +76,9 @@ export default new Vuex.Store({
 
       return array
     },
+    findBlog: (state) => (id) => {
+      return state.blogPosts.find((post) => post.blogID === id)
+    },
   },
 
   /* 'mutation' is used to update changes to the 'state'.

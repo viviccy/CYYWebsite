@@ -97,9 +97,12 @@ const routes = [
   },
   {
     path: "*",
-    name: "Home",
-    component: Home,
-    meta: { title: "Home", requiresAuth: false },
+    name: "404",
+    meta: { title: "404", requiresAuth: false },
+    beforeEnter: (to, from, next) => {
+      console.log("been to rounter *")
+      next({ name: "Home" })
+    },
   },
 ]
 
@@ -168,11 +171,19 @@ router.beforeEach(async (to, from, next) => {
       return next()
     }
 
+    console.log("been here")
     return next({ name: "Home" })
   }
 
   return next()
 })
+
+/* const originalPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return originalPush.call(this, location).catch((err) => {
+    console.log("error=" + err)
+  })
+} */
 
 //this router file will be exported to src/main.js to use
 export default router

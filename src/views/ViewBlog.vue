@@ -1,23 +1,20 @@
 <template>
-  <div class="post-view" v-if="currentBlog">
+  <div class="post-view" v-if="blogReady">
     <div class="container quillWrapper">
-      <h2>{{ this.currentBlog[0].blogTitle }}</h2>
+      <h2>{{ currentBlog.blogTitle }}</h2>
       <h4>
         Posted on:
         {{
-          new Date(this.currentBlog[0].blogDate).toLocaleString("en-my", {
+          new Date(this.currentBlog.blogDate).toLocaleString("en-my", {
             dateStyle: "long",
           })
         }}
       </h4>
-      <img :src="this.currentBlog[0].blogCoverPhoto" alt="" />
+      <img :src="currentBlog.blogCoverPhoto" alt="" />
 
-      <div class="shortDesc">{{ this.currentBlog[0].blogShortDesc }}</div>
+      <div class="shortDesc">{{ currentBlog.blogShortDesc }}</div>
       <!--   'v-html' is to bind to html code string -->
-      <div
-        class="post-content ql-editor"
-        v-html="this.currentBlog[0].blogHTML"
-      ></div>
+      <div class="post-content ql-editor" v-html="currentBlog.blogHTML"></div>
     </div>
   </div>
 </template>
@@ -27,9 +24,17 @@ export default {
   name: "ViewBlog",
   data() {
     return {
-      currentBlog: null,
+      blogReady: false,
+      currentBlog: {
+        blogTitle: "",
+        blogCoverPhoto: "",
+        blogShortDesc: "",
+        blogHTML: "",
+        blogDate: "",
+      },
     }
   },
+
   async mounted() {
     //Check to see if 'blogPosts' values in Store are ready.
     //If yes the find the blog wanted.
@@ -45,19 +50,28 @@ export default {
         return state.blogPosts
       },
       async () => {
-        this.findBlog()
+        if (this.$route.name == "ViewBlog") {
+          this.findBlog()
+        }
       }
     )
   },
   methods: {
     async findBlog() {
-      this.currentBlog = await this.$store.state.blogPosts.filter(
-        //for each object in 'this.$store.state.blogPosts'
-        (post) => {
-          //check to see if object property 'blogID' is equals to the current 'blogid' parameter from URL. If there is a match, return the whole object to 'this.currentBlgo'.
-          return post.blogID === this.$route.params.blogid
-        }
-      )
+      let tempArray
+      tempArray = await this.$store.getters.findBlog(this.$route.params.blogid)
+
+      if (tempArray) {
+        this.$set(this.currentBlog, "blogTitle", tempArray.blogTitle)
+        this.$set(this.currentBlog, "blogCoverPhoto", tempArray.blogCoverPhoto)
+        this.$set(this.currentBlog, "blogShortDesc", tempArray.blogShortDesc)
+        this.$set(this.currentBlog, "blogHTML", tempArray.blogHTML)
+        this.$set(this.currentBlog, "blogDate", tempArray.blogDate)
+
+        this.blogReady = true
+      } else {
+        this.$router.push({ name: "Home" })
+      }
     },
   },
 }
