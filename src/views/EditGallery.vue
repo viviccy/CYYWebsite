@@ -114,12 +114,20 @@
             </div>
           </transition-group>
         </draggable>
+        <div
+          class="staticLoadingText"
+          ref="staticLoadingText"
+          id="staticLoadingText"
+        >
+          Loading...
+        </div>
         <button class="save-all" @click="saveGallery">Save</button>
       </div>
       <nav aria-label="Page navigation" class="navigation">
         <ul class="page-number pagination">
           <li class="page-item">
             <a
+              href="javascript:void();"
               class="page-link"
               @click.prevent="loadRecord(paginationCurrentPageNumber - 1)"
               aria-label="Previous"
@@ -133,6 +141,7 @@
             v-for="index in countTotalPage"
           >
             <a
+              href="javascript:void();"
               class="page-link"
               :class="checkClass(index)"
               @click.prevent="loadRecord(index)"
@@ -142,6 +151,7 @@
 
           <li class="page-item">
             <a
+              href="javascript:void();"
               class="page-link"
               @click.prevent="loadRecord(paginationCurrentPageNumber + 1)"
               aria-label="Next"
@@ -154,6 +164,7 @@
           <li class="page-item">
             <a
               class="page-link selected"
+              href="javascript:void();"
               @click.prevent="changeRecordNumber(10, 1)"
               aria-label="2"
             >
@@ -162,6 +173,7 @@
           </li>
           <li class="page-item">
             <a
+              href="javascript:void();"
               class="page-link"
               @click.prevent="changeRecordNumber(20, 2)"
               aria-label="5"
@@ -171,6 +183,7 @@
           </li>
           <li class="page-item">
             <a
+              href="javascript:void();"
               class="page-link"
               @click.prevent="changeRecordNumber(30, 3)"
               aria-label="7"
@@ -668,10 +681,10 @@ export default {
       //assign 'tempHeight' to the element(.image-container) css 'clientHeight' value
       tempHeight = imgObj.clientHeight
 
-      /*  
+      /*
      Because the css 'width' for image is set to 100%, certain images might overflow the parent's parent's container(.image-container). To prevent this, we will set that the max-height for the image always less than the parent's parent's container.
 
-    parseInt(value,10) 
+    parseInt(value,10)
     this will remove the 'px' from the css max-height value */
       if (imgObj.clientHeight > parseInt(objStyle.maxHeight, 10)) {
         tempHeight = parseInt(objStyle.maxHeight, 10)
@@ -685,7 +698,7 @@ export default {
 
       //If the total images rendered on page are equal to the total image data in 'requiredPhotoData', then run the code
       if (this.totalImagesLoaded == this.requiredPhotoData.length) {
-        /*  
+        /*
        'mostOccurence(array)
        - This will get the most frequent values in the array. We need this value to determine what is the most common image width and height from all the images then adjust all images' width and height according to this common values.  */
         this.thumbnailDimension = this.mostOccurence(this.imageWidthHeightArray)
@@ -744,15 +757,17 @@ export default {
     onEnd: async function(evt) {
       this.loading = true
 
-      this.oldIndex = evt.oldIndex
-      this.newIndex = evt.newIndex
+      let oldIndex, newIndex
+
+      oldIndex = this.paginationStartIndex + evt.oldIndex
+      newIndex = this.paginationStartIndex + evt.newIndex
 
       this.galleryCurrentOrder = this.$store.state.galOrder
 
-      let elementToMove = this.galleryCurrentOrder[evt.oldIndex]
+      let elementToMove = this.galleryCurrentOrder[oldIndex]
 
-      this.galleryCurrentOrder.splice(evt.oldIndex, 1)
-      this.galleryCurrentOrder.splice(evt.newIndex, 0, elementToMove)
+      this.galleryCurrentOrder.splice(oldIndex, 1)
+      this.galleryCurrentOrder.splice(newIndex, 0, elementToMove)
 
       const galleryOrderDatabase = await db
         .collection("galleryOrder")
@@ -821,9 +836,14 @@ export default {
       this.totalImagesLoaded = 0
       this.imageWidthHeightArray = []
     },
+    //can use this function to delay next code from running by calling this.delay(delay time e.g. 1000)
+    delay: (ms) =>
+      new Promise((res) => {
+        setTimeout(res, ms)
+      }),
 
     //to change the total records showing on page
-    changeRecordNumber(num, index) {
+    async changeRecordNumber(num, index) {
       /*
      num = total images to show on page
     index = the index number of the button clicked (index 1 = 10 records button, index 2 = 20 records button, index 3 = 30 records button) */
@@ -832,7 +852,7 @@ export default {
 
       this.totalImagesLoaded = this.imageWidthHeightArray.length
 
-      this.detectChangeCounter++
+      //this.detectChangeCounter++
 
       document
         .querySelector(
@@ -1221,7 +1241,7 @@ export default {
     detectChangeCounter: function() {
       document
         .querySelectorAll(".accordion-button .image-container img")
-        .forEach((el) => {
+        .forEach((el, index, array) => {
           //if 'thumbnailDimension' has value
           if (this.thumbnailDimension) {
             //get the width and height values from 'thumbnailDimension' by spliting the character "_"
@@ -1233,6 +1253,16 @@ export default {
 
             //make the whole record visible on page. Intially was set to 'hidden' on the CSS.
             el.closest(".accordion-item").style.visibility = "visible"
+            el.closest(".accordion-item").style.position = "relative"
+          }
+
+          if (index === array.length - 1) {
+            document.getElementById("staticLoadingText").style.display =
+              "inline"
+            setTimeout(function() {
+              document.querySelector(".staticLoadingText").style.display =
+                "none"
+            }, 2000)
           }
         })
     },
@@ -1276,6 +1306,11 @@ export default {
     flex-direction: column;
     margin: 0 auto;
 
+    .staticLoadingText {
+      text-align: center;
+      display: none;
+    }
+
     .accordion-item {
       margin: 0 0 10px 0;
       border: 0;
@@ -1285,6 +1320,13 @@ export default {
       overflow: hidden;
       // display: none;
       visibility: hidden;
+      position: absolute;
+
+      /*   &.accordion-item-show{
+         visibility: visible;
+      position: relative;
+
+      } */
 
       &.grey-out {
         opacity: 0.5;
@@ -1495,6 +1537,11 @@ export default {
         }
       }
       .page-link {
+        &:focus {
+          outline: none;
+          -webkit-box-shadow: none;
+          box-shadow: none;
+        }
         border-radius: 5px;
         background: $inputColor1;
         margin: 0 4px;
@@ -1530,6 +1577,11 @@ export default {
         }
       }
       .page-link {
+        &:focus {
+          outline: none;
+          -webkit-box-shadow: none;
+          box-shadow: none;
+        }
         border-radius: 5px;
         background: $inputColor1;
         margin: 0 4px;

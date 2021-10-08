@@ -10,7 +10,6 @@
           v-for="(item, index) in photoDataForInfiniteScroll"
           :href="item.photoURL"
           :data-sub-html="'.caption' + index"
-          @click="getIndexNum(index)"
           :data-exthumbimage="item.thumbPhotoURL"
         >
           <img :src="item.thumbPhotoURL" />
@@ -36,7 +35,6 @@
               >
             </div>  -->
           </div>
-          <div>sdfsfsfsf</div>
         </a>
       </div>
     </div>
@@ -44,29 +42,26 @@
 </template>
 
 <script>
-//import "lightgallery.js"
+//import Light Gallery js file
 import lightGallery from "lightgallery"
 
-//import "lightgallery.js/dist/css/lightgallery.css"
+//import Light Gallery css file
 import "lightgallery/css/lightgallery.css"
-import "lightgallery/css/lg-thumbnail.css"
 
-//import "lightgallery/css/lightgallery-bundle.css"
-//import lgThumbnail from "lg-thumbnail.js"
+//import Light Gallery thumbnail plugin css file
+import "lightgallery/css/lg-thumbnail.css"
 
 //NOTE: 'lightgallery.umd.js' need to be imported first before 'thumbnail' plugin.
 import "lightgallery/lightgallery.umd.js"
-import lgThumbnail from "lightgallery/plugins/thumbnail"
+import lgThumbnail from "lightgallery/plugins/thumbnail/lg-thumbnail.umd.js"
 
+//import Justified Gallery js and css files
 import "justifiedGallery/dist/js/jquery.justifiedGallery.js"
 import "justifiedGallery/dist/css/justifiedGallery.css"
 import $ from "jquery"
 
-//import sortGallery from "../mixins/sortGalleryData"
-
 export default {
   name: "Gallery",
-  // mixins: [sortGallery],
   data() {
     return {
       blocks: [],
@@ -78,9 +73,9 @@ export default {
       currentImageIndex: 0,
       //the total image to be shown on the page
       imageStartTotal: null,
-      imageLoadBatchTotal: null,
-      currentIndexNum: null,
+      //Light Gallery instance variable
       lightGalleryObj: null,
+      //Justified Gallery instance variable
       justifyGalleryObj: null,
     }
   },
@@ -216,9 +211,7 @@ export default {
       this.$store.commit("resetGalleryState")
       await this.$store.dispatch("loadGalleryData")
     },
-    getIndexNum(index) {
-      this.currentIndexNum = index
-    },
+
     async initializeJustifyGallery() {
       let thisPointer = this
 
