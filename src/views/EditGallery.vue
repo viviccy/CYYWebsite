@@ -1257,7 +1257,7 @@ export default {
           }
 
           if (index === array.length - 1) {
-            /*  Once reach the end of rendering all the images according to the proper width and height, the "Loading..." text is shown. This code is here because at this point, nothing has been rendered yet on page (the new records are still blank on page) because browser has not intiated the next Tick, which means any changes made prior to this point will not be shown on page, even the new records have been 'rendered'.
+            /*  Once reach the end of rendering all the images according to the proper width and height, the "Loading..." text is shown. This code is here because at this point, nothing has been rendered yet on page (the new records are still blank on page) because browser has not intiated the next Tick, which means any changes made prior to this point will not be shown on page, even the new records have been 'rendered'. This is because all the changes are still in vue virtual memory.
             At this moment, the new records are still blank on page although if we use querySelector to the newly added record elements would return the objects. Somehow the records will take a while AFTER rendering to show on the page. 
             At this point, if we run below code to show 'staticLoadingText', it will show first before the rest of the records finally shown. This will give the impression that the records are loading although technically the 'staticLoadingText' and records should all shown at the same time. */
             document.getElementById("staticLoadingText").style.display =
