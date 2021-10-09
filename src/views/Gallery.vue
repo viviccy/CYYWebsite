@@ -157,7 +157,7 @@ export default {
   */
       if (
         window.scrollY + window.innerHeight >=
-        document.documentElement.scrollHeight * 0.8
+        document.documentElement.scrollHeight * 0.83
       ) {
         //Declare an empty variable
         let tempArray = []
@@ -194,12 +194,6 @@ export default {
         if (tempArray.length > 0) {
           /*   Once done assigning data to 'tempArray', destroy the Light Gallery instance before adding the images to page.
           If there is no more image to update (meaning tempArray.length = 0), then no need to destroy the Light Gallery instance. */
-          if (thisPointer.lightGalleryObj) {
-            thisPointer.lightGalleryObj.destroy()
-
-            //assign 'lightGalleryObj' to null once the 'lightGallery' instance is destroyed.
-            thisPointer.lightGalleryObj = null
-          }
           thisPointer.currentImageList.push(...tempArray)
         }
       }
@@ -226,8 +220,14 @@ export default {
         })
         //'.on("jg.complete",...) means once the images inside Justify Gallery container have been processed, then run the code. NOTE: This part will also run when being called using $("#lightgallery").justifiedGallery("norewind") at #anchorNoRewind.
         .on("jg.complete", async () => {
-          //Once Justified Gallery has finished its job, then create the Light Gallery instance.
-          thisPointer.initializeLightGallery()
+          if (thisPointer.lightGalleryObj == null) {
+            //This is for first time create Light Gallery instance
+            //Once Justified Gallery has finished its job, then create the Light Gallery instance.
+            thisPointer.initializeLightGallery()
+          } else {
+            //subsequent images update to Light Gallery will only need to call refresh method.
+            thisPointer.lightGalleryObj.refresh()
+          }
         })
     },
     initializeLightGallery() {
@@ -238,11 +238,19 @@ export default {
       this.lightGalleryObj = lightGallery(el, {
         plugins: [lgThumbnail],
         thumbnail: true,
+        toggleThumb: true,
+        allowMediaOverlap: true,
         exThumbImage: "data-exthumbimage",
         subHtmlSelectorRelative: true,
         currentPagerPosition: "right",
         download: false,
         selector: "a",
+        licenseKey: "0000-0000-000-0000",
+        mobileSettings: {
+          controls: false,
+          showCloseIcon: true,
+          download: false,
+        },
       })
     },
   },

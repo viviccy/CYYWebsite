@@ -48,14 +48,18 @@ export default {
   mounted() {},
   methods: {
     divSizeCheck() {
-      this.$emit("blogSectionHeightChange", this.$refs.blogSection.clientHeight)
+      if (this.$refs.blogSection.clientHeight) {
+        this.$emit(
+          "blogSectionHeightChange",
+          this.$refs.blogSection.clientHeight
+        )
+      }
     },
     onImgLoad() {
       this.divSizeCheck()
     },
   },
   beforeDestroy() {
-    console.log("destroyed been here")
     window.removeEventListener("resize", this.divSizeCheck)
   },
 

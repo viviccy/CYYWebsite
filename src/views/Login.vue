@@ -107,7 +107,7 @@ export default {
       text-align: center;
       font-size: 32px;
       color: #303033;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       @media (min-width: 900px) {
         font-size: 40px;
       }
@@ -139,6 +139,12 @@ export default {
           left: 6px;
         }
       }
+
+      .error {
+        color: red;
+        text-align: center;
+        margin-top: 15px;
+      }
     }
 
     .forgot-password {
@@ -146,7 +152,7 @@ export default {
       color: #000;
       cursor: pointer;
       font-size: 14px;
-      margin: 16px 0 32px;
+      margin: 16px 0 16px;
       border-bottom: 1px solid transparent;
       transition: 0.5s ease all;
 

@@ -15,7 +15,7 @@
         class="upload-image-button disabled"
         disabled
       >
-        Upload Image
+        Run Image Upload
       </button>
       <div></div>
       <div class="accordion accordion-flush" id="accordionFlushExample">
@@ -347,9 +347,7 @@ export default {
         },
       },
 
-      oldIndex: "",
       testing: [{ test: 0 }, { test: 1 }],
-      newIndex: "",
       galleryCurrentOrder: [],
       //the record's starting index number for current pagination number. Starting index is 0 since pagination number started with 1 once page loaded.
       paginationStartIndex: 0,
@@ -362,6 +360,7 @@ export default {
       thumbnailDimension: 0,
       files: [],
       windowScreenSize: 0,
+      setTimeOutObj: null,
     }
   },
   beforeDestroy() {
@@ -673,6 +672,9 @@ export default {
       let tempArray = []
 
       let tempHeight
+
+      //Display the loading message at the bottom of the records. NOTE: This has to be set as inline CSS as it make the style load faster compare to using Class.
+      document.getElementById("staticLoadingText").style.display = "block"
 
       //getComputedStyle(element) = to get all the css value of the element
       //imgObj.parentNode.parentNode = the parent of parent of the image element. The targeted element is '.image-container'
@@ -1239,6 +1241,8 @@ export default {
   watch: {
     //to give a numbered width and height to each image according to "thumbnailDimension" variable
     detectChangeCounter: function() {
+      let thisPointer = this
+
       document
         .querySelectorAll(".accordion-button .image-container img")
         .forEach((el, index, array) => {
@@ -1254,19 +1258,25 @@ export default {
             //make the whole record visible on page. Intially was set to 'hidden' on the CSS.
             el.closest(".accordion-item").style.visibility = "visible"
             el.closest(".accordion-item").style.position = "relative"
-          }
 
-          if (index === array.length - 1) {
-            /*  Once reach the end of rendering all the images according to the proper width and height, the "Loading..." text is shown. This code is here because at this point, nothing has been rendered yet on page (the new records are still blank on page) because browser has not intiated the next Tick, which means any changes made prior to this point will not be shown on page, even the new records have been 'rendered'. This is because all the changes are still in vue virtual memory.
+            if (index === array.length - 1) {
+              /*  Once reach the end of rendering all the images according to the proper width and height, the "Loading..." text is shown. This code is here because at this point, nothing has been rendered yet on page (the new records are still blank on page) because browser has not intiated the next Tick, which means any changes made prior to this point will not be shown on page, even the new records have been 'rendered'. This is because all the changes are still in vue virtual memory.
             At this moment, the new records are still blank on page although if we use querySelector to the newly added record elements would return the objects. Somehow the records will take a while AFTER rendering to show on the page. 
             At this point, if we run below code to show 'staticLoadingText', it will show first before the rest of the records finally shown. This will give the impression that the records are loading although technically the 'staticLoadingText' and records should all shown at the same time. */
-            document.getElementById("staticLoadingText").style.display =
-              "inline"
-            setTimeout(function() {
-              //the 'staticLoadingText' is hided after 1 second after it has shown.
-              document.querySelector(".staticLoadingText").style.display =
-                "none"
-            }, 2000)
+
+              let objStyle = getComputedStyle(
+                document.querySelector(".staticLoadingText")
+              )
+
+              if (objStyle.display == "block") {
+                thisPointer.setTimeOutObj = setTimeout(function() {
+                  //the 'staticLoadingText' is hided after 1 second after it has shown.
+                  document.querySelector(".staticLoadingText").style.display =
+                    "none"
+                  clearTimeout(thisPointer.setTimeOutObj)
+                }, 1000)
+              }
+            }
           }
         })
     },
@@ -1326,11 +1336,10 @@ export default {
       visibility: hidden;
       position: absolute;
 
-      /*   &.accordion-item-show{
-         visibility: visible;
-      position: relative;
-
-      } */
+      &.accordion-item-show {
+        visibility: visible;
+        position: relative;
+      }
 
       &.grey-out {
         opacity: 0.5;

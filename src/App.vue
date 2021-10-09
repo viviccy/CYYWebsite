@@ -149,4 +149,9 @@ export default {
     }
   }
 }
+
+//for Light Gallery thumbnail highlight. This only work when put in global scoped css.
+.lg-outer .lg-thumb-item.active {
+  border: 2px solid #a90707;
+}
 </style>
