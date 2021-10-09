@@ -77,6 +77,8 @@ export default {
       lightGalleryObj: null,
       //Justified Gallery instance variable
       justifyGalleryObj: null,
+      //Used for scroll section. To determine when the image adding is allowed when the scroll condition is met.
+      readyToAddImage: true,
     }
   },
   async mounted() {
@@ -129,7 +131,7 @@ export default {
       this.imageStartTotal + 1
     )
 
-    //assign 'currentImageIndex' as then next starting index for next image batch. The number is the
+    //assign 'currentImageIndex' as then next starting index for next image batch.
     this.currentImageIndex = this.imageStartTotal + 1
 
     let thisPointer = this
@@ -155,9 +157,12 @@ export default {
       window.scrollY + window.innerHeight >= document.documentElement.scrollHeight * 0.88
       - If the scroll travel distance is more than or equal to 88 percent of the whole page height, then load the next batch of images.
   */
+
+      /*  'readyToAddImage' is set to true initially. The scroll condition below will run multiple times once the page almost scrolled to the bottom. Hence to prevent the code inside being run indefinately, we use the variable 'readyToAddImage' to determine when the codes can run again. */
       if (
         window.scrollY + window.innerHeight >=
-        document.documentElement.scrollHeight * 0.83
+          document.documentElement.scrollHeight * 0.83 &&
+        this.readyToAddImage == true
       ) {
         //Declare an empty variable
         let tempArray = []
@@ -196,6 +201,8 @@ export default {
           If there is no more image to update (meaning tempArray.length = 0), then no need to destroy the Light Gallery instance. */
           thisPointer.currentImageList.push(...tempArray)
         }
+
+        this.readyToAddImage = false
       }
     })
   },
@@ -227,6 +234,9 @@ export default {
           } else {
             //subsequent images update to Light Gallery will only need to call refresh method.
             thisPointer.lightGalleryObj.refresh()
+
+            //once the new images are loaded, set 'readyToAddImage' to false to prevent the scroll function to run multiple times.
+            thisPointer.readyToAddImage = true
           }
         })
     },
