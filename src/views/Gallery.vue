@@ -235,7 +235,7 @@ export default {
             //subsequent images update to Light Gallery will only need to call refresh method.
             thisPointer.lightGalleryObj.refresh()
 
-            //once the new images are loaded, set 'readyToAddImage' to false to prevent the scroll function to run multiple times.
+            //once the new images are loaded, set 'readyToAddImage' to true to allow the scroll codes to run again.
             thisPointer.readyToAddImage = true
           }
         })
