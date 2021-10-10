@@ -1096,9 +1096,7 @@ export default {
       })
     },
     async saveGallery() {
-      //var tbodyRowCount = table.tBodies[0].rows.length
-
-      // let content = document.querySelectorAll(".gallery-list li")
+      this.loading = true
 
       let content = this.$store.getters.photoDataSorted
 
@@ -1156,6 +1154,7 @@ export default {
       // Commit the batch
       batch.commit().then(() => {
         console.log("success")
+        this.loading = false
       })
 
       //tempArray
