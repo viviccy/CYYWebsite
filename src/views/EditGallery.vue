@@ -31,8 +31,8 @@
             <div
               class="accordion-item"
               :class="{ 'grey-out': !checkUser(item.photoCreator) }"
-              v-bind:key="item.photoId"
               v-for="(item, index) in requiredPhotoData"
+              v-bind:key="item.photoId"
             >
               <h2
                 class="accordion-header"
@@ -234,7 +234,15 @@ export default {
     let thisPointer = this
     return {
       images: [],
+      //total of new images loaded in (either through clicking 'changeRecordNumber' button or through dropzone). New images added through Dropzone is not counted here.
       totalImagesLoaded: 0,
+
+      //the count of new images added in through Dropzone
+      totalNewImage: 0,
+
+      //the total number of files needed to upload after the upload button is clicked
+      totalFilesToUpload: 0,
+
       imageWidthHeightArray: [],
       detectChangeCounter: 0,
       totalAcceptedFiles: 0,
@@ -269,6 +277,15 @@ export default {
             document.querySelector(
               ".content-container .task-message"
             ).textContent = ""
+
+            /*  #anchorQueueComplete */
+            thisPointer.dropzoneQueueComplete = true
+
+            //remove 'disabled' class from '.accordion-flush' and '.navigation' to enable record editing
+            document
+              .querySelector(".accordion-flush")
+              .classList.remove("disabled")
+            document.querySelector(".navigation").classList.remove("disabled")
           })
 
           this.on("removedfile", function(file) {
@@ -303,7 +320,6 @@ export default {
               .classList.remove("disabled")
 
             if (this.files.length) {
-              console.log("file has length")
               var _i, _len
               for (
                 _i = 0, _len = this.files.length;
@@ -331,6 +347,9 @@ export default {
           })
 
           this.on("sending", function(file, xhr) {
+            /*  #anchorTotalFiles */
+            thisPointer.totalFilesToUpload = this.files.length
+
             thisPointer.afterComplete(file)
             xhr.ontimeout = () => {
               console.log("Server Timeout")
@@ -361,6 +380,7 @@ export default {
       files: [],
       windowScreenSize: 0,
       setTimeOutObj: null,
+      dropzoneQueueComplete: false,
     }
   },
   beforeDestroy() {
@@ -425,6 +445,10 @@ export default {
     async afterComplete(file) {
       document.querySelector(".content-container .task-message").textContent =
         "Uploading images..."
+
+      //add 'disabled' class to '.accordion-flush' and '.navigation' to disable record editing. These will be enabled back at #anchorQueueComplete once image uploading is completed.
+      document.querySelector(".accordion-flush").classList.add("disabled")
+      document.querySelector(".navigation").classList.add("disabled")
 
       let imageURL
       let thumbnailURL
@@ -664,23 +688,18 @@ export default {
       }
     },
 
-    //to get each image's height and width and put them in array 'imageWidthHeightArray'
-    checkImageHeight(imgObj) {
-      //every time an image is rendered, add 1 to variable 'totalImagesLoaded'
-      this.totalImagesLoaded++
+    handleImageUploadTask(imgObj) {
+      //'totalNewImage' is the count of new images added in through Dropzone
+      this.totalNewImage++
 
       let tempArray = []
 
       let tempHeight
-
-      //Display the loading message at the bottom of the records. NOTE: This has to be set as inline CSS as it make the style load faster compare to using Class.
-      document.getElementById("staticLoadingText").style.display = "block"
-
       //getComputedStyle(element) = to get all the css value of the element
       //imgObj.parentNode.parentNode = the parent of parent of the image element. The targeted element is '.image-container'
       let objStyle = getComputedStyle(imgObj.parentNode.parentNode)
 
-      //assign 'tempHeight' to the element(.image-container) css 'clientHeight' value
+      //set 'tempHeight' to current image height
       tempHeight = imgObj.clientHeight
 
       /*
@@ -695,18 +714,78 @@ export default {
       //assign the joined values of image width and height to array 'tempArray'
       tempArray = imgObj.clientWidth + "_" + tempHeight
 
-      //push 'tempArray' values to 'imageWidthHeightArray' array
-      this.imageWidthHeightArray.push(tempArray)
+      //remove the last item in the array
+      this.imageWidthHeightArray.pop()
 
-      //If the total images rendered on page are equal to the total image data in 'requiredPhotoData', then run the code
-      if (this.totalImagesLoaded == this.requiredPhotoData.length) {
-        /*
-       'mostOccurence(array)
-       - This will get the most frequent values in the array. We need this value to determine what is the most common image width and height from all the images then adjust all images' width and height according to this common values.  */
+      //add in the latest width_height combination from 'tempArray' as the first item
+      this.imageWidthHeightArray.unshift(tempArray)
+
+      //if total new images loaded is equal to all the required files to upload (this value comes from #anchorTotalFiles)
+      if (this.totalNewImage == this.totalFilesToUpload) {
         this.thumbnailDimension = this.mostOccurence(this.imageWidthHeightArray)
 
-        //We will use 'detectChangeCounter' variable as a trigger to resize all the images according to the common width height values from 'thumbnailDimension'. NOTE: we cannot assign 'thumbnailDimension' as the 'watch' variable because there are cases where we need to resize new images on page but the value 'thumbnailDimension' has not changed. Therefore having a separate 'watch' variable 'detectChangeCounter' will give more control on when the images' width and height need to adjust.
+        //reset the variables to default once the image uploading tasks are done
+        this.totalNewImage = 0
+        this.dropzoneQueueComplete = 0
+        this.totalFilesToUpload = 0
+
+        //run the resize all record images function through 'detectChangeCounter'
         this.detectChangeCounter++
+      }
+    },
+
+    //to get each image's height and width and put them in array 'imageWidthHeightArray'
+    checkImageHeight(imgObj) {
+      /*  If user is performing image upload task through dropzone, then 'dropzoneQueueComplete' will be true as assigned at #anchorQueueComplete. During this, the function 'handleImageUploadTask' will run instead. */
+      if (this.dropzoneQueueComplete) {
+        this.handleImageUploadTask(imgObj)
+        return
+      } else {
+        /* If it is task other than image uploading, then execute below */
+        //every time an image is rendered, add 1 to variable 'totalImagesLoaded'
+        this.totalImagesLoaded++
+        let tempArray = []
+
+        let tempHeight
+
+        //Display the loading message at the bottom of the records. NOTE: This has to be set as inline CSS as it make the style load faster compare to using Class.
+
+        document.getElementById("staticLoadingText").style.display = "block"
+
+        //getComputedStyle(element) = to get all the css value of the element
+        //imgObj.parentNode.parentNode = the parent of parent of the image element. The targeted element is '.image-container'
+        let objStyle = getComputedStyle(imgObj.parentNode.parentNode)
+
+        //assign 'tempHeight' to the element(.image-container) css 'clientHeight' value
+        tempHeight = imgObj.clientHeight
+
+        /*
+     Because the css 'width' for image is set to 100%, certain images might overflow the parent's parent's container(.image-container). To prevent this, we will set that the max-height for the image always less than the parent's parent's container.
+
+    parseInt(value,10)
+    this will remove the 'px' from the css max-height value */
+        if (imgObj.clientHeight > parseInt(objStyle.maxHeight, 10)) {
+          tempHeight = parseInt(objStyle.maxHeight, 10)
+        }
+
+        //assign the joined values of image width and height to array 'tempArray'
+        tempArray = imgObj.clientWidth + "_" + tempHeight
+
+        //push 'tempArray' values to 'imageWidthHeightArray' array
+        this.imageWidthHeightArray.push(tempArray)
+
+        //If the total images rendered on page are equal to the total image data in 'requiredPhotoData', then run the code
+        if (this.totalImagesLoaded == this.requiredPhotoData.length) {
+          /*
+       'mostOccurence(array)
+       - This will get the most frequent values in the array. We need this value to determine what is the most common image width and height from all the images then adjust all images' width and height according to this common values.  */
+          this.thumbnailDimension = this.mostOccurence(
+            this.imageWidthHeightArray
+          )
+
+          //We will use 'detectChangeCounter' variable as a trigger to resize all the images according to the common width height values from 'thumbnailDimension'. NOTE: we cannot assign 'thumbnailDimension' as the 'watch' variable because there are cases where we need to resize new images on page but the value 'thumbnailDimension' has not changed. Therefore having a separate 'watch' variable 'detectChangeCounter' will give more control on when the images' width and height need to adjust.
+          this.detectChangeCounter++
+        }
       }
     },
 
@@ -759,8 +838,15 @@ export default {
     onEnd: async function(evt) {
       this.loading = true
 
+      /*   
+      oldIndex
+      -index number before the element get moved, based on current image indexes shown on page. This means if currently there are only 10 images showing on page, the indexing used is from 0 to 9, not based on full gallery indexing from 'this.$store.state.galOrder'. If the user clicked on page 2, the indexing used for oldIndex and newIndex are still 0 to 10. If according to full gallery index, if it is page 2 now, then the indexing should be 10 to 19.
+
+      newIndex
+      -index number after the element get moved */
       let oldIndex, newIndex
 
+      //determine the before and after index of the moved element based on full gallery indexing.
       oldIndex = this.paginationStartIndex + evt.oldIndex
       newIndex = this.paginationStartIndex + evt.newIndex
 
@@ -768,8 +854,23 @@ export default {
 
       let elementToMove = this.galleryCurrentOrder[oldIndex]
 
+      //remove 1 element at index 'oldIndex'
       this.galleryCurrentOrder.splice(oldIndex, 1)
+
+      //remove 0 element at index 'oldIndex', but add new element 'elementToMove' to 'oldIndex' position
       this.galleryCurrentOrder.splice(newIndex, 0, elementToMove)
+
+      //repeat the position shifting for array 'imageWidthHeightArray'. Since 'imageWidthHeightArray' used 0-10 indexing, evt.oldIndex and evt.newIndex are not required to add 'this.paginationStartIndex'.
+      let imageWidthHeightElementToMove = this.imageWidthHeightArray[
+        evt.oldIndex
+      ]
+
+      this.imageWidthHeightArray.splice(evt.oldIndex, 1)
+      this.imageWidthHeightArray.splice(
+        evt.newIndex,
+        0,
+        imageWidthHeightElementToMove
+      )
 
       const galleryOrderDatabase = await db
         .collection("galleryOrder")
@@ -1151,19 +1252,24 @@ export default {
 
         this.totalImagesLoaded--
 
-        let child = document.querySelector(
-          ".accordion-item .image-container .image-inner-container img[imgid='" +
-            photoId +
-            "']"
-        )
+        //reference to the targeted image ancestor container '.accordion-item'
+        let child = document
+          .querySelector(
+            ".accordion-item .image-container .image-inner-container img[imgid='" +
+              photoId +
+              "']"
+          )
+          .closest(".accordion-item")
 
+        //reference to the '.accordion-item' parent
         let parent = child.parentNode
-        // The equivalent of parent.children.indexOf(child)
+
+        // the equivalent of parent.children.indexOf(child)
         let index = Array.prototype.indexOf.call(parent.children, child)
 
+        // remove the item from 'imageWidthHeightArray' according to index. The missing item will be replaced with the new added in image once 'requiredPhotoData' kicked in.
         this.imageWidthHeightArray.splice(index, 1)
 
-        // this.$store.state.galleryPhotos.splice(index,1)
         this.$store.commit("deleteArrayState", {
           array: "galleryPhotos",
           property: "photoId",
@@ -1319,6 +1425,11 @@ export default {
     display: flex;
     flex-direction: column;
     margin: 0 auto;
+
+    &.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
 
     .staticLoadingText {
       text-align: center;
@@ -1540,6 +1651,12 @@ export default {
   flex-wrap: wrap;
   padding: 10px 0;
   margin-top: 30px;
+
+  &.disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
   .page-number {
     flex: 1;
     .page-item {
