@@ -1130,7 +1130,7 @@ export default {
           const blogDatabase = db.collection("blogPosts").doc(blogId)
 
           batch.update(blogDatabase, {
-            blogTitle: content[i].blogId,
+            blogTitle: content[i].photoTitle,
             blogShortDescription: content[i].photoShortDesc,
           })
         }
