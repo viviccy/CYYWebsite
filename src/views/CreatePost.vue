@@ -697,7 +697,21 @@ export default {
                             const galleryOrderDatabase = await db.collection(
                               "galleryOrder"
                             )
-                            await galleryOrderDatabase
+
+                            galleryOrderDocument = galleryOrderDatabase.doc(
+                              "galleryOrder"
+                            )
+
+                            var docData = {
+                              order: ["testing"],
+                            }
+
+                            await galleryOrderDocument
+                              .set(docData)
+                              .then(async () => {
+                                await console.log("Test array created")
+                              })
+                            /*  await galleryOrderDatabase
                               .get()
                               .then(async (docSnapshot) => {
                                 if (docSnapshot.size >= 1) {
@@ -705,7 +719,7 @@ export default {
                                     .collection("galleryOrder")
                                     .doc(docSnapshot.docs[0].id)
                                 }
-                              })
+                              }) */
 
                             await galleryOrderDocument
                               .get()

@@ -3,7 +3,7 @@
     <nav class="container">
       <div class="branding">
         <router-link class="header" :to="{ name: 'Home' }">
-          <puzzle class="puzzle" /><span>The Missing Piece</span></router-link
+          <puzzle class="puzzle" /><span>CYY</span></router-link
         >
       </div>
       <div class="nav-links">

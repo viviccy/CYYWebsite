@@ -102,8 +102,8 @@ export default new Vuex.Store({
     },
     setProfileInitials(state) {
       state.profileInitials =
-        state.profileFirstName.match(/(\b\S)?/g).join("") +
-        state.profileLastName.match(/(\b\S)?/g).join("")
+        state.profileLastName.match(/(\b\S)?/g).join("") +
+        state.profileFirstName.match(/(\b\S)?/g).join("")
     },
 
     /* To check if the user is login or not.
@@ -324,8 +324,6 @@ To use other methods of 'context', they can be written like this:
       //reference to the firebase document 'gallery'
       const galleryDataBase = await db.collection("gallery")
 
-      console.log(" payload.blogID=" + payload.blogID)
-
       // Search for the blog id reference based on routeID using 'where'. Note that blog id in this collection is unique too.
       const galleryDataBaseFiltered = await galleryDataBase.where(
         "blogID",
@@ -336,9 +334,7 @@ To use other methods of 'context', they can be written like this:
       let galleryDocumentId
 
       let tempArray
-      console.log(
-        "galleryDataBaseFiltered=" + JSON.stringify(galleryDataBaseFiltered)
-      )
+
       ///////////////////////////
       //the variable to store gallery id corresponding to current blog id
 
@@ -362,7 +358,6 @@ To use other methods of 'context', they can be written like this:
           //to retrive the document id of the 'galleryOrder' collection
           await galleryOrderDatabase.get().then(async (docSnapshot) => {
             if (docSnapshot.size >= 1) {
-              console.log("snapshot=")
               //assign the reference to the single document of 'galleryOrder' once the document id is identified
               galleryOrderDocument = await db
                 .collection("galleryOrder")
@@ -378,8 +373,6 @@ To use other methods of 'context', they can be written like this:
             if (index > -1) {
               tempArray.splice(index, 1)
             }
-
-            console.log("tempArray after splice=" + tempArray)
 
             batch.update(galleryOrderDocument, {
               order: firebase.firestore.FieldValue.delete(),
@@ -514,8 +507,6 @@ To use other methods of 'context', they can be written like this:
           commit("updateGalleryOrderState", tempArray)
         }
       })
-
-      console.log()
     },
   },
   modules: {},
