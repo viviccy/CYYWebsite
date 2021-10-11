@@ -505,7 +505,6 @@ To use other methods of 'context', they can be written like this:
         if (docSnapshot.size >= 1) {
           let tempArray = docSnapshot.docs[0].data().order
           commit("updateGalleryOrderState", tempArray)
-          console.log("test")
         }
       })
     },
