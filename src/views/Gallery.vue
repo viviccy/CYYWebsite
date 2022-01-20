@@ -161,7 +161,7 @@ export default {
       /*  'readyToAddImage' is set to true initially. The scroll condition below will run multiple times once the page almost scrolled to the bottom. Hence to prevent the code inside being run indefinately, we use the variable 'readyToAddImage' to determine when the codes can run again. */
       if (
         window.scrollY + window.innerHeight >=
-          document.documentElement.scrollHeight * 0.83 &&
+          document.documentElement.scrollHeight * 0.75 &&
         this.readyToAddImage == true
       ) {
         //Declare an empty variable

@@ -595,9 +595,8 @@ export default {
                                 blogCoverPhotoName: newFileName,
 
                                 blogID: "",
-                                blogTitle: "Dream Destination Awaits!",
-                                blogShortDescription:
-                                  "Immerse yourself with a world of worder in Malaysia",
+                                blogTitle: "Artwork",
+                                blogShortDescription: "Artwork",
                                 userName:
                                   thisPointer2.$store.state.profileUserName,
                               }
